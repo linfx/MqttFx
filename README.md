@@ -1,10 +1,12 @@
 # nMqtt
 dotnet mqtt client
 
-#Use
+# Examples
+```c#
 using System;
 using System.Text;
 using nMqtt.Messages;
+
 
 namespace nMqtt.Test
 {

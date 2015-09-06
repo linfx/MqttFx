@@ -1,0 +1,4 @@
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Baoluo\nMqtt\bin\Release\nMqtt.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Baoluo\nMqtt\bin\Release\nMqtt.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Baoluo\nMqtt\obj\Release\nMqtt.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Baoluo\nMqtt\obj\Release\nMqtt.pdb

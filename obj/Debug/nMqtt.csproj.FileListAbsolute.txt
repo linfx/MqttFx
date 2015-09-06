@@ -1,0 +1,5 @@
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\ConsoleApplication\nMqtt\bin\Debug\nMqtt.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\ConsoleApplication\nMqtt\obj\Debug\nMqtt.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\ConsoleApplication\nMqtt\obj\Debug\nMqtt.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\ConsoleApplication\nMqtt\bin\Debug\nMqtt.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\ConsoleApplication\nMqtt\obj\Debug\nMqtt.dll

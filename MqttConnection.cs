@@ -2,8 +2,8 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using nMqtt.Messages;
 using System.Diagnostics;
+using nMqtt.Messages;
 
 namespace nMqtt
 {
@@ -102,7 +102,9 @@ namespace nMqtt
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("*********************");
                 Debug.WriteLine(ex);
+                Debug.WriteLine("*********************");
             }
         }
 

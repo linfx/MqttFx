@@ -5,8 +5,10 @@ namespace nMqtt.Messages
 {
     internal sealed class SubscribeMessage : MqttMessage
     {
+        List<TopicQos> Topics = new List<TopicQos>();
+
         public short MessageIdentifier { get; set; }
-        public List<TopicQos> Topics = new List<TopicQos>();
+
 
         public SubscribeMessage()
             : base(MessageType.SUBSCRIBE)
@@ -31,7 +33,7 @@ namespace nMqtt.Messages
             }
         }
 
-        public void AddSubscribe(string topic, Qos qos)
+        public void Subscribe(string topic, Qos qos)
         {
             Topics.Add(new TopicQos
             {

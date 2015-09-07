@@ -8,11 +8,6 @@ namespace nMqtt.Messages
             : base(MessageType.PINGREQ)
         {
         }
-
-        public override void Encode(Stream stream)
-        {
-            FixedHeader.WriteTo(stream);
-        }
     }
 
     internal class PingRespMessage : MqttMessage

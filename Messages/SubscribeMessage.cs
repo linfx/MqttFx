@@ -42,7 +42,7 @@ namespace nMqtt.Messages
             });
         }
 
-        internal struct TopicQos
+        struct TopicQos
         {
             public string Topic { get; set; }
             public Qos Qos { get; set; }

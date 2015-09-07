@@ -8,10 +8,5 @@ namespace nMqtt.Messages
             : base(MessageType.DISCONNECT)
         {
         }
-
-        public override void Encode(Stream stream)
-        {
-            FixedHeader.WriteTo(stream);
-        }
     }
 }

@@ -21,9 +21,9 @@ namespace nMqtt
         public MqttConnection()
         {
             const int receiveBufferSize = 4096;
-            socketAsynPool = new SocketAsyncEventArgsPool(m_nConnection);
             var bufferManager = new BufferManager(receiveBufferSize * m_nConnection, receiveBufferSize);
-            bufferManager.InitBuffer();
+            bufferManager.ResetBuffer();
+            socketAsynPool = new SocketAsyncEventArgsPool(m_nConnection);
 
             //按照连接数建立读写对象
             for (int i = 0; i < m_nConnection; i++)
@@ -43,18 +43,6 @@ namespace nMqtt
             socket.ReceiveAsync(socketAsynPool.Pop());
         }
 
-        void IO_Completed(object sender, SocketAsyncEventArgs e)
-        {
-            switch (e.LastOperation)
-            {
-                case SocketAsyncOperation.Receive:
-                    ProcessRecv(e);
-                    break;
-                default:
-                    throw new ArgumentException("nError in I/O Completed");
-            }
-        }
-
         void ProcessRecv(SocketAsyncEventArgs e)
         {
             Debug.WriteLine("----------------------- ProcessRecv:{0}", e.BytesTransferred);
@@ -64,12 +52,12 @@ namespace nMqtt
                 var buffer = new byte[e.BytesTransferred];
                 Buffer.BlockCopy(e.Buffer, e.Offset, buffer, 0, buffer.Length);
 
-                token.Message.AddRange(buffer);
+                token.Buffer.AddRange(buffer);
 
                 if (token.IsReadComplete)
                 {
                     if (Recv != null)
-                        Recv(token.Message.ToArray());
+                        Recv(token.Buffer.ToArray());
                     token.Reset();
                 }
 
@@ -90,47 +78,40 @@ namespace nMqtt
             {
                 message.Encode(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                Send(stream.ToArray());
+                socket.Send(stream.ToArray(), SocketFlags.None);
             }
         }
 
-        void Send(byte[] message)
+        void IO_Completed(object sender, SocketAsyncEventArgs e)
         {
-            try
+            switch (e.LastOperation)
             {
-                socket.Send(message, SocketFlags.None);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("*********************");
-                Debug.WriteLine(ex);
-                Debug.WriteLine("*********************");
+                case SocketAsyncOperation.Receive:
+                    ProcessRecv(e);
+                    break;
+                default:
+                    throw new ArgumentException("nError in I/O Completed");
             }
         }
 
         class RecvToken
         {
-            /// <summary>
-            /// The read buffer size from the network
-            /// </summary>
-            public const int BufferSize = 4096;
+            public List<byte> Buffer { get; set; } = new List<byte>();
 
-            /// <summary>
-            ///     The total bytes expected to be read from from the header of content
-            /// </summary>
             public int Count
             {
                 get
                 {
-                    if (Message != null && Message.Count >= 2)
+                    if (Buffer != null && Buffer.Count >= 2)
                     {
                         int offset = 1;
                         byte encodedByte;
                         var multiplier = 1;
                         var remainingLength = 0;
+
                         do
                         {
-                            encodedByte = Message[offset];
+                            encodedByte = Buffer[offset];
                             remainingLength += encodedByte & 0x7f * multiplier;
                             multiplier *= 0x80;
                         } while ((++offset <=4) && (encodedByte & 0x80) != 0);
@@ -142,27 +123,16 @@ namespace nMqtt
             }
 
             /// <summary>
-            ///     The bytes associated with the message being read.
-            /// </summary>
-            public List<byte> Message { get; set; } = new List<byte>();
-
-            /// <summary>
-            ///     The buffer the last stream read wrote into.
-            /// </summary>
-            public byte[] Buffer;
-
-            /// <summary>
             /// A boolean that indicates whether the message read is complete 
             /// </summary>
             public bool IsReadComplete
             {
-                get { return Message.Count >= Count; }
+                get { return Buffer.Count >= Count; }
             }
 
             public void Reset()
             {
-                Buffer = new byte[BufferSize];
-                Message.Clear();
+                Buffer.Clear();
             }
         }
     }
@@ -197,7 +167,7 @@ namespace nMqtt
 
     internal sealed class SocketAsyncEventArgsPool
     {
-        private readonly Stack<SocketAsyncEventArgs> pool;
+        readonly Stack<SocketAsyncEventArgs> pool;
 
         internal SocketAsyncEventArgsPool(int capacity)
         {
@@ -225,11 +195,11 @@ namespace nMqtt
 
     internal sealed class BufferManager
     {
-        readonly int m_numBytes;
         byte[] m_buffer;
-        readonly Stack<int> m_freeIndexPool;
         int m_currentIndex;
+        readonly int m_numBytes;
         readonly int m_bufferSize;
+        readonly Stack<int> m_freeIndexPool;
 
         public BufferManager(int totalBytes, int bufferSize)
         {
@@ -242,7 +212,7 @@ namespace nMqtt
         /// <summary>
         /// Allocates buffer space used by the buffer pool
         /// </summary>
-        public void InitBuffer()
+        public void ResetBuffer()
         {
             // create one big large buffer and divide that out to each SocketAsyncEventArg object
             m_buffer = new byte[m_numBytes];

@@ -43,6 +43,9 @@ namespace nMqtt.Messages
         }
     }
 
+    /// <summary>
+    /// QoS level = 1
+    /// </summary>
     internal sealed class PublishAckMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
@@ -51,29 +54,67 @@ namespace nMqtt.Messages
             : base(MessageType.PUBACK)
         {
         }
+
+        public override void Decode(Stream stream)
+        {
+            MessageIdentifier = stream.ReadShort();
+        }
     }
 
+    /// <summary>
+    /// Publish received 
+    /// QoS 2 publish received, part 1
+    /// </summary>
     internal sealed class PublishRecMessage : MqttMessage
     {
+        public short MessageIdentifier { get; set; }
+
         public PublishRecMessage()
             : base(MessageType.PUBREC)
         {
         }
+
+        public override void Decode(Stream stream)
+        {
+            MessageIdentifier = stream.ReadShort();
+        }
     }
 
+    /// <summary>
+    /// Publish release
+    /// QoS 2 publish received, part 2
+    /// </summary>
     internal sealed class PublishRelMessage : MqttMessage
     {
+        public short MessageIdentifier { get; set; }
+
         public PublishRelMessage()
             : base(MessageType.PUBREL)
         {
         }
+
+        public override void Decode(Stream stream)
+        {
+            MessageIdentifier = stream.ReadShort();
+        }
     }
 
+    /// <summary>
+    /// Publish complete
+    /// QoS 2 publish received, part 3
+    /// </summary>
     internal sealed class PublishCompMessage : MqttMessage
     {
+        public short MessageIdentifier { get; set; }
+
         public PublishCompMessage()
             : base(MessageType.PUBCOMP)
         {
+        }
+
+        public override void Decode(Stream stream)
+        {
+            MessageIdentifier = stream.ReadShort();
         }
     }
 }

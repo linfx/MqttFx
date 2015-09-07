@@ -53,6 +53,7 @@ namespace nMqtt.Messages
                 flags |=  CleanSession.ToByte() << 1;
                 body.WriteByte((byte)flags);
 
+                //keep alive
                 body.WriteShort(KeepAlive);      //byte 11 - 12
 
                 //payload
@@ -77,6 +78,7 @@ namespace nMqtt.Messages
     internal sealed class ConnAckMessage : MqttMessage
     {
         public bool SessionPresent { get; set; }
+
         public MqttConnectReturnCode ReturnCode { get; set; }
 
         public ConnAckMessage()

@@ -9,7 +9,7 @@ namespace nMqtt
     {
         Timer pingTimer;
         MqttConnection conn;
-        readonly AutoResetEvent connectionResetEvent;
+        readonly AutoResetEvent connResetEvent;
         public Action<string, byte[]> MessageReceived;
 
         public MqttClient(string server, string clientId)
@@ -17,7 +17,8 @@ namespace nMqtt
             Server = server;
             ClientId = clientId;
             conn = new MqttConnection();
-            connectionResetEvent = new AutoResetEvent(false);
+            conn.Recv += DecodeMessage;
+            connResetEvent = new AutoResetEvent(false);
         }
 
         public ConnectionState Connect()
@@ -27,8 +28,8 @@ namespace nMqtt
 
         public ConnectionState Connect(string username, string password = "")
         {
+            ConnectionState = ConnectionState.Connecting;
             conn.Connect(Server, Port);
-            conn.Recv += DecodeMessage;
 
             var msg = new ConnectMessage();
             msg.ClientId = ClientId;
@@ -46,7 +47,7 @@ namespace nMqtt
             msg.KeepAlive = KeepAlive;
             conn.SendMessage(msg);
 
-            if (!connectionResetEvent.WaitOne(5000, false))
+            if (!connResetEvent.WaitOne(5000, false))
             {
                 ConnectionState = ConnectionState.Disconnecting;
                 Dispose();
@@ -54,10 +55,13 @@ namespace nMqtt
                 return ConnectionState;
             }
 
-            pingTimer = new Timer((state) =>
+            if (ConnectionState == ConnectionState.Connected)
             {
-                Ping();
-            }, null, KeepAlive * 1000, KeepAlive * 1000);
+                pingTimer = new Timer((state) =>
+                {
+                    conn.SendMessage(new PingReqMessage());
+                }, null, KeepAlive * 1000, KeepAlive * 1000);
+            }
 
             return ConnectionState;
         }
@@ -89,26 +93,12 @@ namespace nMqtt
             conn.SendMessage(msg);
         }
 
-        public string ClientId { get; set; }
-
-        public string Server { get; set; } = "localhost";
-
-        public int Port { get; set; } = 1883;
-
-        public short KeepAlive { get; set; } = 60;
-
-        public bool CleanSession { get; set; } = true;
-
-        public ConnectionState ConnectionState { get; private set; }
-
         void DecodeMessage(byte[] buffer)
         {
             var msg = MqttMessage.DecodeMessage(buffer);
             Debug.WriteLine("onRecv:{0}", msg.FixedHeader.MessageType);
             switch (msg.FixedHeader.MessageType)
             {
-                case MessageType.CONNECT:
-                    break;
                 case MessageType.CONNACK:
                     var connAckMsg = (ConnAckMessage)msg;
                     if (connAckMsg.ReturnCode == MqttConnectReturnCode.BrokerUnavailable ||
@@ -126,7 +116,7 @@ namespace nMqtt
                     {
                         ConnectionState = ConnectionState.Connected;
                     }
-                    connectionResetEvent.Set();
+                    connResetEvent.Set();
                     break;
                 case MessageType.PUBLISH:
                     var pubMsg = (PublishMessage)msg;
@@ -141,7 +131,8 @@ namespace nMqtt
                     OnMessageReceived(topic, data);
                     break;
                 case MessageType.PUBACK:
-                    //var pubAckMsg = (MqttPublishAckMessage)msg;
+                    var pubAckMsg = (PublishAckMessage)msg;
+                    Debug.WriteLine("PUBACK MessageIdentifier:" + pubAckMsg.MessageIdentifier);
                     break;
                 case MessageType.PUBREC:
                     break;
@@ -152,25 +143,16 @@ namespace nMqtt
                 case MessageType.SUBSCRIBE:
                     break;
                 case MessageType.SUBACK:
-                    //var subAckMsg = (SubscribeAckMessage)msg;
                     break;
                 case MessageType.UNSUBSCRIBE:
                     break;
                 case MessageType.UNSUBACK:
                     break;
                 case MessageType.PINGREQ:
-                    //var pingReqMsg = (MqttPingReqMessage)msg;
-                    //var pingRespMsg = new MqttPingRespMessage();
-                    //connection.SendMessage(pingRespMsg);
-                    //pingTimer.Change(keepAlivePeriod, keepAlivePeriod);
-                    break;
-                case MessageType.PINGRESP:
-                    //var pingRespMsg = (PingRespMessage)msg;
+                    conn.SendMessage(new PingRespMessage());
                     break;
                 case MessageType.DISCONNECT:
                     Disconnect();
-                    break;
-                default:
                     break;
             }
         }
@@ -179,12 +161,6 @@ namespace nMqtt
         {
             if (MessageReceived != null)
                 MessageReceived(topic, data);
-        }
-
-        void Ping()
-        {
-            var pingMsg = new PingReqMessage();
-            conn.SendMessage(pingMsg);
         }
 
         void Disconnect()
@@ -219,5 +195,17 @@ namespace nMqtt
                pingTimer.Dispose();
             GC.SuppressFinalize(this);
         }
+
+        public string ClientId { get; set; }
+
+        public string Server { get; set; } = "localhost";
+
+        public int Port { get; set; } = 1883;
+
+        public short KeepAlive { get; set; } = 60;
+
+        public bool CleanSession { get; set; } = true;
+
+        public ConnectionState ConnectionState { get; private set; }
     }
 }

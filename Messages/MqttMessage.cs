@@ -64,7 +64,6 @@ namespace nMqtt.Messages
             stream.Write(EncodeLength(RemaingLength));   
         }
 
-
         internal static byte[] EncodeLength(int length)
         {
             var result = new List<byte>();
@@ -107,6 +106,7 @@ namespace nMqtt.Messages
 
         public virtual void Encode(Stream stream)
         {
+            FixedHeader.WriteTo(stream);
         }
 
         public virtual void Decode(Stream stream)
@@ -147,19 +147,18 @@ namespace nMqtt.Messages
                 case MessageType.PUBACK:
                     return new PublishAckMessage();
                 case MessageType.PUBCOMP:
-                    //return new MqttPubcompMessage(str, header);
+                    return new PublishCompMessage();
                 case MessageType.PUBLISH:
                     return new PublishMessage();
                 case MessageType.PUBREC:
-                    //return new MqttPubrecMessage(str, header);
+                    return new PublishRecMessage();
                 case MessageType.PUBREL:
-                    //return new MqttPubrelMessage(str, header);
+                    return new PublishRelMessage();
                 case MessageType.SUBSCRIBE:
                     return new SubscribeMessage();
                 case MessageType.SUBACK:
                     return new SubscribeAckMessage();
                 case MessageType.UNSUBSCRIBE:
-                    Console.WriteLine(msgType);
                     return new UnsubscribeMessage();
                 case MessageType.UNSUBACK:
                     return new UnsubscribeMessage();

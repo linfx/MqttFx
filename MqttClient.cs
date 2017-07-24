@@ -12,11 +12,13 @@ namespace nMqtt
         readonly AutoResetEvent connResetEvent;
         public Action<string, byte[]> MessageReceived;
 
-        public MqttClient(string server, string clientId)
+        public MqttClient(string server, string clientId = "")
         {
             Server = server;
-            ClientId = clientId;
-            conn = new MqttConnection();
+			if(string.IsNullOrEmpty(clientId))
+				clientId = Guid.NewGuid().ToString("N");
+			ClientId = clientId;
+			conn = new MqttConnection();
             conn.Recv += DecodeMessage;
             connResetEvent = new AutoResetEvent(false);
         }
@@ -26,15 +28,17 @@ namespace nMqtt
             return Connect(string.Empty, string.Empty);
         }
 
-        public ConnectionState Connect(string username, string password = "")
+        public ConnectionState Connect(string username = "", string password = "")
         {
             ConnectionState = ConnectionState.Connecting;
             conn.Connect(Server, Port);
 
-            var msg = new ConnectMessage();
-            msg.ClientId = ClientId;
-            msg.CleanSession = CleanSession;
-            if (!string.IsNullOrEmpty(username))
+			var msg = new ConnectMessage
+			{
+				ClientId = ClientId,
+				CleanSession = CleanSession
+			};
+			if (!string.IsNullOrEmpty(username))
             {
                 msg.UsernameFlag = true;
                 msg.Username = username;
@@ -159,9 +163,8 @@ namespace nMqtt
 
         void OnMessageReceived(string topic, byte[] data)
         {
-            if (MessageReceived != null)
-                MessageReceived(topic, data);
-        }
+			MessageReceived?.Invoke(topic, data);
+		}
 
         void Disconnect()
         {

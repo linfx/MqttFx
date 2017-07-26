@@ -1,8 +1,6 @@
-﻿using System.IO;
-
-namespace nMqtt.Messages
+﻿namespace nMqtt.Messages
 {
-    internal sealed class PingReqMessage : MqttMessage
+	internal sealed class PingReqMessage : MqttMessage
     {
         public PingReqMessage()
             : base(MessageType.PINGREQ)

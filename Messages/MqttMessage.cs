@@ -13,22 +13,18 @@ namespace nMqtt.Messages
         /// Message type
         /// </summary>
         public MessageType MessageType { get; set; }
-
         /// <summary>
         /// DUP flag
         /// </summary>
         public bool Dup { get; set; }
-
         /// <summary>
         /// QoS flags
         /// </summary>
         public Qos Qos { get; set; }
-
         /// <summary>
         /// RETAIN 保持
         /// </summary>
         public bool Retain { get; set; }
-
         /// <summary>
         /// 剩余长度
         /// </summary>
@@ -124,13 +120,13 @@ namespace nMqtt.Messages
         public static MqttMessage DecodeMessage(Stream stream)
         {
             var header = new FixedHeader(stream);
-            var msg = NewMessage(header.MessageType);
+            var msg = CreateMessage(header.MessageType);
             msg.FixedHeader = header;
             msg.Decode(stream);
             return msg;
         }
 
-        public static MqttMessage NewMessage(MessageType msgType)
+        public static MqttMessage CreateMessage(MessageType msgType)
         {
             switch (msgType)
             {
@@ -197,13 +193,11 @@ namespace nMqtt.Messages
         ///     QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
         /// </summary>
         AtMostOnce = 0,
-
         /// <summary>
         ///     QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
         ///     more than once if network errors occur.
         /// </summary>
         AtLeastOnce = 1,
-
         /// <summary>
         ///     QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
         ///     it is successfully sent..

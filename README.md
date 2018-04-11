@@ -1,7 +1,7 @@
 ## nMqtt
 c# mqtt 3.1.1 client
 
-## QTT协议英文版
+## MQTT协议英文版
 http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
 
 ## MQTT协议中文版

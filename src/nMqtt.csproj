@@ -12,7 +12,6 @@
     <None Remove="Messages\vssver2.scc" />
     <None Remove="mssccprj.scc" />
     <None Remove="nMqtt.csproj.vspscc" />
-    <None Remove="README.md" />
     <None Remove="vssver2.scc" />
   </ItemGroup>
 

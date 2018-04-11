@@ -164,6 +164,9 @@ namespace nMqtt.Messages
         }
     }
 
+    /// <summary>
+    /// 消息类型
+    /// </summary>
     [Flags]
     public enum MessageType : byte
     {

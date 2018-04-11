@@ -5,6 +5,9 @@ using nMqtt.Messages;
 
 namespace nMqtt
 {
+    /// <summary>
+    /// Mqtt客户端
+    /// </summary>
     public sealed class MqttClient : IDisposable
     {
         Timer pingTimer;
@@ -12,7 +15,7 @@ namespace nMqtt
         readonly AutoResetEvent connResetEvent;
         public Action<string, byte[]> MessageReceived;
 
-        public MqttClient(string server, string clientId = "")
+        public MqttClient(string server, string clientId = default(string))
         {
             Server = server;
 			if(string.IsNullOrEmpty(clientId))
@@ -23,12 +26,16 @@ namespace nMqtt
             connResetEvent = new AutoResetEvent(false);
         }
 
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <returns></returns>
         public ConnectionState Connect()
         {
             return Connect(string.Empty, string.Empty);
         }
 
-        public ConnectionState Connect(string username = "", string password = "")
+        public ConnectionState Connect(string username = default(string), string password = default(string))
         {
             ConnectionState = ConnectionState.Connecting;
             conn.Connect(Server, Port);

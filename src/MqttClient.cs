@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Diagnostics;
 using nMqtt.Messages;
+using System.Threading.Tasks;
 
 namespace nMqtt
 {
@@ -48,28 +49,13 @@ namespace nMqtt
         /// <summary>
         /// 连接
         /// </summary>
-        /// <returns></returns>
-        public ConnectionState Connect()
-        {
-            return Connect(string.Empty, string.Empty);
-        }
-
-        public void Disconnect()
-        {
-            if (conn.Recv != null)
-                conn.Recv -= DecodeMessage;
-        }
-
-        /// <summary>
-        /// 连接
-        /// </summary>
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
-        public ConnectionState Connect(string username = default(string), string password = default(string))
+        public async Task<ConnectionState> ConnectAsync(string username = default(string), string password = default(string))
         {
             ConnectionState = ConnectionState.Connecting;
-            conn.Connect(Server, Port);
+            await conn.ConnectAsync(Server, Port);
 
 			var msg = new ConnectMessage
 			{
@@ -106,6 +92,12 @@ namespace nMqtt
             }
 
             return ConnectionState;
+        }
+
+        public void Disconnect()
+        {
+            if (conn.Recv != null)
+                conn.Recv -= DecodeMessage;
         }
 
         /// <summary>
@@ -170,6 +162,7 @@ namespace nMqtt
                     else
                     {
                         ConnectionState = ConnectionState.Connected;
+                        Debug.WriteLine("成功连接!");
                     }
                     connResetEvent.Set();
                     break;
@@ -192,6 +185,7 @@ namespace nMqtt
                     Debug.WriteLine("PUBACK MessageIdentifier:" + pubAckMsg.MessageIdentifier);
                     break;
                 case MessageType.PUBREC:
+
                     break;
                 case MessageType.PUBREL:
                     break;

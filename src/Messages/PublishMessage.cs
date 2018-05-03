@@ -56,6 +56,9 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBACK)]
     internal sealed class PublishAckMessage : MqttMessage
     {
+        /// <summary>
+        /// 消息ID
+        /// </summary>
         public short MessageIdentifier { get; set; }
 
         public override void Decode(Stream stream)
@@ -71,6 +74,9 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBREC)]
     internal sealed class PublishRecMessage : MqttMessage
     {
+        /// <summary>
+        /// 消息ID
+        /// </summary>
         public short MessageIdentifier { get; set; }
 
         public override void Decode(Stream stream)
@@ -86,12 +92,10 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBREL)]
     internal sealed class PublishRelMessage : MqttMessage
     {
+        /// <summary>
+        /// 消息ID
+        /// </summary>
         public short MessageIdentifier { get; set; }
-
-        public PublishRelMessage()
-            : base(MessageType.PUBREL)
-        {
-        }
 
         public override void Decode(Stream stream)
         {
@@ -106,6 +110,9 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBCOMP)]
     internal sealed class PublishCompMessage : MqttMessage
     {
+        /// <summary>
+        /// 消息ID
+        /// </summary>
         public short MessageIdentifier { get; set; }
 
         public override void Decode(Stream stream)

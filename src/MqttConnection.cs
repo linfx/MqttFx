@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Diagnostics;
 using nMqtt.Messages;
+using System.Threading.Tasks;
 
 namespace nMqtt
 {
@@ -44,10 +45,22 @@ namespace nMqtt
         /// </summary>
         /// <param name="server"></param>
         /// <param name="port"></param>
-        public void Connect(string server, int port = 1883)
+        public void Connect(string server, int port)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Connect(server, port);
+            socket.ReceiveAsync(socketAsynPool.Pop());
+        }
+
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="port"></param>
+        public async Task ConnectAsync(string server, int port)
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            await socket.ConnectAsync(server, port);
             socket.ReceiveAsync(socketAsynPool.Pop());
         }
 

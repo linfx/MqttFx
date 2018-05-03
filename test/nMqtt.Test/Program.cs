@@ -10,13 +10,13 @@ namespace nMqtt.Test
         static void Main(string[] args)
         {
             var client = new MqttClient("127.0.0.1");
-            var state = client.Connect();
+            var state = client.ConnectAsync().Result;
             if (state == ConnectionState.Connected)
             {
                 client.MessageReceived += OnMessageReceived;
                 client.Subscribe("/World", Qos.ExactlyOnce);
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     client.Publish("/World", Encoding.UTF8.GetBytes("测试发送消息_" + i.ToString()), Qos.ExactlyOnce);
                     Thread.Sleep(100);

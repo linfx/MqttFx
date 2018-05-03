@@ -54,6 +54,12 @@ namespace nMqtt
             return Connect(string.Empty, string.Empty);
         }
 
+        public void Disconnect()
+        {
+            if (conn.Recv != null)
+                conn.Recv -= DecodeMessage;
+        }
+
         /// <summary>
         /// 连接
         /// </summary>
@@ -210,13 +216,7 @@ namespace nMqtt
 
         void OnMessageReceived(string topic, byte[] data)
         {
-			MessageReceived?.Invoke(topic, data);
-		}
-
-        void Disconnect()
-        {
-            if (conn.Recv != null) 
-                conn.Recv -= DecodeMessage;
+            MessageReceived?.Invoke(topic, data);
         }
 
         void Close()

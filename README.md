@@ -1,7 +1,10 @@
-## nMqtt
+# nMqtt
 ```
 c# mqtt 3.1.1 client
 ```
+
+## EMQ  百万级分布式开源物联网MQTT消息服务器
+http://www.emqtt.com/
 
 ***************************
 
@@ -11,7 +14,7 @@ c# mqtt 3.1.1 client
 MQTT 官网:           http://mqtt.org
 MQTT V3.1.1协议规范: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
 MQTT 协议英文版:     http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
-MQTT协议中文版:      https://mcxiaoke.gitbooks.io/mqtt-cn/content/
+MQTT 协议中文版:      https://mcxiaoke.gitbooks.io/mqtt-cn/content/
 
 ```
 

@@ -3,38 +3,76 @@ using System.IO;
 
 namespace nMqtt.Messages
 {
+    /// <summary>
+    /// 发起连接
+    /// </summary>
+    [MessageType(MessageType.CONNECT)]
     internal sealed class ConnectMessage : MqttMessage
     {
-        //variable header
-        public string ProtocolName { get; set; }
-        public byte ProtocolVersion { get; set; }
+        #region 可变报头 Variable header
+        /// <summary>
+        /// 协议名
+        /// </summary>
+        public string ProtocolName { get; } = "MQTT";
+        /// <summary>
+        /// 协议级别
+        /// </summary>
+        public byte ProtocolLevel { get; } = 0x04;
 
-        #region ConnectFlags
-
+        #region 连接标志 Connect Flags
+        /// <summary>
+        /// 用户名标志
+        /// </summary>
         public bool UsernameFlag { get; set; }
+        /// <summary>
+        /// 密码标志
+        /// </summary>
         public bool PasswordFlag { get; set; }
+        /// <summary>
+        /// 遗嘱保留
+        /// </summary>
         public bool WillRetain { get; set; }
+        /// <summary>
+        /// 遗嘱QoS
+        /// </summary>
         public Qos WillQos { get; set; }
+        /// <summary>
+        /// 遗嘱标志
+        /// </summary>
         public bool WillFlag { get; set; }
+        /// <summary>
+        /// 清理会话
+        /// </summary>
         public bool CleanSession { get; set; }
-
+        #endregion
+        /// <summary>
+        /// 保持连接 
+        /// </summary>
+        public short KeepAlive { get; set; } 
         #endregion
 
-        public short KeepAlive { get; set; }
-
-        //payload
+        #region 有效载荷 Payload
+        /// <summary>
+        /// 客户端标识符 Client Identifier
+        /// </summary>
         public string ClientId { get; set; }
+        /// <summary>
+        /// 遗嘱主题 Will Topic
+        /// </summary>
         public string WillTopic { get; set; }
+        /// <summary>
+        /// 遗嘱消息 Will Message
+        /// </summary>
         public string WillMessage { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; } 
-
-        public ConnectMessage()
-            : base(MessageType.CONNECT)
-        {
-            ProtocolName = "MQTT";
-            ProtocolVersion = 0x04;
-        }
+        /// <summary>
+        /// 用户名 User Name
+        /// </summary>
+        public string UserName { get; set; }
+        /// <summary>
+        /// 密码 Password
+        /// </summary>
+        public string Password { get; set; }  
+        #endregion
 
         public override void Encode(Stream stream)
         {
@@ -42,9 +80,9 @@ namespace nMqtt.Messages
             {
                 //variable header
                 body.WriteString(ProtocolName);       //byte 1 - 8
-                body.WriteByte(ProtocolVersion);      //byte 9
+                body.WriteByte(ProtocolLevel);        //byte 9
 
-                //ConnectFlags.WriteTo(body);         //byte 10
+                //connect flags;                      //byte 10
                 var flags = UsernameFlag.ToByte() << 7;
                 flags |= PasswordFlag.ToByte() << 6;
                 flags |= WillRetain.ToByte() << 5;
@@ -64,7 +102,7 @@ namespace nMqtt.Messages
                     body.WriteString(WillMessage);
                 }
                 if (UsernameFlag)
-                    body.WriteString(Username);
+                    body.WriteString(UserName);
                 if (PasswordFlag)
                     body.WriteString(Password);
 
@@ -75,32 +113,57 @@ namespace nMqtt.Messages
         }
     }
 
+    /// <summary>
+    /// 连接回执
+    /// </summary>
+    [MessageType(MessageType.CONNACK)]
     internal sealed class ConnAckMessage : MqttMessage
     {
+        /// <summary>
+        /// 当前会话
+        /// </summary>
         public bool SessionPresent { get; set; }
-
-        public MqttConnectReturnCode ReturnCode { get; set; }
-
-        public ConnAckMessage()
-            : base(MessageType.CONNACK)
-        {
-        }
+        /// <summary>
+        /// 连接返回码
+        /// </summary>
+        public ConnectReturnCode ConnectReturnCode { get; set; }
 
         public override void Decode(Stream stream)
         {
             SessionPresent = (stream.ReadByte() & 0x01) == 1;
-            ReturnCode = (MqttConnectReturnCode)stream.ReadByte();
+            ConnectReturnCode = (ConnectReturnCode)stream.ReadByte();
         }
     }
 
+    /// <summary>
+    /// 连接返回码
+    /// </summary>
     [Flags]
-    internal enum MqttConnectReturnCode : byte
+    internal enum ConnectReturnCode : byte
     {
-        ConnectionAccepted        = 0x00,
+        /// <summary>
+        /// 连接已接受
+        /// </summary>
+        ConnectionAccepted = 0x00,
+        /// <summary>
+        /// 连接已拒绝，不支持的协议版本
+        /// </summary>
         UnacceptedProtocolVersion = 0x01,
-        IdentifierRejected        = 0x02,
-        BrokerUnavailable         = 0x03,
-        BadUsernameOrPassword     = 0x04,
-        NotAuthorized             = 0x05
+        /// <summary>
+        /// 接已拒绝，不合格的客户端标识符
+        /// </summary>
+        IdentifierRejected = 0x02,
+        /// <summary>
+        /// 连接已拒绝，服务端不可用
+        /// </summary>
+        BrokerUnavailable = 0x03,
+        /// <summary>
+        /// 连接已拒绝，无效的用户名或密码
+        /// </summary>
+        BadUsernameOrPassword = 0x04,
+        /// <summary>
+        /// 连接已拒绝，未授权
+        /// </summary>
+        NotAuthorized = 0x05
     }
 }

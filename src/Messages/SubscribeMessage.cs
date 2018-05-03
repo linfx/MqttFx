@@ -3,17 +3,20 @@ using System.Collections.Generic;
 
 namespace nMqtt.Messages
 {
+    /// <summary>
+    /// 订阅主题
+    /// </summary>
+    [MessageType(MessageType.SUBSCRIBE)]
     internal sealed class SubscribeMessage : MqttMessage
     {
+        /// <summary>
+        /// 主题列表
+        /// </summary>
         List<TopicQos> Topics = new List<TopicQos>();
-
+        /// <summary>
+        /// 消息ID
+        /// </summary>
         public short MessageIdentifier { get; set; }
-
-
-        public SubscribeMessage()
-            : base(MessageType.SUBSCRIBE)
-        {
-        }
 
         public override void Encode(Stream stream)
         {
@@ -49,14 +52,13 @@ namespace nMqtt.Messages
         }
     }
 
+    /// <summary>
+    /// 订阅回执
+    /// </summary>
+    [MessageType(MessageType.SUBACK)]
     internal class SubscribeAckMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
-
-        public SubscribeAckMessage()
-            : base(MessageType.SUBACK)
-        {
-        }
 
         public override void Decode(Stream stream)
         {

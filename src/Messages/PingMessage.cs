@@ -1,18 +1,18 @@
 ﻿namespace nMqtt.Messages
 {
-	internal sealed class PingReqMessage : MqttMessage
+    /// <summary>
+    /// PING请求
+    /// </summary>
+    [MessageType(MessageType.PINGREQ)]
+    internal sealed class PingReqMessage : MqttMessage
     {
-        public PingReqMessage()
-            : base(MessageType.PINGREQ)
-        {
-        }
     }
 
+    /// <summary>
+    /// PING响应
+    /// </summary>
+    [MessageType(MessageType.PINGRESP)]
     internal class PingRespMessage : MqttMessage
     {
-        public PingRespMessage()
-            : base(MessageType.PINGRESP)
-        {
-        }
     }
 }

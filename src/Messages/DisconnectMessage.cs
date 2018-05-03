@@ -1,12 +1,10 @@
-﻿using System.IO;
-
-namespace nMqtt.Messages
+﻿namespace nMqtt.Messages
 {
+    /// <summary>
+    /// 断开连接
+    /// </summary>
+    [MessageType(MessageType.DISCONNECT)]
     internal sealed class DisconnectMessage : MqttMessage
     {
-        public DisconnectMessage()
-            : base(MessageType.DISCONNECT)
-        {
-        }
     }
 }

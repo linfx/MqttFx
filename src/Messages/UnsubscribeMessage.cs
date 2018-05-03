@@ -3,16 +3,15 @@ using System.IO;
 
 namespace nMqtt.Messages
 {
+    /// <summary>
+    /// 取消订阅
+    /// </summary>
+    [MessageType(MessageType.UNSUBSCRIBE)]
     internal sealed class UnsubscribeMessage : MqttMessage
     {
         List<string> topics = new List<string>();
 
         public short MessageIdentifier { get; set; }
-
-        public UnsubscribeMessage()
-            : base(MessageType.UNSUBSCRIBE)
-        {
-        }
 
         public override void Encode(Stream stream)
         {
@@ -37,11 +36,11 @@ namespace nMqtt.Messages
         }
     }
 
+    /// <summary>
+    /// 取消订阅回执
+    /// </summary>
+    [MessageType(MessageType.UNSUBACK)]
     internal sealed class UnsubscribeAckMessage : MqttMessage
     {
-        public UnsubscribeAckMessage()
-            : base(MessageType.UNSUBACK)
-        {
-        }
     }
 }

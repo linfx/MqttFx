@@ -10,6 +10,9 @@ namespace nMqtt
     internal sealed class MqttConnection
     {
         Socket socket;
+        /// <summary>
+        /// 最大连接数
+        /// </summary>
         int m_nConnection = 1;
         public Action<byte[]> Recv;
 
@@ -36,6 +39,11 @@ namespace nMqtt
             }
         }
 
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="port"></param>
         public void Connect(string server, int port = 1883)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -56,8 +64,7 @@ namespace nMqtt
 
                 if (token.IsReadComplete)
                 {
-                    if (Recv != null)
-                        Recv(token.Buffer.ToArray());
+                    Recv?.Invoke(token.Buffer.ToArray());
                     token.Reset();
                 }
 
@@ -71,6 +78,10 @@ namespace nMqtt
             }
         }
 
+        /// <summary>
+        /// 发送消息
+        /// </summary>
+        /// <param name="message"></param>
         public void SendMessage(MqttMessage message)
         {
             Debug.WriteLine("onSend:{0}", message.FixedHeader.MessageType);
@@ -137,34 +148,36 @@ namespace nMqtt
         }
     }
 
+    /// <summary>
+    /// 连接状态
+    /// </summary>
     public enum ConnectionState
     {
         /// <summary>
         ///     The MQTT Connection is in the process of disconnecting from the broker.
         /// </summary>
         Disconnecting,
-
         /// <summary>
         ///     The MQTT Connection is not currently connected to any broker.
         /// </summary>
         Disconnected,
-
         /// <summary>
         ///     The MQTT Connection is in the process of connecting to the broker.
         /// </summary>
         Connecting,
-
         /// <summary>
         ///     The MQTT Connection is currently connected to the broker.
         /// </summary>
         Connected,
-
         /// <summary>
         ///     The MQTT Connection is faulted and no longer communicating with the broker.
         /// </summary>
         Faulted
     }
 
+    /// <summary>
+    /// Socket异步对象池
+    /// </summary>
     internal sealed class SocketAsyncEventArgsPool
     {
         readonly Stack<SocketAsyncEventArgs> pool;
@@ -193,6 +206,9 @@ namespace nMqtt
         internal int Count { get { return pool.Count; } }
     }
 
+    /// <summary>
+    /// 缓存
+    /// </summary>
     internal sealed class BufferManager
     {
         byte[] m_buffer;

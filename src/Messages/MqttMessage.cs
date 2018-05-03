@@ -10,19 +10,19 @@ namespace nMqtt.Messages
     internal class FixedHeader
     {
         /// <summary>
-        /// Message type
+        /// 报文类型
         /// </summary>
         public MessageType MessageType { get; set; }
         /// <summary>
-        /// DUP flag
+        /// 重发标志
         /// </summary>
         public bool Dup { get; set; }
         /// <summary>
-        /// QoS flags
+        /// 服务质量等级
         /// </summary>
         public Qos Qos { get; set; }
         /// <summary>
-        /// RETAIN 保持
+        /// 保留标志
         /// </summary>
         public bool Retain { get; set; }
         /// <summary>
@@ -91,26 +91,29 @@ namespace nMqtt.Messages
         }
     }
 
-    internal class MqttMessage
+    /// <summary>
+    /// 消息基类
+    /// </summary>
+    internal abstract class MqttMessage
     {
         /// <summary>
         /// 固定报头
         /// </summary>
-        public FixedHeader FixedHeader { get; protected set; }
+        public FixedHeader FixedHeader { get; set; }
 
-        public MqttMessage(MessageType msgType)
+        public MqttMessage()
         {
-            FixedHeader = new FixedHeader(msgType);
+            var att = (MessageTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(MessageTypeAttribute));
+            FixedHeader = new FixedHeader(att.MessageType);
         }
 
-        public virtual void Encode(Stream stream)
-        {
-            FixedHeader.WriteTo(stream);
-        }
+        public MqttMessage(MessageType msgType) => FixedHeader = new FixedHeader(msgType);
 
-        public virtual void Decode(Stream stream)
-        {
-        }
+        public virtual void Encode(Stream stream) => FixedHeader.WriteTo(stream);
+
+        public virtual void Decode(Stream stream) { }
+
+        #region 静态方法
 
         public static MqttMessage DecodeMessage(byte[] buffer)
         {
@@ -164,7 +167,9 @@ namespace nMqtt.Messages
                 default:
                     throw new Exception("Unsupported Message Type");
             }
-        }
+        } 
+
+        #endregion
     }
 
     /// <summary>
@@ -173,20 +178,62 @@ namespace nMqtt.Messages
     [Flags]
     public enum MessageType : byte
     {
-        CONNECT     = 1,  //发起连接
-        CONNACK     = 2,  //连接回执
-        PUBLISH     = 3,  //发布消息
-        PUBACK      = 4,  //发布回执
-        PUBREC      = 5,  //QoS2消息回执
-        PUBREL      = 6,  //QoS2消息释放
-        PUBCOMP     = 7,  //QoS2消息完成
-        SUBSCRIBE   = 8,  //订阅主题
-        SUBACK      = 9,  //订阅回执
-        UNSUBSCRIBE = 10, //取消订阅
-        UNSUBACK    = 11, //取消订阅回执
-        PINGREQ     = 12, //PING请求
-        PINGRESP    = 13, //PING响应
-        DISCONNECT  = 14  //断开连接
+        /// <summary>
+        /// 发起连接
+        /// </summary>
+        CONNECT = 1,
+        /// <summary>
+        /// 连接回执
+        /// </summary>
+        CONNACK = 2,
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        PUBLISH = 3,
+        /// <summary>
+        /// 发布回执
+        /// </summary>
+        PUBACK = 4,
+        /// <summary>
+        /// QoS2消息回执
+        /// </summary>
+        PUBREC = 5,  
+        /// <summary>
+        /// QoS2消息释放
+        /// </summary>
+        PUBREL = 6, 
+        /// <summary>
+        /// QoS2消息完成
+        /// </summary>
+        PUBCOMP = 7,  
+        /// <summary>
+        /// 订阅主题
+        /// </summary>
+        SUBSCRIBE = 8,
+        /// <summary>
+        /// 订阅回执
+        /// </summary>
+        SUBACK = 9,
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        UNSUBSCRIBE = 10,
+        /// <summary>
+        /// 取消订阅回执
+        /// </summary>
+        UNSUBACK = 11,
+        /// <summary>
+        /// PING请求
+        /// </summary>
+        PINGREQ = 12,
+        /// <summary>
+        /// PING响应
+        /// </summary>
+        PINGRESP = 13,
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        DISCONNECT = 14 
     }
 
     /// <summary>
@@ -209,5 +256,22 @@ namespace nMqtt.Messages
         ///     it is successfully sent..
         /// </summary>
         ExactlyOnce = 2,
+    }
+
+    /// <summary>
+    /// 报文类型
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class MessageTypeAttribute : Attribute
+    {
+        public MessageTypeAttribute(MessageType messageType)
+        {
+            MessageType = messageType;
+        }
+
+        /// <summary>
+        /// 报文类型
+        /// </summary>
+        public MessageType MessageType { get; set; }
     }
 }

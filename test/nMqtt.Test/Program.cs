@@ -14,11 +14,11 @@ namespace nMqtt.Test
             if (state == ConnectionState.Connected)
             {
                 client.MessageReceived += OnMessageReceived;
-                client.Subscribe("a/b", Qos.AtLeastOnce);
+                client.Subscribe("/World", Qos.ExactlyOnce);
 
                 for (int i = 0; i < 100; i++)
                 {
-                    client.Publish("a/b", Encoding.UTF8.GetBytes("Hello World!" + i.ToString()), Qos.AtLeastOnce);
+                    client.Publish("/World", Encoding.UTF8.GetBytes("测试发送消息_" + i.ToString()), Qos.ExactlyOnce);
                     Thread.Sleep(100);
                 }
             }

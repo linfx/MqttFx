@@ -15,11 +15,30 @@ namespace nMqtt
         readonly AutoResetEvent connResetEvent;
         public Action<string, byte[]> MessageReceived;
 
+        /// <summary>
+        /// 客户端标识
+        /// </summary>
+        public string ClientId { get; set; }
+        /// <summary>
+        /// 服务器地址
+        /// </summary>
+        public string Server { get; set; } = "localhost";
+        /// <summary>
+        /// 服务器端口
+        /// </summary>
+        public int Port { get; set; } = 1883;
+
+        public short KeepAlive { get; set; } = 60;
+
+        public bool CleanSession { get; set; } = true;
+
+        public ConnectionState ConnectionState { get; private set; }
+
         public MqttClient(string server, string clientId = default(string))
         {
             Server = server;
-			if(string.IsNullOrEmpty(clientId))
-				clientId = Guid.NewGuid().ToString("N");
+            if (string.IsNullOrEmpty(clientId))
+                clientId = MqttUtils.NextId();
 			ClientId = clientId;
 			conn = new MqttConnection();
             conn.Recv += DecodeMessage;
@@ -35,6 +54,12 @@ namespace nMqtt
             return Connect(string.Empty, string.Empty);
         }
 
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <param name="username">用户名</param>
+        /// <param name="password">密码</param>
+        /// <returns></returns>
         public ConnectionState Connect(string username = default(string), string password = default(string))
         {
             ConnectionState = ConnectionState.Connecting;
@@ -48,7 +73,7 @@ namespace nMqtt
 			if (!string.IsNullOrEmpty(username))
             {
                 msg.UsernameFlag = true;
-                msg.Username = username;
+                msg.UserName = username;
             }
             if(!string.IsNullOrEmpty(password))
             {
@@ -77,25 +102,38 @@ namespace nMqtt
             return ConnectionState;
         }
 
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        /// <param name="topic">主题</param>
+        /// <param name="data">数据</param>
+        /// <param name="qos">服务质量等级</param>
         public void Publish(string topic, byte[] data, Qos qos = Qos.AtMostOnce)
         {
             var msg = new PublishMessage();
             msg.FixedHeader.Qos = qos;
-            //msg.MessageIdentifier += MessageIdentifier;
+            msg.MessageIdentifier = 0;
             msg.TopicName = topic;
             msg.Payload = data;
             conn.SendMessage(msg);
         }
 
+        /// <summary>
+        /// 订阅主题
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <param name="qos"></param>
         public void Subscribe(string topic, Qos qos = Qos.AtMostOnce)
         {
             var msg = new SubscribeMessage();
-            msg.FixedHeader.Qos = Qos.AtLeastOnce;
-            msg.MessageIdentifier = 0;
             msg.Subscribe(topic, qos);
             conn.SendMessage(msg);
         }
 
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="topic"></param>
         public void Unsubscribe(string topic)
         {
             var msg = new UnsubscribeMessage();
@@ -112,11 +150,11 @@ namespace nMqtt
             {
                 case MessageType.CONNACK:
                     var connAckMsg = (ConnAckMessage)msg;
-                    if (connAckMsg.ReturnCode == MqttConnectReturnCode.BrokerUnavailable ||
-                       connAckMsg.ReturnCode == MqttConnectReturnCode.IdentifierRejected ||
-                       connAckMsg.ReturnCode == MqttConnectReturnCode.UnacceptedProtocolVersion ||
-                       connAckMsg.ReturnCode == MqttConnectReturnCode.NotAuthorized ||
-                       connAckMsg.ReturnCode == MqttConnectReturnCode.BadUsernameOrPassword)
+                    if (connAckMsg.ConnectReturnCode == ConnectReturnCode.BrokerUnavailable ||
+                       connAckMsg.ConnectReturnCode == ConnectReturnCode.IdentifierRejected ||
+                       connAckMsg.ConnectReturnCode == ConnectReturnCode.UnacceptedProtocolVersion ||
+                       connAckMsg.ConnectReturnCode == ConnectReturnCode.NotAuthorized ||
+                       connAckMsg.ConnectReturnCode == ConnectReturnCode.BadUsernameOrPassword)
                     {
                         ConnectionState = ConnectionState.Disconnecting;
                         Dispose();
@@ -135,8 +173,10 @@ namespace nMqtt
                     var data = pubMsg.Payload;
                     if(pubMsg.FixedHeader.Qos == Qos.AtLeastOnce)
                     {
-                        var ackMsg = new PublishAckMessage();
-                        ackMsg.MessageIdentifier = pubMsg.MessageIdentifier;
+                        var ackMsg = new PublishAckMessage
+                        {
+                            MessageIdentifier = pubMsg.MessageIdentifier
+                        };
                         conn.SendMessage(ackMsg);
                     }
                     OnMessageReceived(topic, data);
@@ -205,17 +245,5 @@ namespace nMqtt
                pingTimer.Dispose();
             GC.SuppressFinalize(this);
         }
-
-        public string ClientId { get; set; }
-
-        public string Server { get; set; } = "localhost";
-
-        public int Port { get; set; } = 1883;
-
-        public short KeepAlive { get; set; } = 60;
-
-        public bool CleanSession { get; set; } = true;
-
-        public ConnectionState ConnectionState { get; private set; }
     }
 }

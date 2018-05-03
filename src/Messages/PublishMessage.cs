@@ -2,25 +2,31 @@
 
 namespace nMqtt.Messages
 {
+    /// <summary>
+    /// 发布消息
+    /// </summary>
+    [MessageType(MessageType.PUBLISH)]
     internal sealed class PublishMessage : MqttMessage
     {
+        /// <summary>
+        /// 主题
+        /// </summary>
         public string TopicName { get; set; }
-
+        /// <summary>
+        /// 报文标识符
+        /// </summary>
         public short MessageIdentifier { get; set; }
-
+        /// <summary>
+        /// 有效载荷
+        /// </summary>
         public byte[] Payload { get; set; }
-
-        public PublishMessage()
-            : base(MessageType.PUBLISH)
-        {
-        }
 
         public override void Encode(Stream stream)
         {
             using (var body = new MemoryStream())
             {
                 body.WriteString(TopicName);
-                //body.WriteShort(MessageIdentifier);
+                body.WriteShort(MessageIdentifier);
                 body.Write(Payload, 0, Payload.Length);
 
                 FixedHeader.RemaingLength = (int)body.Length;
@@ -44,17 +50,14 @@ namespace nMqtt.Messages
     }
 
     /// <summary>
+    /// 发布回执
     /// QoS level = 1
     /// </summary>
+    [MessageType(MessageType.PUBACK)]
     internal sealed class PublishAckMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
 
-        public PublishAckMessage()
-            : base(MessageType.PUBACK)
-        {
-        }
-
         public override void Decode(Stream stream)
         {
             MessageIdentifier = stream.ReadShort();
@@ -62,18 +65,14 @@ namespace nMqtt.Messages
     }
 
     /// <summary>
-    /// Publish received 
+    /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
+    [MessageType(MessageType.PUBREC)]
     internal sealed class PublishRecMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
 
-        public PublishRecMessage()
-            : base(MessageType.PUBREC)
-        {
-        }
-
         public override void Decode(Stream stream)
         {
             MessageIdentifier = stream.ReadShort();
@@ -81,9 +80,10 @@ namespace nMqtt.Messages
     }
 
     /// <summary>
-    /// Publish release
+    /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
+    [MessageType(MessageType.PUBREL)]
     internal sealed class PublishRelMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
@@ -100,17 +100,13 @@ namespace nMqtt.Messages
     }
 
     /// <summary>
-    /// Publish complete
+    /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
+    [MessageType(MessageType.PUBCOMP)]
     internal sealed class PublishCompMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
-
-        public PublishCompMessage()
-            : base(MessageType.PUBCOMP)
-        {
-        }
 
         public override void Decode(Stream stream)
         {

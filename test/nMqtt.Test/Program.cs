@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using nMqtt.Messages;
 
 namespace nMqtt.Test
@@ -8,12 +9,18 @@ namespace nMqtt.Test
     {
         static void Main(string[] args)
         {
-            var client = new MqttClient("server", "clientId");
-            var state = client.Connect("username");
+            var client = new MqttClient("127.0.0.1");
+            var state = client.Connect();
             if (state == ConnectionState.Connected)
             {
                 client.MessageReceived += OnMessageReceived;
                 client.Subscribe("a/b", Qos.AtLeastOnce);
+
+                for (int i = 0; i < 100; i++)
+                {
+                    client.Publish("a/b", Encoding.UTF8.GetBytes("Hello World!" + i.ToString()), Qos.AtLeastOnce);
+                    Thread.Sleep(100);
+                }
             }
             Console.ReadKey();
         }

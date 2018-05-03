@@ -5,7 +5,7 @@ using System.IO;
 namespace nMqtt.Messages
 {
     /// <summary>
-    /// Fixed header
+    /// 固定报头
     /// </summary>
     internal class FixedHeader
     {
@@ -93,6 +93,9 @@ namespace nMqtt.Messages
 
     internal class MqttMessage
     {
+        /// <summary>
+        /// 固定报头
+        /// </summary>
         public FixedHeader FixedHeader { get; protected set; }
 
         public MqttMessage(MessageType msgType)
@@ -165,25 +168,25 @@ namespace nMqtt.Messages
     }
 
     /// <summary>
-    /// 消息类型
+    /// 报文类型
     /// </summary>
     [Flags]
     public enum MessageType : byte
     {
-        CONNECT     = 1,
-        CONNACK     = 2,
-        PUBLISH     = 3,
-        PUBACK      = 4,
-        PUBREC      = 5,
-        PUBREL      = 6,
-        PUBCOMP     = 7,
-        SUBSCRIBE   = 8,
-        SUBACK      = 9,
-        UNSUBSCRIBE = 10,
-        UNSUBACK    = 11,
-        PINGREQ     = 12,
-        PINGRESP    = 13,
-        DISCONNECT  = 14
+        CONNECT     = 1,  //发起连接
+        CONNACK     = 2,  //连接回执
+        PUBLISH     = 3,  //发布消息
+        PUBACK      = 4,  //发布回执
+        PUBREC      = 5,  //QoS2消息回执
+        PUBREL      = 6,  //QoS2消息释放
+        PUBCOMP     = 7,  //QoS2消息完成
+        SUBSCRIBE   = 8,  //订阅主题
+        SUBACK      = 9,  //订阅回执
+        UNSUBSCRIBE = 10, //取消订阅
+        UNSUBACK    = 11, //取消订阅回执
+        PINGREQ     = 12, //PING请求
+        PINGRESP    = 13, //PING响应
+        DISCONNECT  = 14  //断开连接
     }
 
     /// <summary>

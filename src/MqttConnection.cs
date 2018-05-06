@@ -10,7 +10,7 @@ namespace nMqtt
 {
     internal sealed class MqttConnection
     {
-        Socket socket;
+        Socket _socket;
         /// <summary>
         /// 最大连接数
         /// </summary>
@@ -45,28 +45,15 @@ namespace nMqtt
         /// </summary>
         /// <param name="server"></param>
         /// <param name="port"></param>
-        public void Connect(string server, int port)
-        {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Connect(server, port);
-            socket.ReceiveAsync(socketAsynPool.Pop());
-        }
-
-        /// <summary>
-        /// 连接
-        /// </summary>
-        /// <param name="server"></param>
-        /// <param name="port"></param>
         public async Task ConnectAsync(string server, int port)
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            await socket.ConnectAsync(server, port);
-            socket.ReceiveAsync(socketAsynPool.Pop());
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            await _socket.ConnectAsync(server, port);
+            _socket.ReceiveAsync(socketAsynPool.Pop());
         }
 
         void ProcessRecv(SocketAsyncEventArgs e)
         {
-            Debug.WriteLine("----------------------- ProcessRecv:{0}", e.BytesTransferred);
             var token = e.UserToken as RecvToken;
             if (e.SocketError == SocketError.Success && e.BytesTransferred > 0)
             {
@@ -81,7 +68,7 @@ namespace nMqtt
                     token.Reset();
                 }
 
-                socket.ReceiveAsync(e);
+                _socket.ReceiveAsync(e);
             }
             else
             {
@@ -102,7 +89,7 @@ namespace nMqtt
             {
                 message.Encode(stream);
                 stream.Seek(0, SeekOrigin.Begin);
-                socket.Send(stream.ToArray(), SocketFlags.None);
+                _socket.Send(stream.ToArray(), SocketFlags.None);
             }
         }
 

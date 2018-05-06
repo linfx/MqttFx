@@ -7,7 +7,7 @@ namespace nMqtt.Messages
     /// 订阅主题
     /// </summary>
     [MessageType(MessageType.SUBSCRIBE)]
-    internal sealed class SubscribeMessage : MqttMessage
+    public sealed class SubscribeMessage : MqttMessage
     {
         /// <summary>
         /// 主题列表
@@ -56,7 +56,7 @@ namespace nMqtt.Messages
     /// 订阅回执
     /// </summary>
     [MessageType(MessageType.SUBACK)]
-    internal class SubscribeAckMessage : MqttMessage
+    public class SubscribeAckMessage : MqttMessage
     {
         public short MessageIdentifier { get; set; }
 

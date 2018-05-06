@@ -7,7 +7,7 @@ namespace nMqtt.Messages
     /// <summary>
     /// 固定报头
     /// </summary>
-    internal class FixedHeader
+    public class FixedHeader
     {
         /// <summary>
         /// 报文类型
@@ -94,7 +94,7 @@ namespace nMqtt.Messages
     /// <summary>
     /// 消息基类
     /// </summary>
-    internal abstract class MqttMessage
+    public abstract class MqttMessage
     {
         /// <summary>
         /// 固定报头
@@ -112,64 +112,6 @@ namespace nMqtt.Messages
         public virtual void Encode(Stream stream) => FixedHeader.WriteTo(stream);
 
         public virtual void Decode(Stream stream) { }
-
-        #region 静态方法
-
-        public static MqttMessage DecodeMessage(byte[] buffer)
-        {
-            using (var stream = new MemoryStream(buffer))
-            {
-                return DecodeMessage(stream);
-            }
-        }
-
-        public static MqttMessage DecodeMessage(Stream stream)
-        {
-            var header = new FixedHeader(stream);
-            var msg = CreateMessage(header.MessageType);
-            msg.FixedHeader = header;
-            msg.Decode(stream);
-            return msg;
-        }
-
-        public static MqttMessage CreateMessage(MessageType msgType)
-        {
-            switch (msgType)
-            {
-                case MessageType.CONNECT:
-                    return new ConnectMessage();
-                case MessageType.CONNACK:
-                    return new ConnAckMessage();
-                case MessageType.DISCONNECT:
-                    return new DisconnectMessage();
-                case MessageType.PINGREQ:
-                    return new PingReqMessage();
-                case MessageType.PINGRESP:
-                    return new PingRespMessage();
-                case MessageType.PUBACK:
-                    return new PublishAckMessage();
-                case MessageType.PUBCOMP:
-                    return new PublishCompMessage();
-                case MessageType.PUBLISH:
-                    return new PublishMessage();
-                case MessageType.PUBREC:
-                    return new PublishRecMessage();
-                case MessageType.PUBREL:
-                    return new PublishRelMessage();
-                case MessageType.SUBSCRIBE:
-                    return new SubscribeMessage();
-                case MessageType.SUBACK:
-                    return new SubscribeAckMessage();
-                case MessageType.UNSUBSCRIBE:
-                    return new UnsubscribeMessage();
-                case MessageType.UNSUBACK:
-                    return new UnsubscribeMessage();
-                default:
-                    throw new Exception("Unsupported Message Type");
-            }
-        } 
-
-        #endregion
     }
 
     /// <summary>

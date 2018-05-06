@@ -6,7 +6,7 @@ namespace nMqtt.Messages
     /// 发布消息
     /// </summary>
     [MessageType(MessageType.PUBLISH)]
-    internal sealed class PublishMessage : MqttMessage
+    public sealed class PublishMessage : MqttMessage
     {
         /// <summary>
         /// 主题
@@ -56,6 +56,11 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBACK)]
     internal sealed class PublishAckMessage : MqttMessage
     {
+        public PublishAckMessage(short messageIdentifier = default(short))
+        {
+            MessageIdentifier = messageIdentifier;
+        }
+
         /// <summary>
         /// 消息ID
         /// </summary>
@@ -74,6 +79,11 @@ namespace nMqtt.Messages
     [MessageType(MessageType.PUBREC)]
     internal sealed class PublishRecMessage : MqttMessage
     {
+        public PublishRecMessage(short messageIdentifier = default(short))
+        {
+            MessageIdentifier = messageIdentifier;
+        }
+
         /// <summary>
         /// 消息ID
         /// </summary>

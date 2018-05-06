@@ -7,7 +7,7 @@ namespace nMqtt.Messages
     /// 发起连接
     /// </summary>
     [MessageType(MessageType.CONNECT)]
-    internal sealed class ConnectMessage : MqttMessage
+    public sealed class ConnectMessage : MqttMessage
     {
         #region 可变报头 Variable header
         /// <summary>
@@ -117,7 +117,7 @@ namespace nMqtt.Messages
     /// 连接回执
     /// </summary>
     [MessageType(MessageType.CONNACK)]
-    internal sealed class ConnAckMessage : MqttMessage
+    public sealed class ConnAckMessage : MqttMessage
     {
         /// <summary>
         /// 当前会话
@@ -139,7 +139,7 @@ namespace nMqtt.Messages
     /// 连接返回码
     /// </summary>
     [Flags]
-    internal enum ConnectReturnCode : byte
+    public enum ConnectReturnCode : byte
     {
         /// <summary>
         /// 连接已接受

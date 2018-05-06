@@ -7,7 +7,7 @@ namespace nMqtt.Messages
     /// 取消订阅
     /// </summary>
     [MessageType(MessageType.UNSUBSCRIBE)]
-    internal sealed class UnsubscribeMessage : MqttMessage
+    public sealed class UnsubscribeMessage : MqttMessage
     {
         List<string> topics = new List<string>();
 
@@ -40,7 +40,7 @@ namespace nMqtt.Messages
     /// 取消订阅回执
     /// </summary>
     [MessageType(MessageType.UNSUBACK)]
-    internal sealed class UnsubscribeAckMessage : MqttMessage
+    public sealed class UnsubscribeAckMessage : MqttMessage
     {
     }
 }

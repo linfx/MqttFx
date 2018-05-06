@@ -3,6 +3,8 @@ using System.Threading;
 using System.Diagnostics;
 using nMqtt.Messages;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace nMqtt
 {
@@ -11,10 +13,24 @@ namespace nMqtt
     /// </summary>
     public sealed class MqttClient : IDisposable
     {
-        Timer pingTimer;
-        MqttConnection conn;
+        ILogger _logger;
+        Timer _pingTimer;
+        MqttConnection _conn;
         readonly AutoResetEvent connResetEvent;
-        public Action<string, byte[]> MessageReceived;
+        public Action<MqttMessage> OnMessageReceived;
+
+        public MqttClient(string server, string clientId = default(string), ILogger logger = default(ILogger))
+        {
+            Server = server;
+            if (string.IsNullOrEmpty(clientId))
+                clientId = MqttUtils.NextId();
+            ClientId = clientId;
+            _logger = logger ?? NullLogger<MqttClient>.Instance;
+            _conn = new MqttConnection();
+            _conn.Recv += ProcesMessage;
+            connResetEvent = new AutoResetEvent(false);
+        }
+
 
         /// <summary>
         /// 客户端标识
@@ -32,19 +48,10 @@ namespace nMqtt
         public short KeepAlive { get; set; } = 60;
 
         public bool CleanSession { get; set; } = true;
-
+        /// <summary>
+        /// 连接状态
+        /// </summary>
         public ConnectionState ConnectionState { get; private set; }
-
-        public MqttClient(string server, string clientId = default(string))
-        {
-            Server = server;
-            if (string.IsNullOrEmpty(clientId))
-                clientId = MqttUtils.NextId();
-			ClientId = clientId;
-			conn = new MqttConnection();
-            conn.Recv += DecodeMessage;
-            connResetEvent = new AutoResetEvent(false);
-        }
 
         /// <summary>
         /// 连接
@@ -55,25 +62,25 @@ namespace nMqtt
         public async Task<ConnectionState> ConnectAsync(string username = default(string), string password = default(string))
         {
             ConnectionState = ConnectionState.Connecting;
-            await conn.ConnectAsync(Server, Port);
+            await _conn.ConnectAsync(Server, Port);
 
-			var msg = new ConnectMessage
-			{
-				ClientId = ClientId,
-				CleanSession = CleanSession
-			};
-			if (!string.IsNullOrEmpty(username))
+            var msg = new ConnectMessage
+            {
+                ClientId = ClientId,
+                CleanSession = CleanSession
+            };
+            if (!string.IsNullOrEmpty(username))
             {
                 msg.UsernameFlag = true;
                 msg.UserName = username;
             }
-            if(!string.IsNullOrEmpty(password))
+            if (!string.IsNullOrEmpty(password))
             {
                 msg.PasswordFlag = true;
                 msg.Password = password;
             }
             msg.KeepAlive = KeepAlive;
-            conn.SendMessage(msg);
+            _conn.SendMessage(msg);
 
             if (!connResetEvent.WaitOne(5000, false))
             {
@@ -85,19 +92,103 @@ namespace nMqtt
 
             if (ConnectionState == ConnectionState.Connected)
             {
-                pingTimer = new Timer((state) =>
+                _pingTimer = new Timer((state) =>
                 {
-                    conn.SendMessage(new PingReqMessage());
+                    _conn.SendMessage(new PingReqMessage());
                 }, null, KeepAlive * 1000, KeepAlive * 1000);
             }
 
             return ConnectionState;
         }
 
+        /// <summary>
+        /// 处理消息
+        /// </summary>
+        /// <param name="buffer"></param>
+        void ProcesMessage(byte[] buffer)
+        {
+            try
+            {
+                var message = MessageFactory.CreateMessage(buffer);
+                Debug.WriteLine("onRecv:{0}", message.FixedHeader.MessageType);
+                switch (message)
+                {
+                    #region CONNACK
+                    case ConnAckMessage msg:
+                        if (msg.ConnectReturnCode == ConnectReturnCode.BrokerUnavailable ||
+                           msg.ConnectReturnCode == ConnectReturnCode.IdentifierRejected ||
+                           msg.ConnectReturnCode == ConnectReturnCode.UnacceptedProtocolVersion ||
+                           msg.ConnectReturnCode == ConnectReturnCode.NotAuthorized ||
+                           msg.ConnectReturnCode == ConnectReturnCode.BadUsernameOrPassword)
+                        {
+                            ConnectionState = ConnectionState.Disconnecting;
+                            Dispose();
+                            _conn = null;
+                            ConnectionState = ConnectionState.Disconnected;
+                        }
+                        else
+                        {
+                            ConnectionState = ConnectionState.Connected;
+                        }
+                        connResetEvent.Set();
+                        break;
+                    #endregion
+                    #region PINGREQ
+                    case PingReqMessage msg:
+                        _conn.SendMessage(new PingRespMessage());
+                        return;
+                    #endregion
+                    #region DISCONNECT
+                    case DisconnectMessage msg:
+                        Disconnect();
+                        break; 
+                    #endregion
+                    #region PUBLISH
+                    case PublishMessage msg:
+                        if (msg.FixedHeader.Qos == Qos.AtLeastOnce)
+                        {
+                            _conn.SendMessage(new PublishAckMessage(msg.MessageIdentifier));
+                        }
+                        else if (msg.FixedHeader.Qos == Qos.ExactlyOnce)
+                        {
+                            _conn.SendMessage(new PublishRecMessage(msg.MessageIdentifier));
+                        }
+                        break;
+                    #endregion
+                    #region PUBACK
+                    case PublishAckMessage msg:
+                        Debug.WriteLine("Todo Delete(Msg)");
+                        //_logger.LogDebug("Todo Delete(Msg)");
+                        return;
+                    #endregion
+                    //case MessageType.PUBREC:
+                    //    break;
+                    //case MessageType.PUBREL:
+                    //    OnMessageReceived?.Invoke(message);
+                    //    break;
+                    //case MessageType.PUBCOMP:
+                    //    break;
+                    //case MessageType.SUBSCRIBE:
+                    //    break;
+                    //case MessageType.SUBACK:
+                    //    break;
+                    //case MessageType.UNSUBSCRIBE:
+                    //    break;
+                    //case MessageType.UNSUBACK:
+                    //    break;
+                }
+                OnMessageReceived?.Invoke(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ProcesMessage Error");
+            }
+        }
+
         public void Disconnect()
         {
-            if (conn.Recv != null)
-                conn.Recv -= DecodeMessage;
+            if (_conn.Recv != null)
+                _conn.Recv -= ProcesMessage;
         }
 
         /// <summary>
@@ -113,7 +204,7 @@ namespace nMqtt
             msg.MessageIdentifier = 0;
             msg.TopicName = topic;
             msg.Payload = data;
-            conn.SendMessage(msg);
+            _conn.SendMessage(msg);
         }
 
         /// <summary>
@@ -125,7 +216,7 @@ namespace nMqtt
         {
             var msg = new SubscribeMessage();
             msg.Subscribe(topic, qos);
-            conn.SendMessage(msg);
+            _conn.SendMessage(msg);
         }
 
         /// <summary>
@@ -137,80 +228,7 @@ namespace nMqtt
             var msg = new UnsubscribeMessage();
             msg.FixedHeader.Qos = Qos.AtLeastOnce;
             msg.Unsubscribe(topic);
-            conn.SendMessage(msg);
-        }
-
-        void DecodeMessage(byte[] buffer)
-        {
-            var msg = MqttMessage.DecodeMessage(buffer);
-            Debug.WriteLine("onRecv:{0}", msg.FixedHeader.MessageType);
-            switch (msg.FixedHeader.MessageType)
-            {
-                case MessageType.CONNACK:
-                    var connAckMsg = (ConnAckMessage)msg;
-                    if (connAckMsg.ConnectReturnCode == ConnectReturnCode.BrokerUnavailable ||
-                       connAckMsg.ConnectReturnCode == ConnectReturnCode.IdentifierRejected ||
-                       connAckMsg.ConnectReturnCode == ConnectReturnCode.UnacceptedProtocolVersion ||
-                       connAckMsg.ConnectReturnCode == ConnectReturnCode.NotAuthorized ||
-                       connAckMsg.ConnectReturnCode == ConnectReturnCode.BadUsernameOrPassword)
-                    {
-                        ConnectionState = ConnectionState.Disconnecting;
-                        Dispose();
-                        conn = null;
-                        ConnectionState = ConnectionState.Disconnected;
-                    }
-                    else
-                    {
-                        ConnectionState = ConnectionState.Connected;
-                        Debug.WriteLine("成功连接!");
-                    }
-                    connResetEvent.Set();
-                    break;
-                case MessageType.PUBLISH:
-                    var pubMsg = (PublishMessage)msg;
-                    string topic = pubMsg.TopicName;
-                    var data = pubMsg.Payload;
-                    if(pubMsg.FixedHeader.Qos == Qos.AtLeastOnce)
-                    {
-                        var ackMsg = new PublishAckMessage
-                        {
-                            MessageIdentifier = pubMsg.MessageIdentifier
-                        };
-                        conn.SendMessage(ackMsg);
-                    }
-                    OnMessageReceived(topic, data);
-                    break;
-                case MessageType.PUBACK:
-                    var pubAckMsg = (PublishAckMessage)msg;
-                    Debug.WriteLine("PUBACK MessageIdentifier:" + pubAckMsg.MessageIdentifier);
-                    break;
-                case MessageType.PUBREC:
-
-                    break;
-                case MessageType.PUBREL:
-                    break;
-                case MessageType.PUBCOMP:
-                    break;
-                case MessageType.SUBSCRIBE:
-                    break;
-                case MessageType.SUBACK:
-                    break;
-                case MessageType.UNSUBSCRIBE:
-                    break;
-                case MessageType.UNSUBACK:
-                    break;
-                case MessageType.PINGREQ:
-                    conn.SendMessage(new PingRespMessage());
-                    break;
-                case MessageType.DISCONNECT:
-                    Disconnect();
-                    break;
-            }
-        }
-
-        void OnMessageReceived(string topic, byte[] data)
-        {
-            MessageReceived?.Invoke(topic, data);
+            _conn.SendMessage(msg);
         }
 
         void Close()
@@ -227,16 +245,16 @@ namespace nMqtt
 
         public void Dispose()
         {
-            if (conn != null)
+            if (_conn != null)
             {
                 Close();
-                if (conn != null)
+                if (_conn != null)
                 {
                     //connection.Dispose();
                 }
             }
-           if (pingTimer != null)
-               pingTimer.Dispose();
+            if (_pingTimer != null)
+                _pingTimer.Dispose();
             GC.SuppressFinalize(this);
         }
     }

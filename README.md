@@ -101,6 +101,11 @@ mosquitto_pub -t a/b/c -m hello -q 1
 |DISCONNECT	|14	  |断开连接		  |
 
 
+## Install
+
+`PM> Install-Package nMqtt2 -Version 1.0.0`
+
+
 ## Examples
 ```c#
 using System;

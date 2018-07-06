@@ -5,7 +5,7 @@ namespace nMqtt.Messages
     /// <summary>
     /// 发布消息
     /// </summary>
-    [MessageType(MessageType.PUBLISH)]
+    [MessageType(MqttMessageType.PUBLISH)]
     public sealed class PublishMessage : MqttMessage
     {
         /// <summary>
@@ -53,7 +53,7 @@ namespace nMqtt.Messages
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    [MessageType(MessageType.PUBACK)]
+    [MessageType(MqttMessageType.PUBACK)]
     internal sealed class PublishAckMessage : MqttMessage
     {
         public PublishAckMessage(short messageIdentifier = default(short))
@@ -76,7 +76,7 @@ namespace nMqtt.Messages
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    [MessageType(MessageType.PUBREC)]
+    [MessageType(MqttMessageType.PUBREC)]
     internal sealed class PublishRecMessage : MqttMessage
     {
         public PublishRecMessage(short messageIdentifier = default(short))
@@ -99,7 +99,7 @@ namespace nMqtt.Messages
     /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
-    [MessageType(MessageType.PUBREL)]
+    [MessageType(MqttMessageType.PUBREL)]
     internal sealed class PublishRelMessage : MqttMessage
     {
         /// <summary>
@@ -117,7 +117,7 @@ namespace nMqtt.Messages
     /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
-    [MessageType(MessageType.PUBCOMP)]
+    [MessageType(MqttMessageType.PUBCOMP)]
     internal sealed class PublishCompMessage : MqttMessage
     {
         /// <summary>

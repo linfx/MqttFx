@@ -17,37 +17,37 @@ namespace nMqtt.Messages
             }
         }
 
-        private static MqttMessage CreateMessage(MessageType msgType)
+        private static MqttMessage CreateMessage(MqttMessageType msgType)
         {
             switch (msgType)
             {
-                case MessageType.CONNECT:
+                case MqttMessageType.CONNECT:
                     return new ConnectMessage();
-                case MessageType.CONNACK:
+                case MqttMessageType.CONNACK:
                     return new ConnAckMessage();
-                case MessageType.DISCONNECT:
+                case MqttMessageType.DISCONNECT:
                     return new DisconnectMessage();
-                case MessageType.PINGREQ:
+                case MqttMessageType.PINGREQ:
                     return new PingReqMessage();
-                case MessageType.PINGRESP:
+                case MqttMessageType.PINGRESP:
                     return new PingRespMessage();
-                case MessageType.PUBACK:
+                case MqttMessageType.PUBACK:
                     return new PublishAckMessage();
-                case MessageType.PUBCOMP:
+                case MqttMessageType.PUBCOMP:
                     return new PublishCompMessage();
-                case MessageType.PUBLISH:
+                case MqttMessageType.PUBLISH:
                     return new PublishMessage();
-                case MessageType.PUBREC:
+                case MqttMessageType.PUBREC:
                     return new PublishRecMessage();
-                case MessageType.PUBREL:
+                case MqttMessageType.PUBREL:
                     return new PublishRelMessage();
-                case MessageType.SUBSCRIBE:
+                case MqttMessageType.SUBSCRIBE:
                     return new SubscribeMessage();
-                case MessageType.SUBACK:
+                case MqttMessageType.SUBACK:
                     return new SubscribeAckMessage();
-                case MessageType.UNSUBSCRIBE:
+                case MqttMessageType.UNSUBSCRIBE:
                     return new UnsubscribeMessage();
-                case MessageType.UNSUBACK:
+                case MqttMessageType.UNSUBACK:
                     return new UnsubscribeMessage();
                 default:
                     throw new Exception("Unsupported Message Type");

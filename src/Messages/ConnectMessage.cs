@@ -6,7 +6,7 @@ namespace nMqtt.Messages
     /// <summary>
     /// 发起连接
     /// </summary>
-    [MessageType(MessageType.CONNECT)]
+    [MessageType(MqttMessageType.CONNECT)]
     public sealed class ConnectMessage : MqttMessage
     {
         #region 可变报头 Variable header
@@ -116,7 +116,7 @@ namespace nMqtt.Messages
     /// <summary>
     /// 连接回执
     /// </summary>
-    [MessageType(MessageType.CONNACK)]
+    [MessageType(MqttMessageType.CONNACK)]
     public sealed class ConnAckMessage : MqttMessage
     {
         /// <summary>

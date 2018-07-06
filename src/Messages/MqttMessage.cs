@@ -12,7 +12,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 报文类型
         /// </summary>
-        public MessageType MessageType { get; set; }
+        public MqttMessageType MessageType { get; set; }
         /// <summary>
         /// 重发标志
         /// </summary>
@@ -30,7 +30,7 @@ namespace nMqtt.Messages
         /// </summary>
         public int RemaingLength { get; set; }
 
-        public FixedHeader(MessageType msgType)
+        public FixedHeader(MqttMessageType msgType)
         {
             MessageType = msgType;
         }
@@ -41,7 +41,7 @@ namespace nMqtt.Messages
                 throw new Exception("The supplied header is invalid. Header must be at least 2 bytes long.");
 
             var byte1 = stream.ReadByte();
-            MessageType = (MessageType)((byte1 & 0xf0) >> 4);
+            MessageType = (MqttMessageType)((byte1 & 0xf0) >> 4);
             Dup = ((byte1 & 0x08) >> 3) > 0;
             Qos = (Qos)((byte1 & 0x06) >> 1);
             Retain = (byte1 & 0x01) > 0;
@@ -107,7 +107,7 @@ namespace nMqtt.Messages
             FixedHeader = new FixedHeader(att.MessageType);
         }
 
-        public MqttMessage(MessageType msgType) => FixedHeader = new FixedHeader(msgType);
+        public MqttMessage(MqttMessageType msgType) => FixedHeader = new FixedHeader(msgType);
 
         public virtual void Encode(Stream stream) => FixedHeader.WriteTo(stream);
 
@@ -118,7 +118,7 @@ namespace nMqtt.Messages
     /// 报文类型
     /// </summary>
     [Flags]
-    public enum MessageType : byte
+    public enum MqttMessageType : byte
     {
         /// <summary>
         /// 发起连接
@@ -206,7 +206,7 @@ namespace nMqtt.Messages
     [AttributeUsage(AttributeTargets.Class)]
     public class MessageTypeAttribute : Attribute
     {
-        public MessageTypeAttribute(MessageType messageType)
+        public MessageTypeAttribute(MqttMessageType messageType)
         {
             MessageType = messageType;
         }
@@ -214,6 +214,6 @@ namespace nMqtt.Messages
         /// <summary>
         /// 报文类型
         /// </summary>
-        public MessageType MessageType { get; set; }
+        public MqttMessageType MessageType { get; set; }
     }
 }

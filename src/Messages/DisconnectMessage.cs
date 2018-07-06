@@ -3,7 +3,7 @@
     /// <summary>
     /// 断开连接
     /// </summary>
-    [MessageType(MessageType.DISCONNECT)]
+    [MessageType(MqttMessageType.DISCONNECT)]
     public sealed class DisconnectMessage : MqttMessage
     {
     }

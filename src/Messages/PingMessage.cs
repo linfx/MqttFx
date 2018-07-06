@@ -3,7 +3,7 @@
     /// <summary>
     /// PING请求
     /// </summary>
-    [MessageType(MessageType.PINGREQ)]
+    [MessageType(MqttMessageType.PINGREQ)]
     internal sealed class PingReqMessage : MqttMessage
     {
     }
@@ -11,7 +11,7 @@
     /// <summary>
     /// PING响应
     /// </summary>
-    [MessageType(MessageType.PINGRESP)]
+    [MessageType(MqttMessageType.PINGRESP)]
     internal class PingRespMessage : MqttMessage
     {
     }

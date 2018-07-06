@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using nMqtt.Messages;
 
@@ -10,7 +11,7 @@ namespace nMqtt.Test
         static ILogger _logger;
         static MqttClient _client;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var loggerFactory = new LoggerFactory()
                 .AddConsole();
@@ -18,7 +19,7 @@ namespace nMqtt.Test
 
             _client = new MqttClient("127.0.0.1", logger: _logger);
             _client.OnMessageReceived += OnMessageReceived;
-            _client.ConnectAsync().Wait();
+            await _client.ConnectAsync();
 
             while (Console.ReadLine() != "c")
             {

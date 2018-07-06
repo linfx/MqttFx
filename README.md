@@ -103,7 +103,7 @@ mosquitto_pub -t a/b/c -m hello -q 1
 
 ## Install
 
-`PM> Install-Package nMqtt2 -Version`
+`PM> Install-Package nMqtt2`
 
 
 ## Examples

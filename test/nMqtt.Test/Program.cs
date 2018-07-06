@@ -23,7 +23,7 @@ namespace nMqtt.Test
 
             while (Console.ReadLine() != "c")
             {
-                _client.Publish("/World", Encoding.UTF8.GetBytes("测试发送消息"), Qos.AtLeastOnce);
+                _client.Publish("/World", Encoding.UTF8.GetBytes("测试发送消息"), MqttQos.AtLeastOnce);
             }
 
             Console.ReadKey();

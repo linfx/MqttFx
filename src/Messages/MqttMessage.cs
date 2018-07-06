@@ -20,7 +20,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 服务质量等级
         /// </summary>
-        public Qos Qos { get; set; }
+        public MqttQos Qos { get; set; }
         /// <summary>
         /// 保留标志
         /// </summary>
@@ -43,7 +43,7 @@ namespace nMqtt.Messages
             var byte1 = stream.ReadByte();
             MessageType = (MqttMessageType)((byte1 & 0xf0) >> 4);
             Dup = ((byte1 & 0x08) >> 3) > 0;
-            Qos = (Qos)((byte1 & 0x06) >> 1);
+            Qos = (MqttQos)((byte1 & 0x06) >> 1);
             Retain = (byte1 & 0x01) > 0;
 
             RemaingLength = DecodeLenght(stream);
@@ -182,7 +182,7 @@ namespace nMqtt.Messages
     /// 服务质量等级
     /// </summary>
     [Flags]
-    public enum Qos : byte
+    public enum MqttQos : byte
     {
         /// <summary>
         ///     QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.

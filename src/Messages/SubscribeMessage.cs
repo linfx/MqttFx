@@ -36,7 +36,7 @@ namespace nMqtt.Messages
             }
         }
 
-        public void Subscribe(string topic, Qos qos)
+        public void Subscribe(string topic, MqttQos qos)
         {
             Topics.Add(new TopicQos
             {
@@ -48,7 +48,7 @@ namespace nMqtt.Messages
         struct TopicQos
         {
             public string Topic { get; set; }
-            public Qos Qos { get; set; }
+            public MqttQos Qos { get; set; }
         }
     }
 

@@ -145,11 +145,11 @@ namespace nMqtt
                     #endregion
                     #region PUBLISH
                     case PublishMessage msg:
-                        if (msg.FixedHeader.Qos == Qos.AtLeastOnce)
+                        if (msg.FixedHeader.Qos == MqttQos.AtLeastOnce)
                         {
                             _conn.SendMessage(new PublishAckMessage(msg.MessageIdentifier));
                         }
-                        else if (msg.FixedHeader.Qos == Qos.ExactlyOnce)
+                        else if (msg.FixedHeader.Qos == MqttQos.ExactlyOnce)
                         {
                             _conn.SendMessage(new PublishRecMessage(msg.MessageIdentifier));
                         }
@@ -197,7 +197,7 @@ namespace nMqtt
         /// <param name="topic">主题</param>
         /// <param name="data">数据</param>
         /// <param name="qos">服务质量等级</param>
-        public void Publish(string topic, byte[] data, Qos qos = Qos.AtMostOnce)
+        public void Publish(string topic, byte[] data, MqttQos qos = MqttQos.AtMostOnce)
         {
             var msg = new PublishMessage();
             msg.FixedHeader.Qos = qos;
@@ -212,7 +212,7 @@ namespace nMqtt
         /// </summary>
         /// <param name="topic"></param>
         /// <param name="qos"></param>
-        public void Subscribe(string topic, Qos qos = Qos.AtMostOnce)
+        public void Subscribe(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
             var msg = new SubscribeMessage();
             msg.Subscribe(topic, qos);
@@ -226,7 +226,7 @@ namespace nMqtt
         public void Unsubscribe(string topic)
         {
             var msg = new UnsubscribeMessage();
-            msg.FixedHeader.Qos = Qos.AtLeastOnce;
+            msg.FixedHeader.Qos = MqttQos.AtLeastOnce;
             msg.Unsubscribe(topic);
             _conn.SendMessage(msg);
         }

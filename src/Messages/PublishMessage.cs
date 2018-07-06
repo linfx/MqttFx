@@ -39,7 +39,7 @@ namespace nMqtt.Messages
         {
             //variable header
             TopicName = stream.ReadString();
-            if (FixedHeader.Qos == Qos.AtLeastOnce || FixedHeader.Qos == Qos.ExactlyOnce)
+            if (FixedHeader.Qos == MqttQos.AtLeastOnce || FixedHeader.Qos == MqttQos.ExactlyOnce)
                 MessageIdentifier = stream.ReadShort();
 
             //playload

@@ -35,7 +35,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 遗嘱QoS
         /// </summary>
-        public Qos WillQos { get; set; }
+        public MqttQos WillQos { get; set; }
         /// <summary>
         /// 遗嘱标志
         /// </summary>

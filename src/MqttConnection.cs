@@ -11,16 +11,18 @@ namespace nMqtt
     internal sealed class MqttConnection
     {
         Socket _socket;
+
         /// <summary>
         /// 最大连接数
         /// </summary>
-        int m_nConnection = 1;
+        readonly int m_nConnection = 10;
+
         public Action<byte[]> Recv;
 
         /// <summary>
         /// Socket异步对象池
         /// </summary>
-        SocketAsyncEventArgsPool socketAsynPool;
+        readonly SocketAsyncEventArgsPool socketAsynPool;
 
         public MqttConnection()
         {
@@ -125,7 +127,7 @@ namespace nMqtt
                             encodedByte = Buffer[offset];
                             remainingLength += encodedByte & 0x7f * multiplier;
                             multiplier *= 0x80;
-                        } while ((++offset <=4) && (encodedByte & 0x80) != 0);
+                        } while ((++offset <= 4) && (encodedByte & 0x80) != 0);
 
                         return remainingLength + offset;
                     }
@@ -182,19 +184,15 @@ namespace nMqtt
     {
         readonly Stack<SocketAsyncEventArgs> pool;
 
-        internal SocketAsyncEventArgsPool(int capacity)
-        {
-            pool = new Stack<SocketAsyncEventArgs>(capacity);
-        }
+        internal SocketAsyncEventArgsPool(int capacity) => pool = new Stack<SocketAsyncEventArgs>(capacity);
 
         internal void Push(SocketAsyncEventArgs item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
+
             lock (pool)
-            {
                 pool.Push(item);
-            }
         }
 
         internal SocketAsyncEventArgs Pop()
@@ -207,7 +205,7 @@ namespace nMqtt
     }
 
     /// <summary>
-    /// 缓存
+    /// 缓存管理
     /// </summary>
     internal sealed class BufferManager
     {
@@ -227,12 +225,9 @@ namespace nMqtt
 
         /// <summary>
         /// Allocates buffer space used by the buffer pool
+        /// create one big large buffer and divide that out to each SocketAsyncEventArg object
         /// </summary>
-        public void ResetBuffer()
-        {
-            // create one big large buffer and divide that out to each SocketAsyncEventArg object
-            m_buffer = new byte[m_numBytes];
-        }
+        public void ResetBuffer() => m_buffer = new byte[m_numBytes];
 
         /// <summary>
         /// Assigns a buffer from the buffer pool to the specified SocketAsyncEventArgs object

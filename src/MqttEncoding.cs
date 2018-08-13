@@ -9,9 +9,11 @@ namespace nMqtt
         public override byte[] GetBytes(string s)
         {
             ValidateString(s);
-            var stringBytes = new List<byte>();
-            stringBytes.Add((byte)(s.Length >> 8));
-            stringBytes.Add((byte)(s.Length & 0xFF));
+            var stringBytes = new List<byte>
+            {
+                (byte)(s.Length >> 8),
+                (byte)(s.Length & 0xFF)
+            };
             stringBytes.AddRange(ASCII.GetBytes(s));
             return stringBytes.ToArray();
         }

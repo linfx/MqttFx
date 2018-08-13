@@ -11,7 +11,7 @@ namespace nMqtt
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public sealed class MqttClient : IDisposable
+    public class MqttClient : IDisposable
     {
         ILogger _logger;
         Timer _pingTimer;
@@ -30,7 +30,6 @@ namespace nMqtt
             _conn.Recv += ProcesMessage;
             connResetEvent = new AutoResetEvent(false);
         }
-
 
         /// <summary>
         /// 客户端标识
@@ -110,7 +109,7 @@ namespace nMqtt
             try
             {
                 var message = MessageFactory.CreateMessage(buffer);
-                Debug.WriteLine("onRecv:{0}", message.FixedHeader.MessageType);
+                _logger.LogDebug("onRecv:{0}", message.FixedHeader.MessageType);
                 switch (message)
                 {
                     #region CONNACK

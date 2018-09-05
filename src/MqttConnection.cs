@@ -15,7 +15,7 @@ namespace nMqtt
         /// <summary>
         /// 最大连接数
         /// </summary>
-        readonly int m_nConnection = 10;
+        readonly int m_nConnection = 1;
 
         public Action<byte[]> Recv;
 

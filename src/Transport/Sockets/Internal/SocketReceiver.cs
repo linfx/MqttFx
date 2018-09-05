@@ -22,9 +22,8 @@ namespace nMqtt.Transport.Sockets.Internal
         {
 #if NETCOREAPP2_1
             _eventArgs.SetBuffer(buffer);
-#elif NETSTANDARD2_0
+#else
             var segment = buffer.GetArray();
-
             _eventArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
 #else
 #error TFMs need to be updated

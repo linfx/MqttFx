@@ -25,15 +25,11 @@ namespace nMqtt.Transport.Sockets.Internal
 #else
             var segment = buffer.GetArray();
             _eventArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
-#else
-#error TFMs need to be updated
 #endif
-
             if (!_socket.ReceiveAsync(_eventArgs))
             {
                 _awaitable.Complete(_eventArgs.BytesTransferred, _eventArgs.SocketError);
             }
-
             return _awaitable;
         }
 

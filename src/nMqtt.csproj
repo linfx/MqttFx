@@ -15,6 +15,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Transport\Buffers\**" />
+    <EmbeddedResource Remove="Transport\Buffers\**" />
+    <None Remove="Transport\Buffers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Transport\Abstractions\Internal\MemoryPool.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
     <PackageReference Include="System.IO.Pipelines" Version="4.5.0" />

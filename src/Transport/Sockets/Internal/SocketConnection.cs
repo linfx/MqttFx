@@ -1,11 +1,8 @@
 using Microsoft.Extensions.Logging;
 using nMqtt.Transport.Abstractions.Internal;
 using System;
-using System.Buffers;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipelines;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -21,60 +18,53 @@ namespace nMqtt.Transport.Sockets.Internal
 
         private readonly Socket _socket;
         private readonly PipeScheduler _scheduler;
-        private readonly ILogger _trace;
-        private readonly SocketReceiver _receiver;
-        //private readonly SocketSender _sender;
+        private readonly ILogger _logger;
+        private readonly SocketReceiver _receiver; 
+        private readonly SocketSender _sender;
         private readonly CancellationTokenSource _connectionClosedTokenSource = new CancellationTokenSource();
 
         private volatile bool _aborted;
         private long _totalBytesWritten;
 
-        internal SocketConnection(Socket socket, MemoryPool<byte> memoryPool, PipeScheduler scheduler, ILogger logger)
+        internal SocketConnection(Socket socket, PipeScheduler scheduler)
         {
-            Debug.Assert(socket != null);
-            Debug.Assert(memoryPool != null);
-
             _socket = socket;
-            MemoryPool = memoryPool;
-            _scheduler = scheduler;
-            _trace = logger;
-
-            var localEndPoint = (IPEndPoint)_socket.LocalEndPoint;
-            var remoteEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
-
-            // On *nix platforms, Sockets already dispatches to the ThreadPool.
-            // Yes, the IOQueues are still used for the PipeSchedulers. This is intentional.
-            // https://github.com/aspnet/KestrelHttpServer/issues/2573
-            var awaiterScheduler = IsWindows ? _scheduler : PipeScheduler.Inline;
-
-            _receiver = new SocketReceiver(_socket, awaiterScheduler);
-            //_sender = new SocketSender(_socket, awaiterScheduler);
+            _receiver = new SocketReceiver(_socket, scheduler);
+            _sender = new SocketSender(_socket, scheduler);
         }
-
-        public MemoryPool<byte> MemoryPool { get; }
-        public PipeScheduler InputWriterScheduler => _scheduler;
-        public PipeScheduler OutputReaderScheduler => _scheduler;
-        //public override long TotalBytesWritten => Interlocked.Read(ref _totalBytesWritten);
 
         public async Task StartAsync()
         {
+            var p = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
+            Application = p.Application;
+
             try
             {
                 // Spawn send and receive logic
                 var receiveTask = DoReceive();
-                //var sendTask = DoSend();
+                var sendTask = DoSend();
+
+                // If the sending task completes then close the receive
+                // We don't need to do this in the other direction because the kestrel
+                // will trigger the output closing once the input is complete.
+                if (await Task.WhenAny(receiveTask, sendTask) == sendTask)
+                {
+                    // Tell the reader it's being aborted
+                    _socket.Dispose();
+                }
 
                 // Now wait for both to complete
                 await receiveTask;
                 //await sendTask;
 
+                
                 _receiver.Dispose();
-                //_sender.Dispose();
-                //ThreadPool.QueueUserWorkItem(state => ((SocketConnection)state).CancelConnectionClosedToken(), this);
+                _sender.Dispose();
+                ThreadPool.QueueUserWorkItem(state => ((SocketConnection)state).CancelConnectionClosedToken(), this);
             }
             catch (Exception ex)
             {
-                _trace.LogError(0, ex, $"Unexpected exception in {nameof(SocketConnection)}.{nameof(StartAsync)}.");
+                _logger.LogError(0, ex, $"Unexpected exception in {nameof(SocketConnection)}.{nameof(StartAsync)}.");
             }
         }
 
@@ -140,23 +130,82 @@ namespace nMqtt.Transport.Sockets.Internal
                 if (bytesReceived == 0)
                 {
                     // FIN
-                    //_trace.ConnectionReadFin(ConnectionId);
                     break;
                 }
+
                 Input.Advance(bytesReceived);       //告诉PipeWriter从套邛字读取了多少
 
                 var flushTask = Input.FlushAsync(); //标记数据可用, 让PipeReader读取
                 if (!flushTask.IsCompleted)
                 {
-                    //_trace.ConnectionPause(ConnectionId);
                     await flushTask;
-                    //_trace.ConnectionResume(ConnectionId);
                 }
 
                 var result = flushTask.GetAwaiter().GetResult();
                 if (result.IsCompleted)
                 {
                     // Pipe consumer is shut down, do we stop writing
+                    break;
+                }
+            }
+        }
+
+
+        private async Task<Exception> DoSend()
+        {
+            Exception error = null;
+
+            try
+            {
+                await ProcessSends();
+            }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.OperationAborted)
+            {
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (IOException ex)
+            {
+                error = ex;
+            }
+            catch (Exception ex)
+            {
+                error = new IOException(ex.Message, ex);
+            }
+            finally
+            {
+                _aborted = true;
+                _socket.Shutdown(SocketShutdown.Both);
+            }
+
+            return error;
+        }
+
+        private async Task ProcessSends()
+        {
+            while (true)
+            {
+                // Wait for data to write from the pipe producer
+                var result = await Output.ReadAsync();
+                var buffer = result.Buffer;
+
+                if (result.IsCanceled)
+                {
+                    break;
+                }
+
+                var end = buffer.End;
+                var isCompleted = result.IsCompleted;
+                if (!buffer.IsEmpty)
+                {
+                    await _sender.SendAsync(buffer);
+                }
+
+                Output.AdvanceTo(end);
+
+                if (isCompleted)
+                {
                     break;
                 }
             }

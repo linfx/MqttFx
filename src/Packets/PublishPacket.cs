@@ -1,12 +1,12 @@
 ﻿using System.IO;
 
-namespace nMqtt.Messages
+namespace nMqtt.Packets
 {
     /// <summary>
     /// 发布消息
     /// </summary>
-    [MessageType(MqttMessageType.PUBLISH)]
-    public sealed class PublishMessage : MqttMessage
+    [PacketType(PacketType.PUBLISH)]
+    public sealed class PublishPacket : Packet
     {
         /// <summary>
         /// 主题
@@ -53,10 +53,10 @@ namespace nMqtt.Messages
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    [MessageType(MqttMessageType.PUBACK)]
-    internal sealed class PublishAckMessage : MqttMessage
+    [PacketType(PacketType.PUBACK)]
+    internal sealed class PublishAckPacket : Packet
     {
-        public PublishAckMessage(short messageIdentifier = default(short))
+        public PublishAckPacket(short messageIdentifier = default(short))
         {
             MessageIdentifier = messageIdentifier;
         }
@@ -76,10 +76,10 @@ namespace nMqtt.Messages
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    [MessageType(MqttMessageType.PUBREC)]
-    internal sealed class PublishRecMessage : MqttMessage
+    [PacketType(PacketType.PUBREC)]
+    internal sealed class PublishRecPacket : Packet
     {
-        public PublishRecMessage(short messageIdentifier = default(short))
+        public PublishRecPacket(short messageIdentifier = default)
         {
             MessageIdentifier = messageIdentifier;
         }
@@ -99,8 +99,8 @@ namespace nMqtt.Messages
     /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
-    [MessageType(MqttMessageType.PUBREL)]
-    internal sealed class PublishRelMessage : MqttMessage
+    [PacketType(PacketType.PUBREL)]
+    internal sealed class PublishRelPacket : Packet
     {
         /// <summary>
         /// 消息ID
@@ -117,8 +117,8 @@ namespace nMqtt.Messages
     /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
-    [MessageType(MqttMessageType.PUBCOMP)]
-    internal sealed class PublishCompMessage : MqttMessage
+    [PacketType(PacketType.PUBCOMP)]
+    internal sealed class PublishCompPacket : Packet
     {
         /// <summary>
         /// 消息ID

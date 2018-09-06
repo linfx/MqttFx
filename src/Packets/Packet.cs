@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DotNetty.Buffers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace nMqtt.Messages
+namespace nMqtt.Packets
 {
     /// <summary>
     /// 固定报头
@@ -12,7 +13,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 报文类型
         /// </summary>
-        public MqttMessageType MessageType { get; set; }
+        public PacketType PacketType { get; set; }
         /// <summary>
         /// 重发标志
         /// </summary>
@@ -30,9 +31,9 @@ namespace nMqtt.Messages
         /// </summary>
         public int RemaingLength { get; set; }
 
-        public FixedHeader(MqttMessageType msgType)
+        public FixedHeader(PacketType packetType)
         {
-            MessageType = msgType;
+            PacketType = packetType;
         }
 
         public FixedHeader(Stream stream)
@@ -41,7 +42,7 @@ namespace nMqtt.Messages
                 throw new Exception("The supplied header is invalid. Header must be at least 2 bytes long.");
 
             var byte1 = stream.ReadByte();
-            MessageType = (MqttMessageType)((byte1 & 0xf0) >> 4);
+            PacketType = (PacketType)((byte1 & 0xf0) >> 4);
             Dup = ((byte1 & 0x08) >> 3) > 0;
             Qos = (MqttQos)((byte1 & 0x06) >> 1);
             Retain = (byte1 & 0x01) > 0;
@@ -49,15 +50,37 @@ namespace nMqtt.Messages
             RemaingLength = DecodeLenght(stream);
         }
 
-        public void WriteTo(Stream stream)
+        public FixedHeader(IByteBuffer buffer)
         {
-            var flags = (byte)MessageType << 4;
+            var byte1 = buffer.ReadByte();
+            PacketType = (PacketType)((byte1 & 0xf0) >> 4);
+            Dup = ((byte1 & 0x08) >> 3) > 0;
+            Qos = (MqttQos)((byte1 & 0x06) >> 1);
+            Retain = (byte1 & 0x01) > 0;
+
+            RemaingLength = DecodeRemainingLength(buffer);
+        }
+
+        public void WriteTo(Stream buffer)
+        {
+            var flags = (byte)PacketType << 4;
             flags |= Dup.ToByte() << 3;
             flags |= (byte)Qos << 1;
             flags |= Retain.ToByte();
 
-            stream.WriteByte((byte)flags);                
-            stream.Write(EncodeLength(RemaingLength));   
+            buffer.WriteByte((byte)flags);                
+            buffer.Write(EncodeLength(RemaingLength));   
+        }
+
+        public void WriteTo(IByteBuffer buffer)
+        {
+            var flags = (byte)PacketType << 4;
+            flags |= Dup.ToByte() << 3;
+            flags |= (byte)Qos << 1;
+            flags |= Retain.ToByte();
+
+            buffer.WriteByte((byte)flags);
+            buffer.WriteBytes(EncodeLength(RemaingLength));
         }
 
         internal static byte[] EncodeLength(int length)
@@ -89,29 +112,48 @@ namespace nMqtt.Messages
 
             return remainingLength;
         }
+
+        internal static int DecodeRemainingLength(IByteBuffer buffer)
+        {
+            byte encodedByte;
+            var multiplier = 1;
+            var remainingLength = 0;
+            do
+            {
+                encodedByte = buffer.ReadByte();
+                remainingLength += (encodedByte & 0x7f) * multiplier;
+                multiplier *= 0x80;
+            } while ((encodedByte & 0x80) != 0);
+
+            return remainingLength;
+        }
     }
 
     /// <summary>
     /// 消息基类
     /// </summary>
-    public abstract class MqttMessage
+    public abstract class Packet
     {
         /// <summary>
         /// 固定报头
         /// </summary>
         public FixedHeader FixedHeader { get; set; }
 
-        public MqttMessage()
+        public Packet()
         {
-            var att = (MessageTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(MessageTypeAttribute));
-            FixedHeader = new FixedHeader(att.MessageType);
+            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
+            FixedHeader = new FixedHeader(att.PacketType);
         }
 
-        public MqttMessage(MqttMessageType msgType) => FixedHeader = new FixedHeader(msgType);
+        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
 
         public virtual void Encode(Stream stream) => FixedHeader.WriteTo(stream);
 
         public virtual void Decode(Stream stream) { }
+
+        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
+
+        public virtual void Decode(IByteBuffer buffer) { }
     }
 
     /// <summary>
@@ -140,7 +182,7 @@ namespace nMqtt.Messages
     /// 报文类型
     /// </summary>
     [Flags]
-    public enum MqttMessageType : byte
+    public enum PacketType : byte
     {
         /// <summary>
         /// 发起连接
@@ -204,16 +246,16 @@ namespace nMqtt.Messages
     /// 报文类型
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class MessageTypeAttribute : Attribute
+    public class PacketTypeAttribute : Attribute
     {
-        public MessageTypeAttribute(MqttMessageType messageType)
+        public PacketTypeAttribute(PacketType packetType)
         {
-            MessageType = messageType;
+            PacketType = packetType;
         }
 
         /// <summary>
         /// 报文类型
         /// </summary>
-        public MqttMessageType MessageType { get; set; }
+        public PacketType PacketType { get; set; }
     }
 }

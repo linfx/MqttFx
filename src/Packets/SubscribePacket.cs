@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using System.Collections.Generic;
 
-namespace nMqtt.Messages
+namespace nMqtt.Packets
 {
     /// <summary>
     /// 订阅主题
     /// </summary>
-    [MessageType(MqttMessageType.SUBSCRIBE)]
-    public sealed class SubscribeMessage : MqttMessage
+    [PacketType(PacketType.SUBSCRIBE)]
+    public sealed class SubscribePacket : Packet
     {
         /// <summary>
         /// 主题列表
@@ -55,8 +55,8 @@ namespace nMqtt.Messages
     /// <summary>
     /// 订阅回执
     /// </summary>
-    [MessageType(MqttMessageType.SUBACK)]
-    public class SubscribeAckMessage : MqttMessage
+    [PacketType(PacketType.SUBACK)]
+    public class SubscribeAckPacket : Packet
     {
         public short MessageIdentifier { get; set; }
 

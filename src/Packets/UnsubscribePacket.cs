@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace nMqtt.Messages
+namespace nMqtt.Packets
 {
     /// <summary>
     /// 取消订阅
     /// </summary>
-    [MessageType(MqttMessageType.UNSUBSCRIBE)]
-    public sealed class UnsubscribeMessage : MqttMessage
+    [PacketType(PacketType.UNSUBSCRIBE)]
+    public sealed class UnsubscribePacket : Packet
     {
         List<string> topics = new List<string>();
 
@@ -39,8 +39,8 @@ namespace nMqtt.Messages
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    [MessageType(MqttMessageType.UNSUBACK)]
-    public sealed class UnsubscribeAckMessage : MqttMessage
+    [PacketType(PacketType.UNSUBACK)]
+    public sealed class UnsubscribeAckMessage : Packet
     {
     }
 }

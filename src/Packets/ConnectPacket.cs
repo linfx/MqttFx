@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using DotNetty.Buffers;
 
-namespace nMqtt.Messages
+namespace nMqtt.Packets
 {
     /// <summary>
     /// 发起连接
     /// </summary>
-    [MessageType(MqttMessageType.CONNECT)]
-    public sealed class ConnectMessage : MqttMessage
+    [PacketType(PacketType.CONNECT)]
+    public sealed class ConnectPacket : Packet
     {
         #region 可变报头 Variable header
         /// <summary>
@@ -74,7 +76,7 @@ namespace nMqtt.Messages
         public string Password { get; set; }  
         #endregion
 
-        public override void Encode(Stream stream)
+        public override void Encode(Stream buffer)
         {
             using (var body = new MemoryStream())
             {
@@ -107,8 +109,52 @@ namespace nMqtt.Messages
                     body.WriteString(Password);
 
                 FixedHeader.RemaingLength = (int)body.Length;
-                FixedHeader.WriteTo(stream);
-                body.WriteTo(stream);
+                FixedHeader.WriteTo(buffer);
+                body.WriteTo(buffer);
+            }
+        }
+
+        public override void Encode(IByteBuffer buffer)
+        {
+            var buf = Unpooled.Buffer();
+            try
+            {
+                //variable header
+                buf.WriteString(ProtocolName);       //byte 1 - 8
+                buf.WriteByte(ProtocolLevel);        //byte 9
+
+                //connect flags;                      //byte 10
+                var flags = UsernameFlag.ToByte() << 7;
+                flags |= PasswordFlag.ToByte() << 6;
+                flags |= WillRetain.ToByte() << 5;
+                flags |= ((byte)WillQos) << 3;
+                flags |= WillFlag.ToByte() << 2;
+                flags |= CleanSession.ToByte() << 1;
+                buf.WriteByte((byte)flags);
+
+                //keep alive
+                buf.WriteShort(KeepAlive);      //byte 11 - 12
+
+                //payload
+                buf.WriteString(ClientId);
+                if (WillFlag)
+                {
+                    buf.WriteString(WillTopic);
+                    buf.WriteString(WillMessage);
+                }
+                if (UsernameFlag)
+                    buf.WriteString(UserName);
+                if (PasswordFlag)
+                    buf.WriteString(Password);
+
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
+                buf.WriteBytes(buffer);
+                buf = null;
+            }
+            finally
+            {
+                buf?.Release();
             }
         }
     }
@@ -116,8 +162,8 @@ namespace nMqtt.Messages
     /// <summary>
     /// 连接回执
     /// </summary>
-    [MessageType(MqttMessageType.CONNACK)]
-    public sealed class ConnAckMessage : MqttMessage
+    [PacketType(PacketType.CONNACK)]
+    public sealed class ConnAckPacket : Packet
     {
         /// <summary>
         /// 当前会话
@@ -128,10 +174,16 @@ namespace nMqtt.Messages
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
 
-        public override void Decode(Stream stream)
+        public override void Decode(Stream buffer)
         {
-            SessionPresent = (stream.ReadByte() & 0x01) == 1;
-            ConnectReturnCode = (ConnectReturnCode)stream.ReadByte();
+            SessionPresent = (buffer.ReadByte() & 0x01) == 1;
+            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
+        }
+
+        public override void Decode(IByteBuffer buffer)
+        {
+            SessionPresent = (buffer.ReadByte() & 0x01) == 1;
+            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
         }
     }
 
@@ -144,7 +196,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 连接已接受
         /// </summary>
-        ConnectionAccepted = 0x00,
+        Accepted = 0x00,
         /// <summary>
         /// 连接已拒绝，不支持的协议版本
         /// </summary>
@@ -164,6 +216,7 @@ namespace nMqtt.Messages
         /// <summary>
         /// 连接已拒绝，未授权
         /// </summary>
-        NotAuthorized = 0x05
+        NotAuthorized = 0x05,
+        RefusedNotAuthorized = 0x6
     }
 }

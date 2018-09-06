@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Threading;
-using System.Diagnostics;
-using nMqtt.Messages;
+using nMqtt.Packets;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels.Sockets;
+using System.Net;
 
 namespace nMqtt
 {
@@ -13,44 +16,26 @@ namespace nMqtt
     /// </summary>
     public class MqttClient : IDisposable
     {
-        ILogger _logger;
+        readonly ILogger _logger;
         Timer _pingTimer;
-        MqttConnection _conn;
-        readonly AutoResetEvent connResetEvent;
-        public Action<MqttMessage> OnMessageReceived;
+        public Action<Packet> OnMessageReceived;
 
-        public MqttClient(string server, string clientId = default(string), ILogger logger = default(ILogger))
+        IChannel _clientChannel;
+
+        public MqttClient(string clientId = default, ILogger logger = default)
         {
-            Server = server;
-            if (string.IsNullOrEmpty(clientId))
-                clientId = MqttUtils.NextId();
-            ClientId = clientId;
+            ClientId = clientId ?? "Lin";
             _logger = logger ?? NullLogger<MqttClient>.Instance;
-            _conn = new MqttConnection();
-            _conn.Recv += ProcesMessage;
-            connResetEvent = new AutoResetEvent(false);
         }
 
         /// <summary>
         /// 客户端标识
         /// </summary>
         public string ClientId { get; set; }
-        /// <summary>
-        /// 服务器地址
-        /// </summary>
-        public string Server { get; set; } = "localhost";
-        /// <summary>
-        /// 服务器端口
-        /// </summary>
-        public int Port { get; set; } = 1883;
 
         public short KeepAlive { get; set; } = 60;
 
         public bool CleanSession { get; set; } = true;
-        /// <summary>
-        /// 连接状态
-        /// </summary>
-        public ConnectionState ConnectionState { get; private set; }
 
         /// <summary>
         /// 连接
@@ -58,136 +43,75 @@ namespace nMqtt
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
-        public async Task<ConnectionState> ConnectAsync(string username = default(string), string password = default(string))
+        public async Task ConnectAsync(string username = default, string password = default)
         {
-            ConnectionState = ConnectionState.Connecting;
-            await _conn.ConnectAsync(Server, Port);
+            var group = new MultithreadEventLoopGroup();
+            var readListeningHandler = new ReadListeningHandler();
+            var bootstrap = new Bootstrap();
 
-            var msg = new ConnectMessage
-            {
-                ClientId = ClientId,
-                CleanSession = CleanSession
-            };
-            if (!string.IsNullOrEmpty(username))
-            {
-                msg.UsernameFlag = true;
-                msg.UserName = username;
-            }
-            if (!string.IsNullOrEmpty(password))
-            {
-                msg.PasswordFlag = true;
-                msg.Password = password;
-            }
-            msg.KeepAlive = KeepAlive;
-            _conn.SendMessage(msg);
-
-            if (!connResetEvent.WaitOne(5000, false))
-            {
-                ConnectionState = ConnectionState.Disconnecting;
-                Dispose();
-                ConnectionState = ConnectionState.Disconnected;
-                return ConnectionState;
-            }
-
-            if (ConnectionState == ConnectionState.Connected)
-            {
-                _pingTimer = new Timer((state) =>
+            bootstrap
+                .Group(group)
+                .Channel<TcpSocketChannel>()
+                .Option(ChannelOption.TcpNodelay, true)
+                .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
-                    _conn.SendMessage(new PingReqMessage());
-                }, null, KeepAlive * 1000, KeepAlive * 1000);
-            }
+                    var pipeline = channel.Pipeline;
+                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(), readListeningHandler);
+                }));
 
-            return ConnectionState;
+            try
+            {
+                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883));
+                await Task.WhenAll(ProcesMessageAsync(_clientChannel, readListeningHandler));
+                await _clientChannel.CloseAsync();
+            }
+            finally
+            {
+                await group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            }
         }
 
         /// <summary>
         /// 处理消息
         /// </summary>
-        /// <param name="buffer"></param>
-        void ProcesMessage(byte[] buffer)
+        async Task ProcesMessageAsync(IChannel channel, ReadListeningHandler readListener)
         {
-            try
+            var connectPacket = new ConnectPacket
             {
-                var message = MessageFactory.CreateMessage(buffer);
-                _logger.LogDebug("onRecv:{0}", message.FixedHeader.MessageType);
-                switch (message)
-                {
-                    #region CONNACK
-                    case ConnAckMessage msg:
-                        if (msg.ConnectReturnCode == ConnectReturnCode.BrokerUnavailable ||
-                           msg.ConnectReturnCode == ConnectReturnCode.IdentifierRejected ||
-                           msg.ConnectReturnCode == ConnectReturnCode.UnacceptedProtocolVersion ||
-                           msg.ConnectReturnCode == ConnectReturnCode.NotAuthorized ||
-                           msg.ConnectReturnCode == ConnectReturnCode.BadUsernameOrPassword)
-                        {
-                            ConnectionState = ConnectionState.Disconnecting;
-                            Dispose();
-                            _conn = null;
-                            ConnectionState = ConnectionState.Disconnected;
-                        }
-                        else
-                        {
-                            ConnectionState = ConnectionState.Connected;
-                        }
-                        connResetEvent.Set();
-                        break;
-                    #endregion
-                    #region PINGREQ
-                    case PingReqMessage msg:
-                        _conn.SendMessage(new PingRespMessage());
-                        return;
-                    #endregion
-                    #region DISCONNECT
-                    case DisconnectMessage msg:
-                        Disconnect();
-                        break; 
-                    #endregion
-                    #region PUBLISH
-                    case PublishMessage msg:
-                        if (msg.FixedHeader.Qos == MqttQos.AtLeastOnce)
-                        {
-                            _conn.SendMessage(new PublishAckMessage(msg.MessageIdentifier));
-                        }
-                        else if (msg.FixedHeader.Qos == MqttQos.ExactlyOnce)
-                        {
-                            _conn.SendMessage(new PublishRecMessage(msg.MessageIdentifier));
-                        }
-                        break;
-                    #endregion
-                    #region PUBACK
-                    case PublishAckMessage msg:
-                        Debug.WriteLine("Todo Delete(Msg)");
-                        //_logger.LogDebug("Todo Delete(Msg)");
-                        return;
-                    #endregion
-                    //case MessageType.PUBREC:
-                    //    break;
-                    //case MessageType.PUBREL:
-                    //    OnMessageReceived?.Invoke(message);
-                    //    break;
-                    //case MessageType.PUBCOMP:
-                    //    break;
-                    //case MessageType.SUBSCRIBE:
-                    //    break;
-                    //case MessageType.SUBACK:
-                    //    break;
-                    //case MessageType.UNSUBSCRIBE:
-                    //    break;
-                    //case MessageType.UNSUBACK:
-                    //    break;
-                }
-                OnMessageReceived?.Invoke(message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
-        }
+                ClientId = ClientId,
+                CleanSession = CleanSession
+            };
+            //if (!string.IsNullOrEmpty(username))
+            //{
+            //    packet.UsernameFlag = true;
+            //    packet.UserName = username;
+            //}
+            //if (!string.IsNullOrEmpty(password))
+            //{
+            //    packet.PasswordFlag = true;
+            //    packet.Password = password;
+            //}
+            connectPacket.KeepAlive = KeepAlive;
+            await _clientChannel.WriteAndFlushAsync(connectPacket);
 
-        public void Disconnect()
-        {
-            if (_conn.Recv != null)
-                _conn.Recv -= ProcesMessage;
+            while (true)
+            {
+                if (await readListener.ReceiveAsync() is Packet packet)
+                {
+                    switch (packet)
+                    {
+                        case ConnAckPacket connAckPacket:
+                            break;
+
+                        case PublishPacket publishPacket:
+
+                            Console.WriteLine(publishPacket.TopicName);
+                            //Console.WriteLine(publishPacket.Payload.ToString(System.Text.Encoding.UTF8));
+
+                            break;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -198,12 +122,12 @@ namespace nMqtt
         /// <param name="qos">服务质量等级</param>
         public void Publish(string topic, byte[] data, MqttQos qos = MqttQos.AtMostOnce)
         {
-            var msg = new PublishMessage();
+            var msg = new PublishPacket();
             msg.FixedHeader.Qos = qos;
             msg.MessageIdentifier = 0;
             msg.TopicName = topic;
             msg.Payload = data;
-            _conn.SendMessage(msg);
+            _clientChannel.WriteAndFlushAsync(msg);
         }
 
         /// <summary>
@@ -213,9 +137,9 @@ namespace nMqtt
         /// <param name="qos"></param>
         public void Subscribe(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
-            var msg = new SubscribeMessage();
+            var msg = new SubscribePacket();
             msg.Subscribe(topic, qos);
-            _conn.SendMessage(msg);
+            _clientChannel.WriteAndFlushAsync(msg);
         }
 
         /// <summary>
@@ -224,34 +148,14 @@ namespace nMqtt
         /// <param name="topic"></param>
         public void Unsubscribe(string topic)
         {
-            var msg = new UnsubscribeMessage();
+            var msg = new UnsubscribePacket();
             msg.FixedHeader.Qos = MqttQos.AtLeastOnce;
             msg.Unsubscribe(topic);
-            _conn.SendMessage(msg);
-        }
-
-        void Close()
-        {
-            if (ConnectionState == ConnectionState.Connecting)
-            {
-                // TODO: Decide what to do if the caller tries to close a connection that is in the process of being connected.
-            }
-            if (ConnectionState == ConnectionState.Connected)
-            {
-                Disconnect();
-            }
+            _clientChannel.WriteAndFlushAsync(msg);
         }
 
         public void Dispose()
         {
-            if (_conn != null)
-            {
-                Close();
-                if (_conn != null)
-                {
-                    //connection.Dispose();
-                }
-            }
             if (_pingTimer != null)
                 _pingTimer.Dispose();
             GC.SuppressFinalize(this);

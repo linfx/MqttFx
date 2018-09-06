@@ -1,4 +1,6 @@
-﻿namespace nMqtt.Packets
+﻿using nMqtt.Protocol;
+
+namespace nMqtt.Packets
 {
     /// <summary>
     /// PING请求

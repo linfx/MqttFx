@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections.Generic;
+using nMqtt.Protocol;
 
 namespace nMqtt.Packets
 {

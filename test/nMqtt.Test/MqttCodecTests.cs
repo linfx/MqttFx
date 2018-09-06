@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using nMqtt.Packets;
+using nMqtt.Protocol;
 using System.Collections.Generic;
 using Xunit;
 
@@ -63,8 +64,8 @@ namespace nMqtt.Test
 
 
         [Theory]
-        [InlineData(false, ConnectReturnCode.Accepted)]
-        [InlineData(true, ConnectReturnCode.Accepted)]
+        [InlineData(false, ConnectReturnCode.ConnectionAccepted)]
+        [InlineData(true, ConnectReturnCode.ConnectionAccepted)]
         [InlineData(false, ConnectReturnCode.UnacceptedProtocolVersion)]
         //[InlineData(false, ConnectReturnCode.RefusedIdentifierRejected)]
         //[InlineData(false, ConnectReturnCode.RefusedServerUnavailable)]

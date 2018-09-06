@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using nMqtt.Packets;
+using nMqtt.Protocol;
 using System;
 using System.IO;
 

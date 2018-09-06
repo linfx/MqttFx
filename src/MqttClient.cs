@@ -8,6 +8,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels.Sockets;
 using System.Net;
+using nMqtt.Protocol;
 
 namespace nMqtt
 {

@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using nMqtt.Packets;
 using System;
 using System.IO;
 
@@ -6,6 +7,11 @@ namespace nMqtt
 {
     internal static class MqttExtensions
     {
+        public static int NewPacketId(this Packet packet)
+        {
+            return Guid.NewGuid().GetHashCode() & ushort.MaxValue;
+        }
+
         /// <summary>
         /// 写入
         /// </summary>

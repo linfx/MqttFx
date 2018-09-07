@@ -18,8 +18,8 @@ namespace nMqtt
     public class MqttClient
     {
         readonly ILogger _logger;
+        readonly IEventLoopGroup _group;
         private IChannel _clientChannel;
-        private IEventLoopGroup _group;
         public Action<Message> OnMessageReceived;
         public Action<ConnectReturnCode> OnConnected;
 
@@ -43,7 +43,7 @@ namespace nMqtt
         /// <returns></returns>
         public async Task<ConnectReturnCode> ConnectAsync(string username = default, string password = default)
         {
-            var readListeningHandler = new ReadListeningHandler();
+            var clientReadListener = new ReadListeningHandler();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(_group)
@@ -52,17 +52,17 @@ namespace nMqtt
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
-                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(), readListeningHandler);
+                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 0124), clientReadListener);
                 }));
 
             try
             {
                 _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883)).ConfigureAwait(false);
 
-                var connectResponse = await AuthenticateAsync(readListeningHandler).ConfigureAwait(false); ;
+                var connectResponse = await AuthenticateAsync(clientReadListener).ConfigureAwait(false); ;
                 if (connectResponse == ConnectReturnCode.ConnectionAccepted)
                 {
-                    StartReceivingPackets(readListeningHandler);
+                    StartReceivingPackets(clientReadListener);
                 }
                 OnConnected?.Invoke(connectResponse);
                 return connectResponse;
@@ -70,7 +70,7 @@ namespace nMqtt
             catch
             {
                 await DisconnectAsync();
-                return ConnectReturnCode.BrokerUnavailable;
+                throw new Exception("BrokerUnavailable");
             }
         }
 
@@ -101,16 +101,16 @@ namespace nMqtt
             return ConnectReturnCode.UnacceptedProtocolVersion;
         }
 
-        private void StartReceivingPackets(ReadListeningHandler readListener)
+        private void StartReceivingPackets(ReadListeningHandler clientReadListener)
         {
-            Task.Run(() => ReceivePacketsAsync(readListener));
+            Task.Run(() => ReceivePacketsAsync(clientReadListener));
         }
 
-        private async Task ReceivePacketsAsync(ReadListeningHandler readListener)
+        private async Task ReceivePacketsAsync(ReadListeningHandler clientReadListener)
         {
             while (true)
             {
-                if (await readListener.ReceiveAsync() is Packet packet)
+                if (await clientReadListener.ReceiveAsync() is Packet packet)
                 {
                     await ProcessReceivedPacketAsync(packet);
                 }
@@ -135,8 +135,6 @@ namespace nMqtt
             }
             return Task.CompletedTask;
         }
-
-
 
         private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
         {
@@ -200,11 +198,11 @@ namespace nMqtt
         /// 取消订阅
         /// </summary>
         /// <param name="topics">主题</param>
-        public void Unsubscribe(params string[] topics)
+        public Task UnsubscribeAsync(params string[] topics)
         {
             var packet = new UnsubscribePacket();
             packet.AddRange(topics);
-            _clientChannel.WriteAndFlushAsync(packet);
+            return _clientChannel.WriteAndFlushAsync(packet);
         }
 
         /// <summary>

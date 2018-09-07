@@ -22,6 +22,15 @@ namespace nMqtt.Packets
         /// </summary>
         public byte[] Payload { get; set; }
 
+        internal PublishPacket()
+        {
+        }
+
+        public PublishPacket(MqttQos qos)
+        {
+            FixedHeader.Qos = qos;
+        }
+
         public override void Encode(Stream stream)
         {
             using (var body = new MemoryStream())

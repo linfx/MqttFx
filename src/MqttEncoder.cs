@@ -1,10 +1,9 @@
-﻿using DotNetty.Buffers;
+﻿using System.Collections.Generic;
+using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using nMqtt.Packets;
-using System;
-using System.Collections.Generic;
 
 namespace nMqtt
 {

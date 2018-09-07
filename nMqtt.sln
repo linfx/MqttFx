@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nMqtt", "src\nMqtt.csproj",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nMqtt.Test", "test\nMqtt.Test\nMqtt.Test.csproj", "{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Client", "examples\Echo.Client\Echo.Client.csproj", "{F657D758-2730-44FE-B58D-D41816F90B60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F657D758-2730-44FE-B58D-D41816F90B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F657D758-2730-44FE-B58D-D41816F90B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F657D758-2730-44FE-B58D-D41816F90B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F657D758-2730-44FE-B58D-D41816F90B60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

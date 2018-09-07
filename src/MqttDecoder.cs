@@ -1,8 +1,8 @@
-﻿using DotNetty.Buffers;
+﻿using System.Collections.Generic;
+using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using nMqtt.Packets;
-using System.Collections.Generic;
 
 namespace nMqtt
 {
@@ -12,7 +12,7 @@ namespace nMqtt
         {
             try
             {
-                if(!TryDecodePacket(context, input, out Packet packet))
+                if (!TryDecodePacket(context, input, out Packet packet))
                     return;
 
                 output.Add(packet);
@@ -26,7 +26,7 @@ namespace nMqtt
 
         bool TryDecodePacket(IChannelHandlerContext context, IByteBuffer buffer, out Packet packet)
         {
-            if(!buffer.IsReadable(2))
+            if (!buffer.IsReadable(2))
             {
                 packet = null;
                 return false;

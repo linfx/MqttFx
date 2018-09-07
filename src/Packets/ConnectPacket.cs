@@ -148,7 +148,7 @@ namespace nMqtt.Packets
 
                 FixedHeader.RemaingLength = buf.WriterIndex;
                 FixedHeader.WriteTo(buffer);
-                buf.WriteBytes(buffer);
+                buffer.WriteBytes(buf);
                 buf = null;
             }
             finally

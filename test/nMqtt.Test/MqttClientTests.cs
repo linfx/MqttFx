@@ -2,14 +2,13 @@
 
 namespace nMqtt.Test
 {
-    public class Class1
+    public class MqttClientTests
     {
         [Fact]
-        public void TestConnAckMessage()
+        public void TestConnect()
         {
             MqttClient client = new MqttClient();
             client.ConnectAsync().Wait();
-
         }
     }
 }

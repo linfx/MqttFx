@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Threading;
-using nMqtt.Packets;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels.Sockets;
-using System.Net;
+using nMqtt.Messages;
+using nMqtt.Packets;
 using nMqtt.Protocol;
 
 namespace nMqtt
@@ -18,10 +18,8 @@ namespace nMqtt
     public class MqttClient : IDisposable
     {
         readonly ILogger _logger;
-        Timer _pingTimer;
-        public Action<Packet> OnMessageReceived;
-
-        IChannel _clientChannel;
+        private IChannel _clientChannel;
+        public Action<Message> OnMessageReceived;
 
         public MqttClient(string clientId = default, ILogger logger = default)
         {
@@ -34,10 +32,6 @@ namespace nMqtt
         /// </summary>
         public string ClientId { get; set; }
 
-        public short KeepAlive { get; set; } = 60;
-
-        public bool CleanSession { get; set; } = true;
-
         /// <summary>
         /// 连接
         /// </summary>
@@ -49,7 +43,6 @@ namespace nMqtt
             var group = new MultithreadEventLoopGroup();
             var readListeningHandler = new ReadListeningHandler();
             var bootstrap = new Bootstrap();
-
             bootstrap
                 .Group(group)
                 .Channel<TcpSocketChannel>()
@@ -63,7 +56,7 @@ namespace nMqtt
             try
             {
                 _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883));
-                await Task.WhenAll(ProcesMessageAsync(_clientChannel, readListeningHandler));
+                await Task.WhenAll(RunMqttClientAsync(_clientChannel, readListeningHandler));
                 await _clientChannel.CloseAsync();
             }
             finally
@@ -75,12 +68,12 @@ namespace nMqtt
         /// <summary>
         /// 处理消息
         /// </summary>
-        async Task ProcesMessageAsync(IChannel channel, ReadListeningHandler readListener)
+        async Task RunMqttClientAsync(IChannel channel, ReadListeningHandler readListener)
         {
             var connectPacket = new ConnectPacket
             {
                 ClientId = ClientId,
-                CleanSession = CleanSession
+                CleanSession = true
             };
             //if (!string.IsNullOrEmpty(username))
             //{
@@ -92,7 +85,7 @@ namespace nMqtt
             //    packet.PasswordFlag = true;
             //    packet.Password = password;
             //}
-            connectPacket.KeepAlive = KeepAlive;
+            //connectPacket.KeepAlive = KeepAlive;
             await _clientChannel.WriteAndFlushAsync(connectPacket);
 
             while (true)
@@ -103,12 +96,16 @@ namespace nMqtt
                     {
                         case ConnAckPacket connAckPacket:
                             break;
-
                         case PublishPacket publishPacket:
-
-                            Console.WriteLine(publishPacket.TopicName);
-                            //Console.WriteLine(publishPacket.Payload.ToString(System.Text.Encoding.UTF8));
-
+                            OnMessageReceived?.Invoke(new Message
+                            {
+                                Topic = publishPacket.TopicName,
+                                Payload = publishPacket.Payload,
+                                Qos = publishPacket.FixedHeader.Qos,
+                                Retain = publishPacket.FixedHeader.Retain
+                            });
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -119,46 +116,45 @@ namespace nMqtt
         /// 发布消息
         /// </summary>
         /// <param name="topic">主题</param>
-        /// <param name="data">数据</param>
+        /// <param name="payload">数据</param>
         /// <param name="qos">服务质量等级</param>
-        public void Publish(string topic, byte[] data, MqttQos qos = MqttQos.AtMostOnce)
+        public void Publish(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
         {
-            var msg = new PublishPacket();
-            msg.FixedHeader.Qos = qos;
-            msg.MessageIdentifier = 0;
-            msg.TopicName = topic;
-            msg.Payload = data;
-            _clientChannel.WriteAndFlushAsync(msg);
+            var packet = new PublishPacket(qos)
+            {
+                MessageIdentifier = 0,
+                TopicName = topic,
+                Payload = payload
+            };
+            _clientChannel.WriteAndFlushAsync(packet);
         }
 
         /// <summary>
         /// 订阅主题
         /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="qos"></param>
+        /// <param name="topic">主题</param>
+        /// <param name="qos">服务质量等级</param>
         public void Subscribe(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
-            var msg = new SubscribePacket();
-            msg.Subscribe(topic, qos);
-            _clientChannel.WriteAndFlushAsync(msg);
+            var packet = new SubscribePacket();
+            packet.Subscribe(topic, qos);
+            _clientChannel.WriteAndFlushAsync(packet);
         }
 
         /// <summary>
         /// 取消订阅
         /// </summary>
-        /// <param name="topic"></param>
-        public void Unsubscribe(string topic)
+        /// <param name="topics">主题</param>
+        public void Unsubscribe(params string[] topics)
         {
-            var msg = new UnsubscribePacket();
-            msg.FixedHeader.Qos = MqttQos.AtLeastOnce;
-            msg.Unsubscribe(topic);
-            _clientChannel.WriteAndFlushAsync(msg);
+            var packet = new UnsubscribePacket();
+            packet.AddRange(topics);
+            _clientChannel.WriteAndFlushAsync(packet);
         }
 
         public void Dispose()
         {
-            if (_pingTimer != null)
-                _pingTimer.Dispose();
+            _clientChannel.DisconnectAsync();
             GC.SuppressFinalize(this);
         }
     }

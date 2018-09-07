@@ -10,7 +10,7 @@ namespace nMqtt.Packets
     [PacketType(PacketType.UNSUBSCRIBE)]
     public sealed class UnsubscribePacket : Packet
     {
-        List<string> topics = new List<string>();
+        List<string> _topics = new List<string>();
 
         public short MessageIdentifier { get; set; }
 
@@ -20,7 +20,7 @@ namespace nMqtt.Packets
             {
                 body.WriteShort(MessageIdentifier);
 
-                foreach (var item in topics)
+                foreach (var item in _topics)
                 {
                     body.WriteString(item);
                 }
@@ -31,9 +31,9 @@ namespace nMqtt.Packets
             }
         }
 
-        public void Unsubscribe(string topic)
+        public void AddRange(params string[] topics)
         {
-            topics.Add(topic);
+            _topics.AddRange(topics);
         }
     }
 

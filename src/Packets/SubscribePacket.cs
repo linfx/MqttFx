@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections.Generic;
+using DotNetty.Buffers;
 using nMqtt.Protocol;
 
 namespace nMqtt.Packets
@@ -14,26 +15,33 @@ namespace nMqtt.Packets
         /// 主题列表
         /// </summary>
         List<TopicQos> Topics = new List<TopicQos>();
+
         /// <summary>
         /// 消息ID
         /// </summary>
         public short MessageIdentifier { get; set; }
 
-        public override void Encode(Stream stream)
+        public override void Encode(IByteBuffer buffer)
         {
-            using (var body = new MemoryStream())
+            var buf = Unpooled.Buffer();
+            try
             {
-                body.WriteShort(MessageIdentifier);
+                buf.WriteShort(MessageIdentifier);
 
                 foreach (var item in Topics)
                 {
-                    body.WriteString(item.Topic);
-                    body.WriteByte((byte)item.Qos);
+                    buf.WriteString(item.Topic);
+                    buf.WriteByte((byte)item.Qos);
                 }
 
-                FixedHeader.RemaingLength = (int)body.Length;
-                FixedHeader.WriteTo(stream); 
-                body.WriteTo(stream);         
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+            }
+            finally
+            {
+                buf?.Release();
+                buf = null;
             }
         }
 
@@ -61,9 +69,9 @@ namespace nMqtt.Packets
     {
         public short MessageIdentifier { get; set; }
 
-        public override void Decode(Stream stream)
+        public override void Decode(IByteBuffer buffer)
         {
-            MessageIdentifier = stream.ReadShort();
+            MessageIdentifier = buffer.ReadShort();
         }
     }
 }

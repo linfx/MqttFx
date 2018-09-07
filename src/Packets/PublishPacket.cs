@@ -1,4 +1,5 @@
-﻿using nMqtt.Protocol;
+﻿using DotNetty.Buffers;
+using nMqtt.Protocol;
 using System.IO;
 
 namespace nMqtt.Packets
@@ -31,31 +32,37 @@ namespace nMqtt.Packets
             FixedHeader.Qos = qos;
         }
 
-        public override void Encode(Stream stream)
+        public override void Encode(IByteBuffer buffer)
         {
-            using (var body = new MemoryStream())
+            var buf = Unpooled.Buffer();
+            try
             {
-                body.WriteString(TopicName);
-                body.WriteShort(MessageIdentifier);
-                body.Write(Payload, 0, Payload.Length);
+                buf.WriteString(TopicName);
+                buf.WriteShort(MessageIdentifier);
+                buf.WriteBytes(Payload, 0, Payload.Length);
 
-                FixedHeader.RemaingLength = (int)body.Length;
-                FixedHeader.WriteTo(stream);
-                body.WriteTo(stream);
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+            }
+            finally
+            {
+                buf?.Release();
+                buf = null;
             }
         }
 
-        public override void Decode(Stream stream)
+        public override void Decode(IByteBuffer buffer)
         {
             //variable header
-            TopicName = stream.ReadString();
+            TopicName = buffer.ReadString();
             if (FixedHeader.Qos == MqttQos.AtLeastOnce || FixedHeader.Qos == MqttQos.ExactlyOnce)
-                MessageIdentifier = stream.ReadShort();
+                MessageIdentifier = buffer.ReadShort();
 
             //playload
             var len = FixedHeader.RemaingLength - (TopicName.Length + 2);
             Payload = new byte[len];
-            stream.Read(Payload, 0, len);
+            buffer.ReadBytes(Payload, 0, len);
         }
     }
 

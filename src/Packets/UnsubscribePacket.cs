@@ -1,4 +1,5 @@
-﻿using nMqtt.Protocol;
+﻿using DotNetty.Buffers;
+using nMqtt.Protocol;
 using System.Collections.Generic;
 using System.IO;
 
@@ -14,20 +15,26 @@ namespace nMqtt.Packets
 
         public short MessageIdentifier { get; set; }
 
-        public override void Encode(Stream stream)
+        public override void Encode(IByteBuffer buffer)
         {
-            using (var body = new MemoryStream())
+            var buf = Unpooled.Buffer();
+            try
             {
-                body.WriteShort(MessageIdentifier);
+                buf.WriteShort(MessageIdentifier);
 
                 foreach (var item in _topics)
                 {
-                    body.WriteString(item);
+                    buf.WriteString(item);
                 }
 
-                FixedHeader.RemaingLength = (int)body.Length;
-                FixedHeader.WriteTo(stream);
-                body.WriteTo(stream);
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+                buf = null;
+            }
+            finally
+            {
+                buf?.Release();
             }
         }
 

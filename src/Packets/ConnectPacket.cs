@@ -75,44 +75,6 @@ namespace nMqtt.Packets
         public string Password { get; set; }  
         #endregion
 
-        public override void Encode(Stream buffer)
-        {
-            using (var body = new MemoryStream())
-            {
-                //variable header
-                body.WriteString(ProtocolName);       //byte 1 - 8
-                body.WriteByte(ProtocolLevel);        //byte 9
-
-                //connect flags;                      //byte 10
-                var flags = UsernameFlag.ToByte() << 7;
-                flags |= PasswordFlag.ToByte() << 6;
-                flags |= WillRetain.ToByte() << 5;
-                flags |= ((byte)WillQos) << 3;
-                flags |= WillFlag.ToByte() << 2;
-                flags |=  CleanSession.ToByte() << 1;
-                body.WriteByte((byte)flags);
-
-                //keep alive
-                body.WriteShort(KeepAlive);      //byte 11 - 12
-
-                //payload
-                body.WriteString(ClientId);
-                if (WillFlag)
-                {
-                    body.WriteString(WillTopic);
-                    body.WriteString(WillMessage);
-                }
-                if (UsernameFlag)
-                    body.WriteString(UserName);
-                if (PasswordFlag)
-                    body.WriteString(Password);
-
-                FixedHeader.RemaingLength = (int)body.Length;
-                FixedHeader.WriteTo(buffer);
-                body.WriteTo(buffer);
-            }
-        }
-
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
@@ -149,11 +111,11 @@ namespace nMqtt.Packets
                 FixedHeader.RemaingLength = buf.WriterIndex;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {
                 buf?.Release();
+                buf = null;
             }
         }
     }
@@ -172,12 +134,6 @@ namespace nMqtt.Packets
         /// 连接返回码
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
-
-        public override void Decode(Stream buffer)
-        {
-            SessionPresent = (buffer.ReadByte() & 0x01) == 1;
-            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
-        }
 
         public override void Decode(IByteBuffer buffer)
         {

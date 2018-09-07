@@ -1,5 +1,6 @@
 ﻿using nMqtt;
 using nMqtt.Messages;
+using nMqtt.Protocol;
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,12 +12,19 @@ namespace Echo.Client
         static async Task Main(string[] args)
         {
             MqttClient client = new MqttClient();
+            client.OnConnected += Connected;
             client.OnMessageReceived += MessageReceived;
-            await client.ConnectAsync();
+            if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
+            {
+                await client.SubscribeAsync("/World");
+                //await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello"));
+            }
+            Console.ReadKey();
+        }
 
-            client.
-
-            Console.WriteLine("连接成功");
+        private static void Connected(ConnectReturnCode connectResponse)
+        {
+            Console.WriteLine("连接成功, ConnectReturnCode: " + connectResponse);
         }
 
         private static void MessageReceived(Message message)

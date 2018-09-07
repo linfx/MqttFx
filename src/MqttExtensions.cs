@@ -103,6 +103,44 @@ namespace nMqtt
         }
 
         /// <summary>
+        /// 读取字符串
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
+        public static string ReadString(this IByteBuffer buffer)
+        {
+            // read and check the length
+            var lengthBytes = new byte[2];
+            var bytesRead = buffer.ReadBytes(lengthBytes, 0, 2);
+            //if (bytesRead < 2)
+            //{
+            //    throw new ArgumentException(
+            //        "The stream did not have enough bytes to describe the length of the string",
+            //        "stringStream");
+            //}
+
+            var enc = new MqttEncoding();
+            var stringLength = (ushort)enc.GetCharCount(lengthBytes);
+
+            // read the bytes from the string, validate we have enough etc.
+            var stringBytes = new byte[stringLength];
+            var readBuffer = new byte[1 << 10]; // 1KB read buffer
+            var totalRead = 0;
+
+            // Keep reading until we have all. Intentionally synchronous
+            //while (totalRead < stringLength)
+            //{
+            //    var remainingBytes = stringLength - totalRead;
+            //    var nextReadSize = remainingBytes > readBuffer.Length ? readBuffer.Length : remainingBytes;
+            //    bytesRead = buffer.Read(readBuffer, 0, nextReadSize);
+            //    Array.Copy(readBuffer, 0, stringBytes, totalRead, bytesRead);
+            //    totalRead += bytesRead;
+            //}
+
+            return enc.GetString(stringBytes);
+        }
+
+        /// <summary>
         /// 布尔转字节
         /// </summary>
         /// <param name="input"></param>

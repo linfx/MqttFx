@@ -148,9 +148,9 @@ namespace nMqtt.Packets
 
         public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
 
-        public virtual void Encode(Stream stream) => FixedHeader.WriteTo(stream);
+        public virtual void Encode(Stream buffer) => FixedHeader.WriteTo(buffer);
 
-        public virtual void Decode(Stream stream) { }
+        public virtual void Decode(Stream buffer) { }
 
         public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
 

@@ -15,16 +15,19 @@ namespace nMqtt
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public class MqttClient : IDisposable
+    public class MqttClient
     {
         readonly ILogger _logger;
         private IChannel _clientChannel;
+        private IEventLoopGroup _group;
         public Action<Message> OnMessageReceived;
+        public Action<ConnectReturnCode> OnConnected;
 
         public MqttClient(string clientId = default, ILogger logger = default)
         {
             ClientId = clientId ?? "Lin";
             _logger = logger ?? NullLogger<MqttClient>.Instance;
+            _group = new MultithreadEventLoopGroup();
         }
 
         /// <summary>
@@ -38,13 +41,12 @@ namespace nMqtt
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
         /// <returns></returns>
-        public async Task ConnectAsync(string username = default, string password = default)
+        public async Task<ConnectReturnCode> ConnectAsync(string username = default, string password = default)
         {
-            var group = new MultithreadEventLoopGroup();
             var readListeningHandler = new ReadListeningHandler();
             var bootstrap = new Bootstrap();
             bootstrap
-                .Group(group)
+                .Group(_group)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
@@ -55,20 +57,24 @@ namespace nMqtt
 
             try
             {
-                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883));
-                await Task.WhenAll(RunMqttClientAsync(_clientChannel, readListeningHandler));
-                await _clientChannel.CloseAsync();
+                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883)).ConfigureAwait(false);
+
+                var connectResponse = await AuthenticateAsync(readListeningHandler).ConfigureAwait(false); ;
+                if (connectResponse == ConnectReturnCode.ConnectionAccepted)
+                {
+                    StartReceivingPackets(readListeningHandler);
+                }
+                OnConnected?.Invoke(connectResponse);
+                return connectResponse;
             }
-            finally
+            catch
             {
-                await group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+                await DisconnectAsync();
+                return ConnectReturnCode.BrokerUnavailable;
             }
         }
 
-        /// <summary>
-        /// 处理消息
-        /// </summary>
-        async Task RunMqttClientAsync(IChannel channel, ReadListeningHandler readListener)
+        private async Task<ConnectReturnCode> AuthenticateAsync(ReadListeningHandler readListener)
         {
             var connectPacket = new ConnectPacket
             {
@@ -86,29 +92,78 @@ namespace nMqtt
             //    packet.Password = password;
             //}
             //connectPacket.KeepAlive = KeepAlive;
-            await _clientChannel.WriteAndFlushAsync(connectPacket);
 
+            await _clientChannel.WriteAndFlushAsync(connectPacket);
+            if (await readListener.ReceiveAsync() is ConnAckPacket connAckPacket)
+            {
+                return connAckPacket.ConnectReturnCode;
+            }
+            return ConnectReturnCode.UnacceptedProtocolVersion;
+        }
+
+        private void StartReceivingPackets(ReadListeningHandler readListener)
+        {
+            Task.Run(() => ReceivePacketsAsync(readListener));
+        }
+
+        private async Task ReceivePacketsAsync(ReadListeningHandler readListener)
+        {
             while (true)
             {
                 if (await readListener.ReceiveAsync() is Packet packet)
                 {
-                    switch (packet)
-                    {
-                        case ConnAckPacket connAckPacket:
-                            break;
-                        case PublishPacket publishPacket:
-                            OnMessageReceived?.Invoke(new Message
-                            {
-                                Topic = publishPacket.TopicName,
-                                Payload = publishPacket.Payload,
-                                Qos = publishPacket.FixedHeader.Qos,
-                                Retain = publishPacket.FixedHeader.Retain
-                            });
-                            break;
-                        default:
-                            break;
-                    }
+                    await ProcessReceivedPacketAsync(packet);
                 }
+            }
+        }
+
+        private Task ProcessReceivedPacketAsync(Packet packet)
+        {
+            switch (packet)
+            {
+                case DisconnectPacket disconnectPacket:
+                    return DisconnectAsync();
+
+                case PingReqPacket pingReqPacket:
+                    return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
+
+                case PublishPacket publishPacket:
+                    return ProcessReceivedPublishPacketAsync(publishPacket);
+
+                case PublishRelPacket publishRelPacket:
+                    return Task.CompletedTask;
+            }
+            return Task.CompletedTask;
+        }
+
+
+
+        private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
+        {
+            OnMessageReceived?.Invoke(new Message
+            {
+                Topic = publishPacket.TopicName,
+                Payload = publishPacket.Payload,
+                Qos = publishPacket.FixedHeader.Qos,
+                Retain = publishPacket.FixedHeader.Retain
+            });
+
+            switch (publishPacket.FixedHeader.Qos)
+            {
+                case MqttQos.AtMostOnce:
+                    return Task.CompletedTask;
+                case MqttQos.AtLeastOnce:
+                    return _clientChannel.WriteAndFlushAsync(new PublishAckPacket
+                    {
+                        MessageIdentifier = publishPacket.MessageIdentifier
+                    });
+                case MqttQos.ExactlyOnce:
+                    return _clientChannel.WriteAndFlushAsync(new PublishRecPacket
+                    {
+                        MessageIdentifier = publishPacket.MessageIdentifier
+                    });
+                default:
+                    throw new Exception("Received a not supported QoS level.");
             }
         }
 
@@ -116,9 +171,9 @@ namespace nMqtt
         /// 发布消息
         /// </summary>
         /// <param name="topic">主题</param>
-        /// <param name="payload">数据</param>
+        /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
-        public void Publish(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
         {
             var packet = new PublishPacket(qos)
             {
@@ -126,7 +181,7 @@ namespace nMqtt
                 TopicName = topic,
                 Payload = payload
             };
-            _clientChannel.WriteAndFlushAsync(packet);
+            return _clientChannel.WriteAndFlushAsync(packet);
         }
 
         /// <summary>
@@ -134,11 +189,11 @@ namespace nMqtt
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
-        public void Subscribe(string topic, MqttQos qos = MqttQos.AtMostOnce)
+        public Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
             var packet = new SubscribePacket();
             packet.Subscribe(topic, qos);
-            _clientChannel.WriteAndFlushAsync(packet);
+            return _clientChannel.WriteAndFlushAsync(packet);
         }
 
         /// <summary>
@@ -152,10 +207,14 @@ namespace nMqtt
             _clientChannel.WriteAndFlushAsync(packet);
         }
 
-        public void Dispose()
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        /// <returns></returns>
+        public async Task DisconnectAsync()
         {
-            _clientChannel.DisconnectAsync();
-            GC.SuppressFinalize(this);
+            await _clientChannel.CloseAsync();
+            await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
     }
 }

@@ -2,24 +2,11 @@
 using nMqtt.Packets;
 using nMqtt.Protocol;
 using System;
-using System.IO;
 
 namespace nMqtt
 {
     internal static class MqttPacketFactory
     {
-        public static Packet CreatePacket(byte[] buffer)
-        {
-            using (var stream = new MemoryStream(buffer))
-            {
-                var header = new FixedHeader(stream);
-                var msg = CreatePacket(header.PacketType);
-                msg.FixedHeader = header;
-                msg.Decode(stream);
-                return msg;
-            }
-        }
-
         public static Packet CreatePacket(IByteBuffer buffer)
         {
             var header = new FixedHeader(buffer);

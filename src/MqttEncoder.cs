@@ -20,11 +20,11 @@ namespace nMqtt
             {
                 packet.Encode(buffer);
                 output.Add(buffer);
+                buffer = null;
             }
             finally
             {
                 buffer?.SafeRelease();
-                buffer = null;
             }
         }
     }

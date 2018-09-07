@@ -37,11 +37,11 @@ namespace nMqtt.Packets
                 FixedHeader.RemaingLength = buf.WriterIndex;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
+                buf = null;
             }
             finally
             {
                 buf?.Release();
-                buf = null;
             }
         }
 

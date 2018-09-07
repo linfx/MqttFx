@@ -44,11 +44,11 @@ namespace nMqtt.Packets
                 FixedHeader.RemaingLength = buf.WriterIndex;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
+                buf = null;
             }
             finally
             {
                 buf?.Release();
-                buf = null;
             }
         }
 
@@ -82,11 +82,6 @@ namespace nMqtt.Packets
         /// 消息ID
         /// </summary>
         public short MessageIdentifier { get; set; }
-
-        public override void Decode(Stream stream)
-        {
-            MessageIdentifier = stream.ReadShort();
-        }
     }
 
     /// <summary>
@@ -105,11 +100,6 @@ namespace nMqtt.Packets
         /// 消息ID
         /// </summary>
         public short MessageIdentifier { get; set; }
-
-        public override void Decode(Stream stream)
-        {
-            MessageIdentifier = stream.ReadShort();
-        }
     }
 
     /// <summary>
@@ -123,11 +113,6 @@ namespace nMqtt.Packets
         /// 消息ID
         /// </summary>
         public short MessageIdentifier { get; set; }
-
-        public override void Decode(Stream stream)
-        {
-            MessageIdentifier = stream.ReadShort();
-        }
     }
 
     /// <summary>
@@ -141,10 +126,5 @@ namespace nMqtt.Packets
         /// 消息ID
         /// </summary>
         public short MessageIdentifier { get; set; }
-
-        public override void Decode(Stream stream)
-        {
-            MessageIdentifier = stream.ReadShort();
-        }
     }
 }

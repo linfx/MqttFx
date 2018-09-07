@@ -7,6 +7,29 @@ using System.IO;
 namespace nMqtt.Packets
 {
     /// <summary>
+    /// 消息基类
+    /// </summary>
+    public abstract class Packet
+    {
+        /// <summary>
+        /// 固定报头
+        /// </summary>
+        public FixedHeader FixedHeader { get; set; }
+
+        public Packet()
+        {
+            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
+            FixedHeader = new FixedHeader(att.PacketType);
+        }
+
+        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
+
+        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
+
+        public virtual void Decode(IByteBuffer buffer) { }
+    }
+
+    /// <summary>
     /// 固定报头
     /// </summary>
     public class FixedHeader
@@ -35,20 +58,6 @@ namespace nMqtt.Packets
         public FixedHeader(PacketType packetType)
         {
             PacketType = packetType;
-        }
-
-        public FixedHeader(Stream stream)
-        {
-            if (stream.Length < 2)
-                throw new Exception("The supplied header is invalid. Header must be at least 2 bytes long.");
-
-            var byte1 = stream.ReadByte();
-            PacketType = (PacketType)((byte1 & 0xf0) >> 4);
-            Dup = ((byte1 & 0x08) >> 3) > 0;
-            Qos = (MqttQos)((byte1 & 0x06) >> 1);
-            Retain = (byte1 & 0x01) > 0;
-
-            RemaingLength = DecodeLenght(stream);
         }
 
         public FixedHeader(IByteBuffer buffer)
@@ -99,21 +108,6 @@ namespace nMqtt.Packets
             return result.ToArray();
         }
 
-        internal static int DecodeLenght(Stream stream)
-        {
-            byte encodedByte;
-            var multiplier = 1;
-            var remainingLength = 0;
-            do
-            {
-                encodedByte = (byte)stream.ReadByte();
-                remainingLength += (encodedByte & 0x7f) * multiplier;
-                multiplier *= 0x80;
-            } while ((encodedByte & 0x80) != 0);
-
-            return remainingLength;
-        }
-
         internal static int DecodeRemainingLength(IByteBuffer buffer)
         {
             byte encodedByte;
@@ -128,32 +122,5 @@ namespace nMqtt.Packets
 
             return remainingLength;
         }
-    }
-
-    /// <summary>
-    /// 消息基类
-    /// </summary>
-    public abstract class Packet
-    {
-        /// <summary>
-        /// 固定报头
-        /// </summary>
-        public FixedHeader FixedHeader { get; set; }
-
-        public Packet()
-        {
-            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
-            FixedHeader = new FixedHeader(att.PacketType);
-        }
-
-        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
-
-        public virtual void Encode(Stream buffer) => FixedHeader.WriteTo(buffer);
-
-        public virtual void Decode(Stream buffer) { }
-
-        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
-
-        public virtual void Decode(IByteBuffer buffer) { }
     }
 }

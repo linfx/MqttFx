@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -20,30 +21,30 @@ namespace nMqtt
     {
         readonly ILogger _logger;
         readonly IEventLoopGroup _group;
+        readonly MqttClientOptions _options;
+        readonly MqttPacketIdentifierProvider _packetIdentifierProvider;
+        readonly MqttPacketDispatcher _packetDispatcher;
+
         private IChannel _clientChannel;
+        private CancellationTokenSource _cancellationTokenSource;
+
         public Action<Message> OnMessageReceived;
         public Action<ConnectReturnCode> OnConnected;
-        MqttPacketIdentifierProvider _packetIdentifierProvider = new MqttPacketIdentifierProvider();
 
         public MqttClient(string clientId = default, ILogger logger = default)
         {
-            ClientId = clientId ?? "Lin";
             _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
+            _options = new MqttClientOptions();
+            _packetIdentifierProvider = new MqttPacketIdentifierProvider();
+            _packetDispatcher = new MqttPacketDispatcher();
         }
-
-        /// <summary>
-        /// 客户端标识
-        /// </summary>
-        public string ClientId { get; set; }
 
         /// <summary>
         /// 连接
         /// </summary>
-        /// <param name="username">用户名</param>
-        /// <param name="password">密码</param>
         /// <returns></returns>
-        public async Task<ConnectReturnCode> ConnectAsync(string username = default, string password = default)
+        public async Task<ConnectReturnCode> ConnectAsync()
         {
             var clientReadListener = new ReadListeningHandler();
             var bootstrap = new Bootstrap();
@@ -59,15 +60,19 @@ namespace nMqtt
 
             try
             {
-                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883)).ConfigureAwait(false);
+                _packetDispatcher.Reset();
+                _packetIdentifierProvider.Reset();
+                _cancellationTokenSource = new CancellationTokenSource();
+                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883));
 
-                var connectResponse = await AuthenticateAsync(clientReadListener).ConfigureAwait(false); ;
-                if (connectResponse == ConnectReturnCode.ConnectionAccepted)
+                StartReceivingPackets(clientReadListener);
+
+                var connectResponse = await AuthenticateAsync(clientReadListener); ;
+                if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
                 {
-                    StartReceivingPackets(clientReadListener);
+                    OnConnected?.Invoke(connectResponse.ConnectReturnCode);
                 }
-                OnConnected?.Invoke(connectResponse);
-                return connectResponse;
+                return connectResponse.ConnectReturnCode;
             }
             catch
             {
@@ -76,31 +81,21 @@ namespace nMqtt
             }
         }
 
-        private async Task<ConnectReturnCode> AuthenticateAsync(ReadListeningHandler readListener)
+        private Task<ConnAckPacket> AuthenticateAsync(ReadListeningHandler readListener)
         {
-            var connectPacket = new ConnectPacket
+            var packet = new ConnectPacket
             {
-                ClientId = ClientId,
-                CleanSession = true
+                ClientId = _options.ClientId,
+                CleanSession = _options.CleanSession,
+                KeepAlive = _options.KeepAlive,
             };
-            //if (!string.IsNullOrEmpty(username))
-            //{
-            //    packet.UsernameFlag = true;
-            //    packet.UserName = username;
-            //}
-            //if (!string.IsNullOrEmpty(password))
-            //{
-            //    packet.PasswordFlag = true;
-            //    packet.Password = password;
-            //}
-            //connectPacket.KeepAlive = KeepAlive;
-
-            await _clientChannel.WriteAndFlushAsync(connectPacket);
-            if (await readListener.ReceiveAsync() is ConnAckPacket connAckPacket)
+            if(_options.Credentials != null)
             {
-                return connAckPacket.ConnectReturnCode;
+                packet.UsernameFlag = true;
+                packet.UserName = _options.Credentials.Username;
+                packet.Password = _options.Credentials.Username;
             }
-            return ConnectReturnCode.UnacceptedProtocolVersion;
+            return SendAndReceiveAsync<ConnAckPacket>(packet, _cancellationTokenSource.Token);
         }
 
         private void StartReceivingPackets(ReadListeningHandler clientReadListener)
@@ -135,6 +130,7 @@ namespace nMqtt
                 case PublishRelPacket publishRelPacket:
                     return Task.CompletedTask;
             }
+            _packetDispatcher.Dispatch(packet);
             return Task.CompletedTask;
         }
 
@@ -164,6 +160,34 @@ namespace nMqtt
                     });
                 default:
                     throw new Exception("Received a not supported QoS level.");
+            }
+        }
+
+        private async Task<TResponsePacket> SendAndReceiveAsync<TResponsePacket>(Packet requestPacket, CancellationToken cancellationToken) where TResponsePacket : Packet
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ushort identifier = 0;
+            if (requestPacket is IMqttPacketIdentifier packetWithIdentifier)
+            {
+                identifier = packetWithIdentifier.PacketIdentifier;
+            }
+
+            var packetAwaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
+            try
+            {
+                await _clientChannel.WriteAndFlushAsync(requestPacket);
+                var respone = await Extensions.TaskExtensions.TimeoutAfterAsync(ct => packetAwaiter.Task, _options.Timeout, cancellationToken);
+                return (TResponsePacket)respone;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                _packetDispatcher.RemovePacketAwaiter<TResponsePacket>(identifier);
             }
         }
 

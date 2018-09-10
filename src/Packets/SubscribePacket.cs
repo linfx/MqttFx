@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 using nMqtt.Protocol;
 
@@ -65,13 +64,16 @@ namespace nMqtt.Packets
     /// 订阅回执
     /// </summary>
     [PacketType(PacketType.SUBACK)]
-    public class SubscribeAckPacket : Packet
+    public class SubscribeAckPacket : Packet, IMqttPacketIdentifier
     {
-        public short MessageIdentifier { get; set; }
+        /// <summary>
+        /// 报文标识符
+        /// </summary>
+        public ushort PacketIdentifier { get; set; }
 
         public override void Decode(IByteBuffer buffer)
         {
-            MessageIdentifier = buffer.ReadShort();
+            PacketIdentifier = buffer.ReadUnsignedShort();
         }
     }
 }

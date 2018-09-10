@@ -24,7 +24,7 @@
 
 //            //var f = container.GetService<SocketTransportFactory>();
 //            //var transport = f.Create();
-//            //await transport.BindAsync().ConfigureAwait(false);
+//            //await transport.BindAsync();
 
 
 //            //var loggerFactory = new LoggerFactory()

@@ -1,7 +1,7 @@
-﻿using DotNetty.Transport.Channels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DotNetty.Transport.Channels;
 
 namespace nMqtt
 {
@@ -30,7 +30,7 @@ namespace nMqtt
             {
                 if (_readPromises.Count > 0)
                 {
-                    TaskCompletionSource<object> promise = _readPromises.Dequeue();
+                    var promise = _readPromises.Dequeue();
                     promise.TrySetResult(message);
                 }
                 else
@@ -56,7 +56,7 @@ namespace nMqtt
             {
                 while (_readPromises.Count > 0)
                 {
-                    TaskCompletionSource<object> promise = _readPromises.Dequeue();
+                    var promise = _readPromises.Dequeue();
                     promise.TrySetException(exception);
                 }
             }
@@ -65,12 +65,9 @@ namespace nMqtt
         public async Task<object> ReceiveAsync(TimeSpan timeout = default)
         {
             if (registeredException != null)
-            {
                 throw registeredException;
-            }
 
             var promise = new TaskCompletionSource<object>();
-
             lock (_gate)
             {
                 if (_receivedQueue.Count > 0)
@@ -84,11 +81,10 @@ namespace nMqtt
             timeout = timeout <= TimeSpan.Zero ? _defaultReadTimeout : timeout;
             if (timeout > TimeSpan.Zero)
             {
-                Task task = await Task.WhenAny(promise.Task, Task.Delay(timeout));
+                var task = await Task.WhenAny(promise.Task, Task.Delay(timeout));
+
                 if (task != promise.Task)
-                {
                     throw new TimeoutException("ReceiveAsync timed out");
-                }
 
                 return promise.Task.Result;
             }

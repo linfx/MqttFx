@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using nMqtt.Packets;
 
-namespace nMqtt
+namespace nMqtt.Extensions
 {
     public class MqttPacketDispatcher
     {
@@ -23,10 +23,10 @@ namespace nMqtt
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 
             ushort identifier = 0;
-            //if (packet is IMqttPacketWithIdentifier packetWithIdentifier && packetWithIdentifier.PacketIdentifier.HasValue)
-            //{
-            //    identifier = packetWithIdentifier.PacketIdentifier.Value;
-            //}
+            if (packet is IMqttPacketIdentifier packetWithIdentifier)
+            {
+                identifier = packetWithIdentifier.PacketIdentifier;
+            }
 
             var type = packet.GetType();
             var key = new Tuple<ushort, Type>(identifier, type);

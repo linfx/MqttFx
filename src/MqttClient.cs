@@ -175,7 +175,7 @@ namespace nMqtt
         {
             var packet = new PublishPacket(qos)
             {
-                MessageIdentifier = 0,
+                MessageIdentifier = MqttUtils.NewPacketId(),
                 TopicName = topic,
                 Payload = payload
             };
@@ -189,7 +189,10 @@ namespace nMqtt
         /// <param name="qos">服务质量等级</param>
         public Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
-            var packet = new SubscribePacket();
+            var packet = new SubscribePacket
+            {
+                MessageIdentifier = MqttUtils.NewPacketId()
+            };
             packet.Subscribe(topic, qos);
             return _clientChannel.WriteAndFlushAsync(packet);
         }

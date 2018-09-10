@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using nMqtt.Protocol;
 using System;
 using System.Collections.Generic;
@@ -69,17 +70,6 @@ namespace nMqtt.Packets
             Retain = (byte1 & 0x01) > 0;
 
             RemaingLength = DecodeRemainingLength(buffer);
-        }
-
-        public void WriteTo(Stream buffer)
-        {
-            var flags = (byte)PacketType << 4;
-            flags |= Dup.ToByte() << 3;
-            flags |= (byte)Qos << 1;
-            flags |= Retain.ToByte();
-
-            buffer.WriteByte((byte)flags);                
-            buffer.Write(EncodeLength(RemaingLength));   
         }
 
         public void WriteTo(IByteBuffer buffer)

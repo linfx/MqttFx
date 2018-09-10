@@ -8,13 +8,13 @@ namespace nMqtt
 {
     public sealed class MqttDecoder : ByteToMessageDecoder
     {
-        readonly bool isServer;
-        readonly int maxMessageSize;
+        readonly bool _isServer;
+        readonly int _maxMessageSize;
 
         public MqttDecoder(bool isServer, int maxMessageSize)
         {
-            this.isServer = isServer;
-            this.maxMessageSize = maxMessageSize;
+            _isServer = isServer;
+            _maxMessageSize = maxMessageSize;
         }
 
         protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)

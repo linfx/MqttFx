@@ -11,12 +11,12 @@ namespace Echo.Client
     {
         static async Task Main(string[] args)
         {
-            MqttClient client = new MqttClient();
+            var client = new MqttClient();
             client.OnConnected += Connected;
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                //await client.SubscribeAsync("/World");
+                await client.SubscribeAsync("/World");
                 //await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello"));
             }
             Console.ReadKey();
@@ -24,7 +24,7 @@ namespace Echo.Client
 
         private static void Connected(ConnectReturnCode connectResponse)
         {
-            Console.WriteLine("连接成功, ConnectReturnCode: " + connectResponse);
+            Console.WriteLine("Connected Ssuccessful!, ConnectReturnCode: " + connectResponse);
         }
 
         private static void MessageReceived(Message message)

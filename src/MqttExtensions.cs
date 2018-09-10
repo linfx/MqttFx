@@ -1,5 +1,4 @@
 ﻿using DotNetty.Buffers;
-using nMqtt.Packets;
 using System;
 using System.IO;
 
@@ -7,11 +6,6 @@ namespace nMqtt
 {
     internal static class MqttExtensions
     {
-        public static int NewPacketId(this Packet packet)
-        {
-            return Guid.NewGuid().GetHashCode() & ushort.MaxValue;
-        }
-
         /// <summary>
         /// 写入
         /// </summary>
@@ -131,7 +125,7 @@ namespace nMqtt
             // read the bytes from the string, validate we have enough etc.
             var stringBytes = new byte[stringLength];
             var readBuffer = new byte[1 << 10]; // 1KB read buffer
-            var totalRead = 0;
+            //var totalRead = 0;
 
             // Keep reading until we have all. Intentionally synchronous
             //while (totalRead < stringLength)

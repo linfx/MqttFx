@@ -29,8 +29,8 @@ namespace nMqtt.Packets
                     buf.WriteString(item);
                 }
 
-                Header.RemaingLength = buf.WriterIndex;
-                Header.WriteTo(buffer);
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;
             }

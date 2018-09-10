@@ -10,28 +10,61 @@ namespace nMqtt.Packets
     /// </summary>
     public abstract class Packet
     {
-        /// <summary>
-        /// 固定报头
-        /// </summary>
-        public Header Header { get; set; }
-
         public Packet()
         {
             var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
-            Header = new Header(att.PacketType);
+            FixedHeader = new FixedHeader(att.PacketType);
         }
 
-        public Packet(PacketType msgType) => Header = new Header(msgType);
+        #region FixedHeader
 
-        public virtual void Encode(IByteBuffer buffer) => Header.WriteTo(buffer);
+        /// <summary>
+        /// 固定报头
+        /// </summary>
+        internal FixedHeader FixedHeader { get; set; }
+
+        /// <summary>
+        /// 报文类型
+        /// </summary>
+        public PacketType PacketType => FixedHeader.PacketType;
+        /// <summary>
+        /// 重发标志
+        /// </summary>
+        public bool Dup => FixedHeader.Dup;
+        /// <summary>
+        /// 服务质量等级
+        /// </summary>
+        public MqttQos Qos => FixedHeader.Qos;
+        /// <summary>
+        /// 保留标志
+        /// </summary>
+        public bool Retain => FixedHeader.Retain;
+        /// <summary>
+        /// 剩余长度
+        /// </summary>
+        public int RemaingLength => FixedHeader.RemaingLength;
+
+        #endregion
+
+        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
+
+        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
 
         public virtual void Decode(IByteBuffer buffer) { }
     }
 
     /// <summary>
+    /// 报文标识符
+    /// </summary>
+    public interface IMqttPacketIdentifier
+    {
+        ushort PacketIdentifier { get; set; }
+    }
+
+    /// <summary>
     /// 固定报头
     /// </summary>
-    public class Header
+    public class FixedHeader
     {
         /// <summary>
         /// 报文类型
@@ -54,12 +87,12 @@ namespace nMqtt.Packets
         /// </summary>
         public int RemaingLength { get; set; }
 
-        public Header(PacketType packetType)
+        public FixedHeader(PacketType packetType)
         {
             PacketType = packetType;
         }
 
-        public Header(IByteBuffer buffer)
+        public FixedHeader(IByteBuffer buffer)
         {
             var byte1 = buffer.ReadByte();
             PacketType = (PacketType)((byte1 & 0xf0) >> 4);
@@ -78,23 +111,7 @@ namespace nMqtt.Packets
             flags |= Retain.ToByte();
 
             buffer.WriteByte((byte)flags);
-            //WriteVariableLengthInt(buffer, variablePartSize);
             buffer.WriteBytes(EncodeLength(RemaingLength));
-        }
-
-        static void WriteVariableLengthInt(IByteBuffer buffer, int value)
-        {
-            do
-            {
-                int digit = value % 128;
-                value /= 128;
-                if (value > 0)
-                {
-                    digit |= 0x80;
-                }
-                buffer.WriteByte(digit);
-            }
-            while (value > 0);
         }
 
         internal static byte[] EncodeLength(int length)
@@ -126,13 +143,5 @@ namespace nMqtt.Packets
 
             return remainingLength;
         }
-    }
-
-    /// <summary>
-    /// 报文标识符
-    /// </summary>
-    public interface IMqttPacketIdentifier
-    {
-        ushort PacketIdentifier { get; set; }
     }
 }

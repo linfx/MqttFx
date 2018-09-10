@@ -22,5 +22,7 @@ namespace nMqtt.Protocol
         ///     it is successfully sent..
         /// </summary>
         ExactlyOnce = 2,
+        Reserved = 0x3,
+        Failure = 0x80
     }
 }

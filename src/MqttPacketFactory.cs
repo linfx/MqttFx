@@ -9,48 +9,64 @@ namespace nMqtt
     {
         public static Packet CreatePacket(IByteBuffer buffer)
         {
-            var header = new Header(buffer);
-            var packet = CreatePacket(header.PacketType);
-            packet.Header = header;
+            var header = new FixedHeader(buffer);
+            var packet = CreatePacket(header);
             packet.Decode(buffer);
             return packet;
         }
 
-        private static Packet CreatePacket(PacketType msgType)
+        static Packet CreatePacket(FixedHeader header)
         {
-            switch (msgType)
+            Packet packet;
+            switch (header.PacketType)
             {
                 case PacketType.CONNECT:
-                    return new ConnectPacket();
+                    packet = new ConnectPacket();
+                    break;
                 case PacketType.CONNACK:
-                    return new ConnAckPacket();
+                    packet = new ConnAckPacket();
+                    break;
                 case PacketType.DISCONNECT:
-                    return new DisconnectPacket();
+                    packet = new DisconnectPacket();
+                    break;
                 case PacketType.PINGREQ:
-                    return new PingReqPacket();
+                    packet = new PingReqPacket();
+                    break;
                 case PacketType.PINGRESP:
-                    return new PingRespPacket();
+                    packet = new PingRespPacket();
+                    break;
                 case PacketType.PUBACK:
-                    return new PublishAckPacket();
+                    packet = new PublishAckPacket();
+                    break;
                 case PacketType.PUBCOMP:
-                    return new PublishCompPacket();
+                    packet = new PublishCompPacket();
+                    break;
                 case PacketType.PUBLISH:
-                    return new PublishPacket();
+                    packet = new PublishPacket();
+                    break;
                 case PacketType.PUBREC:
-                    return new PublishRecPacket();
+                    packet = new PublishRecPacket();
+                    break;
                 case PacketType.PUBREL:
-                    return new PublishRelPacket();
+                    packet = new PublishRelPacket();
+                    break;
                 case PacketType.SUBSCRIBE:
-                    return new SubscribePacket();
+                    packet = new SubscribePacket();
+                    break;
                 case PacketType.SUBACK:
-                    return new SubscribeAckPacket();
+                    packet = new SubscribeAckPacket();
+                    break;
                 case PacketType.UNSUBSCRIBE:
-                    return new UnsubscribePacket();
+                    packet = new UnsubscribePacket();
+                    break;
                 case PacketType.UNSUBACK:
-                    return new UnsubscribePacket();
+                    packet = new UnsubscribePacket();
+                    break;
                 default:
                     throw new Exception("Unsupported Message Type");
             }
+            packet.FixedHeader = header;
+            return packet;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                //await client.SubscribeAsync("/World");
+                await client.SubscribeAsync("/World");
                 while (true)
                 {
                     await client.PublishAsync("/World", Encoding.UTF8.GetBytes("A"));

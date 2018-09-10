@@ -16,44 +16,45 @@ namespace nMqtt
 
         public static void DoEncode(IByteBufferAllocator bufferAllocator, Packet packet, List<object> output)
         {
-            IByteBuffer buffer = null;
+            IByteBuffer  buffer = bufferAllocator.Buffer();
             try
             {
-                if (packet is PublishPacket publishPacket)
-                {
-                    string topicName = publishPacket.TopicName;
-                    byte[] topicNameBytes = System.Text.Encoding.UTF8.GetBytes(topicName);
-                    int variableHeaderBufferSize = 2 + topicNameBytes.Length + (publishPacket.Header.Qos > MqttQos.AtMostOnce ? 2 : 0);
+                //if (packet is PublishPacket publishPacket)
+                //{
+                //    string topicName = publishPacket.TopicName;
+                //    byte[] topicNameBytes = System.Text.Encoding.UTF8.GetBytes(topicName);
+                //    int variableHeaderBufferSize = 2 + topicNameBytes.Length + (publishPacket.Qos > MqttQos.AtMostOnce ? 2 : 0);
 
 
-                    int payloadBufferSize = publishPacket.Payload.Length;
-                    int variablePartSize = variableHeaderBufferSize + payloadBufferSize;
 
-                    buffer = bufferAllocator.Buffer();
+                //    int payloadBufferSize = publishPacket.Payload.Length;
+                //    int variablePartSize = variableHeaderBufferSize + payloadBufferSize;
 
-                    buffer.WriteByte(CalculateFirstByteOfFixedHeader(publishPacket));
-                    WriteVariableLengthInt(buffer, variablePartSize);
+                //    var buf = Unpooled.Buffer();
 
-                    buffer.WriteShort(topicNameBytes.Length);
-                    buffer.WriteBytes(topicNameBytes);
-                    if (publishPacket.Header.Qos > MqttQos.AtMostOnce)
-                    {
-                        buffer.WriteShort(publishPacket.PacketIdentifier);
-                    }
 
-                    buffer.WriteBytes(publishPacket.Payload, 0, publishPacket.Payload.Length);
+                //    buf.WriteShort(topicNameBytes.Length);
+                //    buf.WriteBytes(topicNameBytes);
+                //    if (publishPacket.Qos > MqttQos.AtMostOnce)
+                //    {
+                //        buf.WriteUnsignedShort(publishPacket.PacketIdentifier);
+                //    }
+                //    buf.WriteBytes(publishPacket.Payload, 0, publishPacket.Payload.Length);
 
-                    output.Add(buffer);
-                    buffer = null;
-                }
-                else
-                {
-                    buffer = bufferAllocator.Buffer();
-                    packet.Encode(buffer);
-                    output.Add(buffer);
-                    buffer = null;
-                }
-  
+
+                //    buffer.WriteByte(CalculateFirstByteOfFixedHeader(publishPacket));
+                //    WriteVariableLengthInt(buffer, variablePartSize);
+
+                //    buffer.WriteBytes(buf);
+
+                //    output.Add(buffer);
+                //    buffer = null;
+                //}
+
+                packet.Encode(buffer);
+                output.Add(buffer);
+                buffer = null;
+
             }
             finally
             {
@@ -65,13 +66,13 @@ namespace nMqtt
         static int CalculateFirstByteOfFixedHeader(Packet packet)
         {
             int ret = 0;
-            ret |= (int)packet.Header.PacketType << 4;
-            if (packet.Header.Dup)
+            ret |= (int)packet.PacketType << 4;
+            if (packet.Dup)
             {
                 ret |= 0x08;
             }
-            ret |= (int)packet.Header.Qos << 1;
-            if (packet.Header.Retain)
+            ret |= (int)packet.Qos << 1;
+            if (packet.Retain)
             {
                 ret |= 0x01;
             }

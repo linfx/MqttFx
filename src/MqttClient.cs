@@ -140,11 +140,11 @@ namespace nMqtt
             {
                 Topic = publishPacket.TopicName,
                 Payload = publishPacket.Payload,
-                Qos = publishPacket.Header.Qos,
-                Retain = publishPacket.Header.Retain
+                Qos = publishPacket.Qos,
+                Retain = publishPacket.Retain
             });
 
-            switch (publishPacket.Header.Qos)
+            switch (publishPacket.Qos)
             {
                 case MqttQos.AtMostOnce:
                     return Task.CompletedTask;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
+using DotNetty.Codecs;
 using nMqtt.Protocol;
 
 namespace nMqtt.Packets
@@ -33,8 +34,8 @@ namespace nMqtt.Packets
                     buf.WriteByte((byte)item.Qos);
                 }
 
-                Header.RemaingLength = buf.WriterIndex;
-                Header.WriteTo(buffer);
+                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;
             }
@@ -71,9 +72,24 @@ namespace nMqtt.Packets
         /// </summary>
         public ushort PacketIdentifier { get; set; }
 
+        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
+
         public override void Decode(IByteBuffer buffer)
         {
             PacketIdentifier = buffer.ReadUnsignedShort();
+            FixedHeader.RemaingLength -= 2;
+
+            var returnCodes = new MqttQos[RemaingLength];
+            for (int i = 0; i < RemaingLength; i++)
+            {
+                var returnCode = (MqttQos)buffer.ReadByte();
+                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
+                {
+                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
+                }
+                returnCodes[i] = returnCode;
+            }
+            ReturnCodes = returnCodes;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using nMqtt.Protocol;
 
 namespace nMqtt.Packets
@@ -11,6 +10,7 @@ namespace nMqtt.Packets
     public sealed class ConnectPacket : Packet
     {
         #region 可变报头 Variable header
+
         /// <summary>
         /// 协议名
         /// </summary>
@@ -50,9 +50,11 @@ namespace nMqtt.Packets
         /// 保持连接 
         /// </summary>
         public short KeepAlive { get; set; } 
+
         #endregion
 
         #region 有效载荷 Payload
+
         /// <summary>
         /// 客户端标识符 Client Identifier
         /// </summary>
@@ -72,7 +74,8 @@ namespace nMqtt.Packets
         /// <summary>
         /// 密码 Password
         /// </summary>
-        public string Password { get; set; }  
+        public string Password { get; set; }
+
         #endregion
 
         public override void Encode(IByteBuffer buffer)

@@ -9,6 +9,7 @@ using DotNetty.Transport.Channels.Sockets;
 using nMqtt.Messages;
 using nMqtt.Packets;
 using nMqtt.Protocol;
+using nMqtt.Extensions;
 
 namespace nMqtt
 {
@@ -22,6 +23,7 @@ namespace nMqtt
         private IChannel _clientChannel;
         public Action<Message> OnMessageReceived;
         public Action<ConnectReturnCode> OnConnected;
+        MqttPacketIdentifierProvider _packetIdentifierProvider = new MqttPacketIdentifierProvider();
 
         public MqttClient(string clientId = default, ILogger logger = default)
         {
@@ -153,12 +155,12 @@ namespace nMqtt
                 case MqttQos.AtLeastOnce:
                     return _clientChannel.WriteAndFlushAsync(new PublishAckPacket
                     {
-                        MessageIdentifier = publishPacket.MessageIdentifier
+                        PacketIdentifier = publishPacket.PacketIdentifier
                     });
                 case MqttQos.ExactlyOnce:
                     return _clientChannel.WriteAndFlushAsync(new PublishRecPacket
                     {
-                        MessageIdentifier = publishPacket.MessageIdentifier
+                        PacketIdentifier = publishPacket.PacketIdentifier
                     });
                 default:
                     throw new Exception("Received a not supported QoS level.");
@@ -175,7 +177,7 @@ namespace nMqtt
         {
             var packet = new PublishPacket(qos)
             {
-                MessageIdentifier = MqttUtils.NewPacketId(),
+                PacketIdentifier = _packetIdentifierProvider.GetNewPacketIdentifier(),
                 TopicName = topic,
                 Payload = payload
             };
@@ -191,7 +193,7 @@ namespace nMqtt
         {
             var packet = new SubscribePacket
             {
-                MessageIdentifier = MqttUtils.NewPacketId()
+                PacketIdentifier = _packetIdentifierProvider.GetNewPacketIdentifier(),
             };
             packet.Subscribe(topic, qos);
             return _clientChannel.WriteAndFlushAsync(packet);

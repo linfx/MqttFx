@@ -1,7 +1,6 @@
-﻿using DotNetty.Buffers;
+﻿using System.Collections.Generic;
+using DotNetty.Buffers;
 using nMqtt.Protocol;
-using System.Collections.Generic;
-using System.IO;
 
 namespace nMqtt.Packets
 {
@@ -9,18 +8,21 @@ namespace nMqtt.Packets
     /// 取消订阅
     /// </summary>
     [PacketType(PacketType.UNSUBSCRIBE)]
-    public sealed class UnsubscribePacket : Packet
+    public sealed class UnsubscribePacket : Packet, IMqttPacketIdentifier
     {
         List<string> _topics = new List<string>();
 
-        public short MessageIdentifier { get; set; }
+        /// <summary>
+        /// 报文标识符
+        /// </summary>
+        public ushort PacketIdentifier { get; set; }
 
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteShort(MessageIdentifier);
+                buf.WriteShort(PacketIdentifier);
 
                 foreach (var item in _topics)
                 {

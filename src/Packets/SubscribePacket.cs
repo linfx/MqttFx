@@ -9,7 +9,7 @@ namespace nMqtt.Packets
     /// 订阅主题
     /// </summary>
     [PacketType(PacketType.SUBSCRIBE)]
-    public sealed class SubscribePacket : Packet
+    public sealed class SubscribePacket : Packet, IMqttPacketIdentifier
     {
         /// <summary>
         /// 主题列表
@@ -17,16 +17,16 @@ namespace nMqtt.Packets
         List<TopicQos> Topics = new List<TopicQos>();
 
         /// <summary>
-        /// 消息ID
+        /// 报文标识符
         /// </summary>
-        public short MessageIdentifier { get; set; }
+        public ushort PacketIdentifier { get; set; }
 
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteShort(MessageIdentifier);
+                buf.WriteUnsignedShort(PacketIdentifier);
 
                 foreach (var item in Topics)
                 {

@@ -1,9 +1,7 @@
 ﻿using DotNetty.Buffers;
-using DotNetty.Codecs;
 using nMqtt.Protocol;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace nMqtt.Packets
 {
@@ -112,5 +110,13 @@ namespace nMqtt.Packets
 
             return remainingLength;
         }
+    }
+
+    /// <summary>
+    /// 报文标识符
+    /// </summary>
+    public interface IMqttPacketIdentifier
+    {
+        ushort PacketIdentifier { get; set; }
     }
 }

@@ -33,8 +33,8 @@ namespace nMqtt.Packets
                     buf.WriteByte((byte)item.Qos);
                 }
 
-                FixedHeader.RemaingLength = buf.WriterIndex;
-                FixedHeader.WriteTo(buffer);
+                Header.RemaingLength = buf.WriterIndex;
+                Header.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;
             }

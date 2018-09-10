@@ -9,9 +9,9 @@ namespace nMqtt
     {
         public static Packet CreatePacket(IByteBuffer buffer)
         {
-            var header = new FixedHeader(buffer);
+            var header = new Header(buffer);
             var packet = CreatePacket(header.PacketType);
-            packet.FixedHeader = header;
+            packet.Header = header;
             packet.Decode(buffer);
             return packet;
         }

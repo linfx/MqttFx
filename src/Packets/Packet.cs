@@ -13,17 +13,17 @@ namespace nMqtt.Packets
         /// <summary>
         /// 固定报头
         /// </summary>
-        public FixedHeader FixedHeader { get; set; }
+        public Header Header { get; set; }
 
         public Packet()
         {
             var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
-            FixedHeader = new FixedHeader(att.PacketType);
+            Header = new Header(att.PacketType);
         }
 
-        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
+        public Packet(PacketType msgType) => Header = new Header(msgType);
 
-        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
+        public virtual void Encode(IByteBuffer buffer) => Header.WriteTo(buffer);
 
         public virtual void Decode(IByteBuffer buffer) { }
     }
@@ -31,7 +31,7 @@ namespace nMqtt.Packets
     /// <summary>
     /// 固定报头
     /// </summary>
-    public class FixedHeader
+    public class Header
     {
         /// <summary>
         /// 报文类型
@@ -54,12 +54,12 @@ namespace nMqtt.Packets
         /// </summary>
         public int RemaingLength { get; set; }
 
-        public FixedHeader(PacketType packetType)
+        public Header(PacketType packetType)
         {
             PacketType = packetType;
         }
 
-        public FixedHeader(IByteBuffer buffer)
+        public Header(IByteBuffer buffer)
         {
             var byte1 = buffer.ReadByte();
             PacketType = (PacketType)((byte1 & 0xf0) >> 4);

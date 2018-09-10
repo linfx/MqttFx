@@ -111,8 +111,8 @@ namespace nMqtt.Packets
                 if (PasswordFlag)
                     buf.WriteString(Password);
 
-                FixedHeader.RemaingLength = buf.WriterIndex;
-                FixedHeader.WriteTo(buffer);
+                Header.RemaingLength = buf.WriterIndex;
+                Header.WriteTo(buffer);
                 buffer.WriteBytes(buf);
             }
             finally

@@ -26,7 +26,7 @@ namespace nMqtt.Packets
 
         public PublishPacket(MqttQos qos)
         {
-            FixedHeader.Qos = qos;
+            Header.Qos = qos;
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -38,8 +38,8 @@ namespace nMqtt.Packets
                 buf.WriteShort(PacketIdentifier);
                 buf.WriteBytes(Payload, 0, Payload.Length);
 
-                FixedHeader.RemaingLength = buf.WriterIndex;
-                FixedHeader.WriteTo(buffer);
+                Header.RemaingLength = buf.WriterIndex;
+                Header.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;
             }
@@ -53,11 +53,11 @@ namespace nMqtt.Packets
         {
             //variable header
             TopicName = buffer.ReadString();
-            if (FixedHeader.Qos == MqttQos.AtLeastOnce || FixedHeader.Qos == MqttQos.ExactlyOnce)
+            if (Header.Qos == MqttQos.AtLeastOnce || Header.Qos == MqttQos.ExactlyOnce)
                 PacketIdentifier = buffer.ReadUnsignedShort();
 
             //playload
-            var len = FixedHeader.RemaingLength - (TopicName.Length + 2);
+            var len = Header.RemaingLength - (TopicName.Length + 2);
             Payload = new byte[len];
             buffer.ReadBytes(Payload, 0, len);
         }

@@ -35,10 +35,10 @@ namespace nMqtt.Packets
             try
             {
                 buf.WriteString(TopicName);
-                buf.WriteShort(PacketIdentifier);
+                buf.WriteUnsignedShort(PacketIdentifier);
                 buf.WriteBytes(Payload, 0, Payload.Length);
 
-                Header.RemaingLength = buf.WriterIndex;
+                Header.RemaingLength = buf.ReadableBytes;
                 Header.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;

@@ -78,7 +78,23 @@ namespace nMqtt.Packets
             flags |= Retain.ToByte();
 
             buffer.WriteByte((byte)flags);
+            //WriteVariableLengthInt(buffer, variablePartSize);
             buffer.WriteBytes(EncodeLength(RemaingLength));
+        }
+
+        static void WriteVariableLengthInt(IByteBuffer buffer, int value)
+        {
+            do
+            {
+                int digit = value % 128;
+                value /= 128;
+                if (value > 0)
+                {
+                    digit |= 0x80;
+                }
+                buffer.WriteByte(digit);
+            }
+            while (value > 0);
         }
 
         internal static byte[] EncodeLength(int length)

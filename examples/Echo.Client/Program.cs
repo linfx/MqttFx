@@ -16,8 +16,12 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                await client.SubscribeAsync("/World");
-                //await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello"));
+                //await client.SubscribeAsync("/World");
+                while (true)
+                {
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("A"));
+                    await Task.Delay(1000);
+                }
             }
             Console.ReadKey();
         }

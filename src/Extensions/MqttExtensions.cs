@@ -40,14 +40,14 @@ namespace nMqtt
         }
 
         /// <summary>
-        /// 写入字符串
+        /// 写入字符串(Encode by UTF8)
         /// </summary>
         /// <param name="buffer">The stream containing the string to write.</param>
         /// <param name="value">The string to write.</param>
         public static void WriteString(this IByteBuffer buffer, string value)
         {
-            System.Text.Encoding enc = new MqttEncoding();
-            byte[] stringBytes = enc.GetBytes(value);
+            byte[] stringBytes = System.Text.Encoding.UTF8.GetBytes(value);
+            buffer.WriteShort(stringBytes.Length);
             buffer.WriteBytes(stringBytes, 0, stringBytes.Length);
         }
 

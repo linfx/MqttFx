@@ -12,55 +12,45 @@ c# mqtt 3.1.1 client
 ```c#
 using System;
 using System.Text;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using nMqtt;
 using nMqtt.Messages;
+using nMqtt.Protocol;
 
-namespace nMqtt.Test
+namespace Echo.Client
 {
     class Program
     {
-        static ILogger _logger;
-        static MqttClient _client;
-
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var loggerFactory = new LoggerFactory()
-                .AddConsole();
-            _logger = loggerFactory.CreateLogger<Program>();
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer("118.126.96.166")
+                .Build();
 
-            _client = new MqttClient("127.0.0.1", logger: _logger);
-            _client.OnMessageReceived += OnMessageReceived;
-            _client.ConnectAsync().Wait();
-
-            while (Console.ReadLine() != "c")
+            var client = new MqttClient(options);
+            client.OnConnected += Connected;
+            client.OnMessageReceived += MessageReceived;
+            if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                _client.Publish("/World", Encoding.UTF8.GetBytes("测试发送消息"), Qos.AtLeastOnce);
+                await client.SubscribeAsync("/World2");
+                //while (true)
+                //{
+                //    await client.PublishAsync("/World2", Encoding.UTF8.GetBytes("A"));
+                //    await Task.Delay(1000);
+                //}
             }
-
             Console.ReadKey();
         }
 
-        static void OnMessageReceived(MqttMessage message)
+        private static void Connected(ConnectReturnCode connectResponse)
         {
-            switch (message)
-            {
-                case ConnAckMessage msg:
-                    _logger.LogInformation("---- OnConnAck");
-                    _client.Subscribe("/World");
-                    break;
+            Console.WriteLine("Connected Ssuccessful!, ConnectReturnCode: " + connectResponse);
+        }
 
-                case SubscribeAckMessage msg:
-                    _logger.LogInformation("---- OnSubAck");
-                    break;
-
-                case PublishMessage msg:
-                    _logger.LogInformation("---- OnMessageReceived");
-                    _logger.LogInformation(@"topic:{0} data:{1}", msg.TopicName, Encoding.UTF8.GetString(msg.Payload));
-                    break;
-
-                default:
-                    break;
-            }
+        private static void MessageReceived(Message message)
+        {
+            var result = Encoding.UTF8.GetString(message.Payload);
+            Console.WriteLine(result);
         }
     }
 }

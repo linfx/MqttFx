@@ -31,13 +31,14 @@ namespace nMqtt
         public Action<Message> OnMessageReceived;
         public Action<ConnectReturnCode> OnConnected;
 
-        public MqttClient(string clientId = default, ILogger logger = default)
+        public MqttClient(MqttClientOptions options,
+            ILogger<MqttClient> logger = default)
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
-            _options = new MqttClientOptions();
             _packetIdentifierProvider = new MqttPacketIdentifierProvider();
             _packetDispatcher = new MqttPacketDispatcher();
+            _options = options;
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace nMqtt
                 _packetDispatcher.Reset();
                 _packetIdentifierProvider.Reset();
                 _cancellationTokenSource = new CancellationTokenSource();
-                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("118.126.96.166"), 1883));
+                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Server), _options.Port));
 
                 StartReceivingPackets(clientReadListener);
 
@@ -89,7 +90,7 @@ namespace nMqtt
                 CleanSession = _options.CleanSession,
                 KeepAlive = _options.KeepAlive,
             };
-            if(_options.Credentials != null)
+            if (_options.Credentials != null)
             {
                 packet.UsernameFlag = true;
                 packet.UserName = _options.Credentials.Username;
@@ -168,9 +169,9 @@ namespace nMqtt
             cancellationToken.ThrowIfCancellationRequested();
 
             ushort identifier = 0;
-            if (requestPacket is PacketWithId packetWithIdentifier)
+            if (requestPacket is PacketWithId packetWithId)
             {
-                identifier = packetWithIdentifier.PacketId;
+                identifier = packetWithId.PacketId;
             }
 
             var packetAwaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
@@ -182,7 +183,6 @@ namespace nMqtt
             }
             catch (Exception)
             {
-
                 throw;
             }
             finally

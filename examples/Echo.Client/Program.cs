@@ -11,7 +11,11 @@ namespace Echo.Client
     {
         static async Task Main(string[] args)
         {
-            var client = new MqttClient();
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer("118.126.96.166")
+                .Build();
+
+            var client = new MqttClient(options);
             client.OnConnected += Connected;
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)

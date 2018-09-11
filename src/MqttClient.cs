@@ -22,7 +22,7 @@ namespace nMqtt
         readonly ILogger _logger;
         readonly IEventLoopGroup _group;
         readonly MqttClientOptions _options;
-        readonly MqttPacketIdentifierProvider _packetIdentifierProvider;
+        readonly MqttPacketIdProvider _packetIdentifierProvider;
         readonly MqttPacketDispatcher _packetDispatcher;
 
         private IChannel _clientChannel;
@@ -37,7 +37,7 @@ namespace nMqtt
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
-            _packetIdentifierProvider = new MqttPacketIdentifierProvider();
+            _packetIdentifierProvider = new MqttPacketIdProvider();
             _packetDispatcher = new MqttPacketDispatcher();
             _options = options;
         }
@@ -203,7 +203,7 @@ namespace nMqtt
         {
             var packet = new PublishPacket(qos)
             {
-                PacketId = _packetIdentifierProvider.GetNewPacketIdentifier(),
+                PacketId = _packetIdentifierProvider.GetNewPacketId(),
                 TopicName = topic,
                 Payload = payload
             };
@@ -219,7 +219,7 @@ namespace nMqtt
         {
             var packet = new SubscribePacket
             {
-                PacketId = _packetIdentifierProvider.GetNewPacketIdentifier(),
+                PacketId = _packetIdentifierProvider.GetNewPacketId(),
             };
             packet.Add(topic, qos);
             return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);

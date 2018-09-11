@@ -151,12 +151,12 @@ namespace nMqtt
                 case MqttQos.AtLeastOnce:
                     return _clientChannel.WriteAndFlushAsync(new PublishAckPacket
                     {
-                        PacketIdentifier = publishPacket.PacketIdentifier
+                        PacketId = publishPacket.PacketId
                     });
                 case MqttQos.ExactlyOnce:
                     return _clientChannel.WriteAndFlushAsync(new PublishRecPacket
                     {
-                        PacketIdentifier = publishPacket.PacketIdentifier
+                        PacketId = publishPacket.PacketId
                     });
                 default:
                     throw new Exception("Received a not supported QoS level.");
@@ -168,9 +168,9 @@ namespace nMqtt
             cancellationToken.ThrowIfCancellationRequested();
 
             ushort identifier = 0;
-            if (requestPacket is IMqttPacketIdentifier packetWithIdentifier)
+            if (requestPacket is PacketWithId packetWithIdentifier)
             {
-                identifier = packetWithIdentifier.PacketIdentifier;
+                identifier = packetWithIdentifier.PacketId;
             }
 
             var packetAwaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
@@ -201,7 +201,7 @@ namespace nMqtt
         {
             var packet = new PublishPacket(qos)
             {
-                PacketIdentifier = _packetIdentifierProvider.GetNewPacketIdentifier(),
+                PacketId = _packetIdentifierProvider.GetNewPacketIdentifier(),
                 TopicName = topic,
                 Payload = payload
             };
@@ -217,10 +217,10 @@ namespace nMqtt
         {
             var packet = new SubscribePacket
             {
-                PacketIdentifier = _packetIdentifierProvider.GetNewPacketIdentifier(),
+                PacketId = _packetIdentifierProvider.GetNewPacketIdentifier(),
             };
             packet.Subscribe(topic, qos);
-            return _clientChannel.WriteAndFlushAsync(packet);
+            return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
         }
 
         /// <summary>

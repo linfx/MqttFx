@@ -21,7 +21,7 @@ namespace nMqtt.Packets
         /// <summary>
         /// 固定报头
         /// </summary>
-        internal FixedHeader FixedHeader { get; set; }
+        public FixedHeader FixedHeader { protected get; set; }
 
         /// <summary>
         /// 报文类型
@@ -54,11 +54,14 @@ namespace nMqtt.Packets
     }
 
     /// <summary>
-    /// 报文标识符
+    /// 消息基类(带ID)
     /// </summary>
-    public interface IMqttPacketIdentifier
+    public abstract class PacketWithId : Packet
     {
-        ushort PacketIdentifier { get; set; }
+        /// <summary>
+        /// 报文标识符
+        /// </summary>
+        public ushort PacketId { get; set; }
     }
 
     /// <summary>

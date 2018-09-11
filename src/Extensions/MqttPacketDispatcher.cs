@@ -23,9 +23,9 @@ namespace nMqtt.Extensions
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 
             ushort identifier = 0;
-            if (packet is IMqttPacketIdentifier packetWithIdentifier)
+            if (packet is PacketWithId packetWithIdentifier)
             {
-                identifier = packetWithIdentifier.PacketIdentifier;
+                identifier = packetWithIdentifier.PacketId;
             }
 
             var type = packet.GetType();

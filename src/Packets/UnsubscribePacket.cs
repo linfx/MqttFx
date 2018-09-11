@@ -8,28 +8,23 @@ namespace nMqtt.Packets
     /// 取消订阅
     /// </summary>
     [PacketType(PacketType.UNSUBSCRIBE)]
-    public sealed class UnsubscribePacket : Packet, IMqttPacketIdentifier
+    public sealed class UnsubscribePacket : PacketWithId
     {
         List<string> _topics = new List<string>();
-
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
 
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteShort(PacketIdentifier);
+                buf.WriteShort(PacketId);
 
                 foreach (var item in _topics)
                 {
                     buf.WriteString(item);
                 }
 
-                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;

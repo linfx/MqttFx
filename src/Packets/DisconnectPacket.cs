@@ -6,7 +6,7 @@ namespace nMqtt.Packets
     /// 断开连接
     /// </summary>
     [PacketType(PacketType.DISCONNECT)]
-    public sealed class DisconnectPacket : Packet
+    internal sealed class DisconnectPacket : Packet
     {
     }
 }

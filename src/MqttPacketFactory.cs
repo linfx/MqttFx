@@ -54,7 +54,7 @@ namespace nMqtt
                     packet = new SubscribePacket();
                     break;
                 case PacketType.SUBACK:
-                    packet = new SubscribeAckPacket();
+                    packet = new SubAckPacket();
                     break;
                 case PacketType.UNSUBSCRIBE:
                     packet = new UnsubscribePacket();

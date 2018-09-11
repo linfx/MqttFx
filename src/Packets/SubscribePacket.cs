@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
-using DotNetty.Codecs;
 using nMqtt.Protocol;
 
 namespace nMqtt.Packets
@@ -9,41 +8,12 @@ namespace nMqtt.Packets
     /// 订阅主题
     /// </summary>
     [PacketType(PacketType.SUBSCRIBE)]
-    public sealed class SubscribePacket : Packet, IMqttPacketIdentifier
+    public sealed class SubscribePacket : PacketWithId
     {
         /// <summary>
         /// 主题列表
         /// </summary>
-        List<TopicQos> Topics = new List<TopicQos>();
-
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
-
-        public override void Encode(IByteBuffer buffer)
-        {
-            var buf = Unpooled.Buffer();
-            try
-            {
-                buf.WriteUnsignedShort(PacketIdentifier);
-
-                foreach (var item in Topics)
-                {
-                    buf.WriteString(item.Topic);
-                    buf.WriteByte((byte)item.Qos);
-                }
-
-                FixedHeader.RemaingLength = buf.WriterIndex;
-                FixedHeader.WriteTo(buffer);
-                buffer.WriteBytes(buf);
-                buf = null;
-            }
-            finally
-            {
-                buf?.Release();
-            }
-        }
+        IList<TopicQos> Topics = new List<TopicQos>();
 
         public void Subscribe(string topic, MqttQos qos)
         {
@@ -59,37 +29,56 @@ namespace nMqtt.Packets
             public string Topic { get; set; }
             public MqttQos Qos { get; set; }
         }
+
+        public override void Encode(IByteBuffer buffer)
+        {
+            var buf = Unpooled.Buffer();
+            try
+            {
+                buf.WriteUnsignedShort(PacketId);
+
+                foreach (var item in Topics)
+                {
+                    buf.WriteString(item.Topic);
+                    buf.WriteByte((byte)item.Qos);
+                }
+
+                FixedHeader.RemaingLength = buf.ReadableBytes;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+                buf = null;
+            }
+            finally
+            {
+                buf?.Release();
+            }
+        }
     }
 
     /// <summary>
     /// 订阅回执
     /// </summary>
     [PacketType(PacketType.SUBACK)]
-    public class SubscribeAckPacket : Packet, IMqttPacketIdentifier
+    public class SubAckPacket : PacketWithId
     {
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
-
-        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
+        public IReadOnlyList<SubscribeReturnCode> ReturnCodes { get; set; }
 
         public override void Decode(IByteBuffer buffer)
         {
-            PacketIdentifier = buffer.ReadUnsignedShort();
+            PacketId = buffer.ReadUnsignedShort();
             FixedHeader.RemaingLength -= 2;
 
             var returnCodes = new MqttQos[RemaingLength];
             for (int i = 0; i < RemaingLength; i++)
             {
-                var returnCode = (MqttQos)buffer.ReadByte();
-                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
-                {
-                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-                }
-                returnCodes[i] = returnCode;
+                var returnCode = (SubscribeReturnCode)buffer.ReadByte();
+                //if (returnCode > SubscribeReturnCode.ExactlyOnce && returnCode != SubscribeReturnCode.Failure)
+                //{
+                //    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
+                //}
+                //returnCodes[i] = returnCode;
             }
-            ReturnCodes = returnCodes;
+            //ReturnCodes = returnCodes;
         }
     }
 }

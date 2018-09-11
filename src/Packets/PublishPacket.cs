@@ -7,16 +7,12 @@ namespace nMqtt.Packets
     /// 发布消息
     /// </summary>
     [PacketType(PacketType.PUBLISH)]
-    public sealed class PublishPacket : Packet, IMqttPacketIdentifier
+    internal sealed class PublishPacket : PacketWithId
     {
         /// <summary>
         /// 主题
         /// </summary>
         public string TopicName { get; set; }
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
         /// <summary>
         /// 有效载荷
         /// </summary>
@@ -24,9 +20,11 @@ namespace nMqtt.Packets
 
         internal PublishPacket() { }
 
-        public PublishPacket(MqttQos qos)
+        public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
         {
             FixedHeader.Qos = qos;
+            FixedHeader.Dup = dup;
+            FixedHeader.Retain = retain;
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -37,7 +35,7 @@ namespace nMqtt.Packets
                 buf.WriteString(TopicName);
                 if (Qos > MqttQos.AtMostOnce)
                 {
-                    buf.WriteUnsignedShort(PacketIdentifier);
+                    buf.WriteUnsignedShort(PacketId);
                 }
                 buf.WriteBytes(Payload, 0, Payload.Length);
 
@@ -56,8 +54,8 @@ namespace nMqtt.Packets
         {
             //variable header
             TopicName = buffer.ReadString();
-            if (FixedHeader.Qos == MqttQos.AtLeastOnce || FixedHeader.Qos == MqttQos.ExactlyOnce)
-                PacketIdentifier = buffer.ReadUnsignedShort();
+            if (Qos == MqttQos.AtLeastOnce || Qos == MqttQos.ExactlyOnce)
+                PacketId = buffer.ReadUnsignedShort();
 
             //playload
             var len = FixedHeader.RemaingLength - (TopicName.Length + 2);
@@ -71,16 +69,11 @@ namespace nMqtt.Packets
     /// QoS level = 1
     /// </summary>
     [PacketType(PacketType.PUBACK)]
-    internal sealed class PublishAckPacket : Packet, IMqttPacketIdentifier
+    internal sealed class PublishAckPacket : PacketWithId
     {
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
-
         public PublishAckPacket(ushort packetIdentifier = default)
         {
-            PacketIdentifier = packetIdentifier;
+            PacketId = packetIdentifier;
         }
     }
 
@@ -89,16 +82,11 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 1
     /// </summary>
     [PacketType(PacketType.PUBREC)]
-    internal sealed class PublishRecPacket : Packet, IMqttPacketIdentifier
+    internal sealed class PublishRecPacket : PacketWithId
     {
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
-
         public PublishRecPacket(ushort packetIdentifier = default)
         {
-            PacketIdentifier = packetIdentifier;
+            PacketId = packetIdentifier;
         }
     }
 
@@ -107,12 +95,8 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 2
     /// </summary>
     [PacketType(PacketType.PUBREL)]
-    internal sealed class PublishRelPacket : Packet, IMqttPacketIdentifier
+    internal sealed class PublishRelPacket : PacketWithId
     {
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
     }
 
     /// <summary>
@@ -120,11 +104,7 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 3
     /// </summary>
     [PacketType(PacketType.PUBCOMP)]
-    internal sealed class PublishCompPacket : Packet, IMqttPacketIdentifier
+    internal sealed class PublishCompPacket : PacketWithId
     {
-        /// <summary>
-        /// 报文标识符
-        /// </summary>
-        public ushort PacketIdentifier { get; set; }
     }
 }

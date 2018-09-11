@@ -7,9 +7,9 @@ namespace nMqtt.Packets
     /// 发起连接
     /// </summary>
     [PacketType(PacketType.CONNECT)]
-    public sealed class ConnectPacket : Packet
+    internal sealed class ConnectPacket : Packet
     {
-        #region 可变报头 Variable header
+        #region Variable header
 
         /// <summary>
         /// 协议名
@@ -19,8 +19,12 @@ namespace nMqtt.Packets
         /// 协议级别
         /// </summary>
         public byte ProtocolLevel { get; } = 0x04;
+        /// <summary>
+        /// 保持连接 
+        /// </summary>
+        public short KeepAlive { get; set; }
 
-        #region 连接标志 Connect Flags
+        #region Connect Flags
         /// <summary>
         /// 用户名标志
         /// </summary>
@@ -46,14 +50,10 @@ namespace nMqtt.Packets
         /// </summary>
         public bool CleanSession { get; set; }
         #endregion
-        /// <summary>
-        /// 保持连接 
-        /// </summary>
-        public short KeepAlive { get; set; } 
 
         #endregion
 
-        #region 有效载荷 Payload
+        #region Payload
 
         /// <summary>
         /// 客户端标识符 Client Identifier
@@ -84,8 +84,8 @@ namespace nMqtt.Packets
             try
             {
                 //variable header
-                buf.WriteString(ProtocolName);       //byte 1 - 8
-                buf.WriteByte(ProtocolLevel);        //byte 9
+                buf.WriteString(ProtocolName);        //byte 1 - 8
+                buf.WriteByte(ProtocolLevel);         //byte 9
 
                 //connect flags;                      //byte 10
                 var flags = UsernameFlag.ToByte() << 7;
@@ -97,7 +97,7 @@ namespace nMqtt.Packets
                 buf.WriteByte((byte)flags);
 
                 //keep alive
-                buf.WriteShort(KeepAlive);      //byte 11 - 12
+                buf.WriteShort(KeepAlive);            //byte 11 - 12
 
                 //payload
                 buf.WriteString(ClientId);
@@ -106,12 +106,13 @@ namespace nMqtt.Packets
                     buf.WriteString(WillTopic);
                     buf.WriteString(WillMessage);
                 }
-                if (UsernameFlag)
+                if (UsernameFlag && PasswordFlag)
+                {
                     buf.WriteString(UserName);
-                if (PasswordFlag)
                     buf.WriteString(Password);
+                }
 
-                FixedHeader.RemaingLength = buf.WriterIndex;
+                FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
             }
@@ -127,7 +128,7 @@ namespace nMqtt.Packets
     /// 连接回执
     /// </summary>
     [PacketType(PacketType.CONNACK)]
-    public sealed class ConnAckPacket : Packet
+    internal sealed class ConnAckPacket : Packet
     {
         /// <summary>
         /// 当前会话

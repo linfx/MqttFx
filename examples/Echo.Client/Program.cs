@@ -20,10 +20,10 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                //await client.SubscribeAsync("/World");
+                await client.SubscribeAsync("/World2");
                 //while (true)
                 //{
-                //    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("A"), MqttQos.AtLeastOnce);
+                //    await client.PublishAsync("/World2", Encoding.UTF8.GetBytes("A"));
                 //    await Task.Delay(1000);
                 //}
             }

@@ -10,12 +10,6 @@ namespace nMqtt.Packets
     /// </summary>
     public abstract class Packet
     {
-        public Packet()
-        {
-            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
-            FixedHeader = new FixedHeader(att.PacketType);
-        }
-
         #region FixedHeader
 
         /// <summary>
@@ -45,6 +39,12 @@ namespace nMqtt.Packets
         public int RemaingLength => FixedHeader.RemaingLength;
 
         #endregion
+
+        public Packet()
+        {
+            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
+            FixedHeader = new FixedHeader(att.PacketType);
+        }
 
         public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
 

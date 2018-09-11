@@ -28,8 +28,9 @@ namespace nMqtt
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public Action<Message> OnMessageReceived;
         public Action<ConnectReturnCode> OnConnected;
+        public Action OnDisconnected;
+        public Action<Message> OnMessageReceived;
 
         public MqttClient(MqttClientOptions options,
             ILogger<MqttClient> logger = default)
@@ -56,7 +57,7 @@ namespace nMqtt
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
-                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 0124), clientReadListener);
+                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024), clientReadListener);
                 }));
 
             try
@@ -66,9 +67,9 @@ namespace nMqtt
                 _cancellationTokenSource = new CancellationTokenSource();
                 _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Server), _options.Port));
 
-                StartReceivingPackets(clientReadListener);
+                StartReceivingPackets(clientReadListener, _cancellationTokenSource.Token);
 
-                var connectResponse = await AuthenticateAsync(clientReadListener); ;
+                var connectResponse = await AuthenticateAsync(clientReadListener, _cancellationTokenSource.Token); ;
                 if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
                 {
                     OnConnected?.Invoke(connectResponse.ConnectReturnCode);
@@ -82,7 +83,7 @@ namespace nMqtt
             }
         }
 
-        private Task<ConnAckPacket> AuthenticateAsync(ReadListeningHandler readListener)
+        private Task<ConnAckPacket> AuthenticateAsync(ReadListeningHandler readListener, CancellationToken cancellationToken)
         {
             var packet = new ConnectPacket
             {
@@ -96,17 +97,17 @@ namespace nMqtt
                 packet.UserName = _options.Credentials.Username;
                 packet.Password = _options.Credentials.Username;
             }
-            return SendAndReceiveAsync<ConnAckPacket>(packet, _cancellationTokenSource.Token);
+            return SendAndReceiveAsync<ConnAckPacket>(packet, cancellationToken);
         }
 
-        private void StartReceivingPackets(ReadListeningHandler clientReadListener)
+        private void StartReceivingPackets(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
         {
-            Task.Run(() => ReceivePacketsAsync(clientReadListener));
+            Task.Run(() => ReceivePacketsAsync(clientReadListener, cancellationToken));
         }
 
-        private async Task ReceivePacketsAsync(ReadListeningHandler clientReadListener)
+        private async Task ReceivePacketsAsync(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 if (await clientReadListener.ReceiveAsync() is Packet packet)
                 {
@@ -117,21 +118,31 @@ namespace nMqtt
 
         private Task ProcessReceivedPacketAsync(Packet packet)
         {
-            switch (packet)
+            if (packet is PublishPacket publishPacket)
             {
-                case DisconnectPacket disconnectPacket:
-                    return DisconnectAsync();
-
-                case PingReqPacket pingReqPacket:
-                    return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
-
-                case PublishPacket publishPacket:
-                    return ProcessReceivedPublishPacketAsync(publishPacket);
-
-                case PublishRelPacket publishRelPacket:
-                    return Task.CompletedTask;
+                return ProcessReceivedPublishPacketAsync(publishPacket);
             }
+
+            if(packet is PingReqPacket)
+            {
+                return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
+            }
+
+            if(packet is DisconnectPacket)
+            {
+                return DisconnectAsync();
+            }
+
+            if (packet is PubRelPacket pubRelPacket)
+            {
+                return _clientChannel.WriteAndFlushAsync(new PubCompPacket
+                {
+                    PacketId = pubRelPacket.PacketId
+                });
+            }
+
             _packetDispatcher.Dispatch(packet);
+
             return Task.CompletedTask;
         }
 
@@ -150,12 +161,12 @@ namespace nMqtt
                 case MqttQos.AtMostOnce:
                     return Task.CompletedTask;
                 case MqttQos.AtLeastOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PublishAckPacket
+                    return _clientChannel.WriteAndFlushAsync(new PubAckPacket
                     {
                         PacketId = publishPacket.PacketId
                     });
                 case MqttQos.ExactlyOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PublishRecPacket
+                    return _clientChannel.WriteAndFlushAsync(new PubRecPacket
                     {
                         PacketId = publishPacket.PacketId
                     });
@@ -242,6 +253,7 @@ namespace nMqtt
         {
             await _clientChannel.CloseAsync();
             await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            OnDisconnected?.Invoke();
         }
     }
 }

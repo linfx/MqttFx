@@ -69,9 +69,9 @@ namespace nMqtt.Packets
     /// QoS level = 1
     /// </summary>
     [PacketType(PacketType.PUBACK)]
-    internal sealed class PublishAckPacket : PacketWithId
+    internal sealed class PubAckPacket : PacketWithId
     {
-        public PublishAckPacket(ushort packetIdentifier = default)
+        public PubAckPacket(ushort packetIdentifier = default)
         {
             PacketId = packetIdentifier;
         }
@@ -82,9 +82,9 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 1
     /// </summary>
     [PacketType(PacketType.PUBREC)]
-    internal sealed class PublishRecPacket : PacketWithId
+    internal sealed class PubRecPacket : PacketWithId
     {
-        public PublishRecPacket(ushort packetIdentifier = default)
+        public PubRecPacket(ushort packetIdentifier = default)
         {
             PacketId = packetIdentifier;
         }
@@ -95,7 +95,7 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 2
     /// </summary>
     [PacketType(PacketType.PUBREL)]
-    internal sealed class PublishRelPacket : PacketWithId
+    internal sealed class PubRelPacket : PacketWithId
     {
     }
 
@@ -104,7 +104,7 @@ namespace nMqtt.Packets
     /// QoS 2 publish received, part 3
     /// </summary>
     [PacketType(PacketType.PUBCOMP)]
-    internal sealed class PublishCompPacket : PacketWithId
+    internal sealed class PubCompPacket : PacketWithId
     {
     }
 }

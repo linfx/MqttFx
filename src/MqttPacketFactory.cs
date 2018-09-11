@@ -36,19 +36,19 @@ namespace nMqtt
                     packet = new PingRespPacket();
                     break;
                 case PacketType.PUBACK:
-                    packet = new PublishAckPacket();
+                    packet = new PubAckPacket();
                     break;
                 case PacketType.PUBCOMP:
-                    packet = new PublishCompPacket();
+                    packet = new PubCompPacket();
                     break;
                 case PacketType.PUBLISH:
                     packet = new PublishPacket();
                     break;
                 case PacketType.PUBREC:
-                    packet = new PublishRecPacket();
+                    packet = new PubRecPacket();
                     break;
                 case PacketType.PUBREL:
-                    packet = new PublishRelPacket();
+                    packet = new PubRelPacket();
                     break;
                 case PacketType.SUBSCRIBE:
                     packet = new SubscribePacket();

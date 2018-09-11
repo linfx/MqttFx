@@ -21,11 +21,9 @@ namespace Echo.Client
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
                 //await client.SubscribeAsync("/World");
-                while (true)
-                {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("A"));
-                    await Task.Delay(1000);
-                }
+                var msg = Encoding.UTF8.GetBytes("A");
+                await client.PublishAsync("/World", msg, MqttQos.AtLeastOnce);
+                await Task.Delay(1000);
             }
             Console.ReadKey();
         }

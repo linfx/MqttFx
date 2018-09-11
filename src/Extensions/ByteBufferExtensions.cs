@@ -4,7 +4,7 @@ using System.IO;
 
 namespace nMqtt
 {
-    internal static class MqttExtensions
+    internal static class ByteBufferExtensions
     {
         /// <summary>
         /// 写入
@@ -62,6 +62,19 @@ namespace nMqtt
             high = (byte)stream.ReadByte();
             low = (byte)stream.ReadByte();
             return (short)((high << 8) + low);
+        }
+
+        /// <summary>
+        /// 读取两字节
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="remainingLength"></param>
+        /// <returns></returns>
+        public static ushort ReadUnsignedShort(this IByteBuffer buffer, ref int remainingLength)
+        {
+            var val = buffer.ReadUnsignedShort();
+            remainingLength -= 2;
+            return val;
         }
 
         /// <summary>

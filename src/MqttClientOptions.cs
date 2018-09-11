@@ -21,7 +21,7 @@ namespace nMqtt
         /// </summary>
         public MqttClientCredentials Credentials { get; set; }
 
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromMinutes(60);
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
 
         public string Server { get; set; } = "localhost";
 

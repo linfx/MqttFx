@@ -48,7 +48,7 @@ namespace nMqtt.Packets
 
         public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
 
-        public virtual void Encode(IByteBuffer buffer) => FixedHeader.WriteTo(buffer);
+        public virtual void Encode(IByteBuffer buffer) { }
 
         public virtual void Decode(IByteBuffer buffer) { }
     }
@@ -62,6 +62,31 @@ namespace nMqtt.Packets
         /// 报文标识符
         /// </summary>
         public ushort PacketId { get; set; }
+
+        public override void Encode(IByteBuffer buffer)
+        {
+            var buf = Unpooled.Buffer();
+            try
+            {
+                buf.WriteUnsignedShort(PacketId);
+
+                FixedHeader.RemaingLength = buf.ReadableBytes;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+                buf = null;
+            }
+            finally
+            {
+                buf?.Release();
+            }
+        }
+
+        public override void Decode(IByteBuffer buffer)
+        {
+            int remainingLength = RemaingLength;
+            PacketId = buffer.ReadUnsignedShort(ref remainingLength);
+            FixedHeader.RemaingLength = remainingLength;
+        }
     }
 
     /// <summary>
@@ -88,7 +113,7 @@ namespace nMqtt.Packets
         /// <summary>
         /// 剩余长度
         /// </summary>
-        public int RemaingLength { get; set; }
+        public int RemaingLength { internal get; set; }
 
         public FixedHeader(PacketType packetType)
         {
@@ -117,7 +142,7 @@ namespace nMqtt.Packets
             buffer.WriteBytes(EncodeLength(RemaingLength));
         }
 
-        internal static byte[] EncodeLength(int length)
+        static byte[] EncodeLength(int length)
         {
             var result = new List<byte>();
             do
@@ -132,7 +157,7 @@ namespace nMqtt.Packets
             return result.ToArray();
         }
 
-        internal static int DecodeRemainingLength(IByteBuffer buffer)
+        static int DecodeRemainingLength(IByteBuffer buffer)
         {
             byte encodedByte;
             var multiplier = 1;

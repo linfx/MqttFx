@@ -3,6 +3,7 @@ using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using nMqtt.Packets;
+using nMqtt.Protocol;
 
 namespace nMqtt
 {
@@ -41,7 +42,28 @@ namespace nMqtt
                 return false;
             }
 
-            packet = MqttPacketFactory.CreatePacket(buffer);
+            var fixedHeader = new FixedHeader(buffer);
+            switch (fixedHeader.PacketType)
+            {
+                case PacketType.CONNECT: packet = new ConnectPacket(); break;
+                case PacketType.CONNACK: packet = new ConnAckPacket(); break;
+                case PacketType.DISCONNECT: packet = new DisconnectPacket(); break;
+                case PacketType.PINGREQ: packet = new PingReqPacket(); break;
+                case PacketType.PINGRESP: packet = new PingRespPacket(); break;
+                case PacketType.PUBACK: packet = new PubAckPacket(); break;
+                case PacketType.PUBCOMP: packet = new PubCompPacket(); break;
+                case PacketType.PUBLISH: packet = new PublishPacket(); break;
+                case PacketType.PUBREC: packet = new PubRecPacket(); break;
+                case PacketType.PUBREL: packet = new PubRelPacket(); break;
+                case PacketType.SUBSCRIBE: packet = new SubscribePacket(); break;
+                case PacketType.SUBACK: packet = new SubAckPacket(); break;
+                case PacketType.UNSUBSCRIBE: packet = new UnsubscribePacket(); break;
+                case PacketType.UNSUBACK: packet = new UnsubscribePacket(); break;
+                default:
+                    throw new DecoderException("Unsupported Message Type");
+            }
+            packet.FixedHeader = fixedHeader;
+            packet.Decode(buffer);
 
             return true;
         }

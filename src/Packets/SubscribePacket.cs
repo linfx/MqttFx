@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
+using DotNetty.Codecs;
 using nMqtt.Protocol;
 
 namespace nMqtt.Packets
@@ -15,7 +16,7 @@ namespace nMqtt.Packets
         /// </summary>
         IList<TopicQos> Topics = new List<TopicQos>();
 
-        public void Subscribe(string topic, MqttQos qos)
+        public void Add(string topic, MqttQos qos)
         {
             Topics.Add(new TopicQos
             {
@@ -65,20 +66,20 @@ namespace nMqtt.Packets
 
         public override void Decode(IByteBuffer buffer)
         {
-            PacketId = buffer.ReadUnsignedShort();
-            FixedHeader.RemaingLength -= 2;
+            base.Decode(buffer);
 
-            var returnCodes = new MqttQos[RemaingLength];
+            var returnCodes = new SubscribeReturnCode[RemaingLength];
             for (int i = 0; i < RemaingLength; i++)
             {
                 var returnCode = (SubscribeReturnCode)buffer.ReadByte();
-                //if (returnCode > SubscribeReturnCode.ExactlyOnce && returnCode != SubscribeReturnCode.Failure)
-                //{
-                //    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-                //}
-                //returnCodes[i] = returnCode;
+                if (returnCode > SubscribeReturnCode.SuccessMaximumQoS2 && returnCode != SubscribeReturnCode.Failure)
+                {
+                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
+                }
+                returnCodes[i] = returnCode;
             }
-            //ReturnCodes = returnCodes;
+            ReturnCodes = returnCodes;
+            FixedHeader.RemaingLength = 0;
         }
     }
 }

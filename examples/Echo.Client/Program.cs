@@ -1,9 +1,9 @@
-﻿using nMqtt;
-using nMqtt.Messages;
-using nMqtt.Protocol;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using nMqtt;
+using nMqtt.Messages;
+using nMqtt.Protocol;
 
 namespace Echo.Client
 {
@@ -21,9 +21,11 @@ namespace Echo.Client
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
                 //await client.SubscribeAsync("/World");
-                var msg = Encoding.UTF8.GetBytes("A");
-                await client.PublishAsync("/World", msg, MqttQos.AtLeastOnce);
-                await Task.Delay(1000);
+                //while (true)
+                //{
+                //    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("A"), MqttQos.AtLeastOnce);
+                //    await Task.Delay(1000);
+                //}
             }
             Console.ReadKey();
         }

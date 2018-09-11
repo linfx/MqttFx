@@ -135,10 +135,7 @@ namespace nMqtt
 
             if (packet is PubRelPacket pubRelPacket)
             {
-                return _clientChannel.WriteAndFlushAsync(new PubCompPacket
-                {
-                    PacketId = pubRelPacket.PacketId
-                });
+                return _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
             }
 
             _packetDispatcher.Dispatch(packet);
@@ -161,15 +158,9 @@ namespace nMqtt
                 case MqttQos.AtMostOnce:
                     return Task.CompletedTask;
                 case MqttQos.AtLeastOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubAckPacket
-                    {
-                        PacketId = publishPacket.PacketId
-                    });
+                    return _clientChannel.WriteAndFlushAsync(new PubAckPacket(publishPacket.PacketId));
                 case MqttQos.ExactlyOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubRecPacket
-                    {
-                        PacketId = publishPacket.PacketId
-                    });
+                    return _clientChannel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId));
                 default:
                     throw new Exception("Received a not supported QoS level.");
             }
@@ -230,7 +221,7 @@ namespace nMqtt
             {
                 PacketId = _packetIdentifierProvider.GetNewPacketIdentifier(),
             };
-            packet.Subscribe(topic, qos);
+            packet.Add(topic, qos);
             return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
         }
 

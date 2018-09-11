@@ -7,8 +7,6 @@ namespace nMqtt.Test
         [Fact]
         public void TestConnect()
         {
-            MqttClient client = new MqttClient();
-            client.ConnectAsync().Wait();
         }
     }
 }

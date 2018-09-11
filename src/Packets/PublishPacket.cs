@@ -58,7 +58,7 @@ namespace nMqtt.Packets
                 PacketId = buffer.ReadUnsignedShort();
 
             //playload
-            var len = FixedHeader.RemaingLength - (TopicName.Length + 2);
+            var len = RemaingLength - (TopicName.Length + 2);
             Payload = new byte[len];
             buffer.ReadBytes(Payload, 0, len);
         }
@@ -71,9 +71,9 @@ namespace nMqtt.Packets
     [PacketType(PacketType.PUBACK)]
     internal sealed class PubAckPacket : PacketWithId
     {
-        public PubAckPacket(ushort packetIdentifier = default)
+        public PubAckPacket(ushort packetId = default)
         {
-            PacketId = packetIdentifier;
+            PacketId = packetId;
         }
     }
 
@@ -84,9 +84,9 @@ namespace nMqtt.Packets
     [PacketType(PacketType.PUBREC)]
     internal sealed class PubRecPacket : PacketWithId
     {
-        public PubRecPacket(ushort packetIdentifier = default)
+        public PubRecPacket(ushort packetId = default)
         {
-            PacketId = packetIdentifier;
+            PacketId = packetId;
         }
     }
 
@@ -97,6 +97,10 @@ namespace nMqtt.Packets
     [PacketType(PacketType.PUBREL)]
     internal sealed class PubRelPacket : PacketWithId
     {
+        public PubRelPacket(ushort packetId = default)
+        {
+            PacketId = packetId;
+        }
     }
 
     /// <summary>
@@ -106,5 +110,9 @@ namespace nMqtt.Packets
     [PacketType(PacketType.PUBCOMP)]
     internal sealed class PubCompPacket : PacketWithId
     {
+        public PubCompPacket(ushort packetId = default)
+        {
+            PacketId = packetId;
+        }
     }
 }

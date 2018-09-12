@@ -120,15 +120,13 @@ namespace nMqtt.Packets
             PacketType = packetType;
         }
 
-        public FixedHeader(IByteBuffer buffer)
+        public FixedHeader(byte signature, int remainingLength)
         {
-            var byte1 = buffer.ReadByte();
-            PacketType = (PacketType)((byte1 & 0xf0) >> 4);
-            Dup = ((byte1 & 0x08) >> 3) > 0;
-            Qos = (MqttQos)((byte1 & 0x06) >> 1);
-            Retain = (byte1 & 0x01) > 0;
-
-            RemaingLength = DecodeRemainingLength(buffer);
+            PacketType = (PacketType)((signature & 0xf0) >> 4);
+            Dup = ((signature & 0x08) >> 3) > 0;
+            Qos = (MqttQos)((signature & 0x06) >> 1);
+            Retain = (signature & 0x01) > 0;
+            RemaingLength = remainingLength;
         }
 
         public void WriteTo(IByteBuffer buffer)
@@ -155,21 +153,6 @@ namespace nMqtt.Packets
             } while (length > 0);
 
             return result.ToArray();
-        }
-
-        static int DecodeRemainingLength(IByteBuffer buffer)
-        {
-            byte encodedByte;
-            var multiplier = 1;
-            var remainingLength = 0;
-            do
-            {
-                encodedByte = buffer.ReadByte();
-                remainingLength += (encodedByte & 0x7f) * multiplier;
-                multiplier *= 0x80;
-            } while ((encodedByte & 0x80) != 0);
-
-            return remainingLength;
         }
     }
 }

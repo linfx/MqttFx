@@ -5,6 +5,10 @@
     <AssemblyName>nMqtt</AssemblyName>
     <RootNamespace>nMqtt</RootNamespace>
     <Version>2.1.0</Version>
+    <Authors>linfx</Authors>
+    <Company />
+    <Description>Mqtt Client,   using Dotnetty</Description>
+    <PackageProjectUrl>https://github.com/linfx/nMqtt</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

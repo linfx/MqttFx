@@ -1,6 +1,9 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace nMqtt
 {
@@ -72,9 +75,8 @@ namespace nMqtt
         /// <returns></returns>
         public static ushort ReadUnsignedShort(this IByteBuffer buffer, ref int remainingLength)
         {
-            var val = buffer.ReadUnsignedShort();
-            remainingLength -= 2;
-            return val;
+            DecreaseRemainingLength(ref remainingLength, 2);
+            return buffer.ReadUnsignedShort(); ;
         }
 
         /// <summary>
@@ -118,39 +120,31 @@ namespace nMqtt
         /// <summary>
         /// 读取字符串
         /// </summary>
-        /// <param name="buffer"></param>
         /// <returns></returns>
-        public static string ReadString(this IByteBuffer buffer)
+        public static string ReadString(this IByteBuffer buffer, ref int remainingLength)
         {
-            // read and check the length
-            var lengthBytes = new byte[2];
-            var bytesRead = buffer.ReadBytes(lengthBytes, 0, 2);
-            //if (bytesRead < 2)
+            int size = ReadUnsignedShort(buffer, ref remainingLength);
+
+            //if (size < minBytes)
             //{
-            //    throw new ArgumentException(
-            //        "The stream did not have enough bytes to describe the length of the string",
-            //        "stringStream");
+            //    throw new DecoderException($"String value is shorter than minimum allowed {minBytes}. Advertised length: {size}");
+            //}
+            //if (size > maxBytes)
+            //{
+            //    throw new DecoderException($"String value is longer than maximum allowed {maxBytes}. Advertised length: {size}");
             //}
 
-            var enc = new MqttEncoding();
-            var stringLength = (ushort)enc.GetCharCount(lengthBytes);
+            if (size == 0)
+            {
+                return string.Empty;
+            }
 
-            // read the bytes from the string, validate we have enough etc.
-            var stringBytes = new byte[stringLength];
-            var readBuffer = new byte[1 << 10]; // 1KB read buffer
-            //var totalRead = 0;
+            DecreaseRemainingLength(ref remainingLength, size);
 
-            // Keep reading until we have all. Intentionally synchronous
-            //while (totalRead < stringLength)
-            //{
-            //    var remainingBytes = stringLength - totalRead;
-            //    var nextReadSize = remainingBytes > readBuffer.Length ? readBuffer.Length : remainingBytes;
-            //    bytesRead = buffer.Read(readBuffer, 0, nextReadSize);
-            //    Array.Copy(readBuffer, 0, stringBytes, totalRead, bytesRead);
-            //    totalRead += bytesRead;
-            //}
+            var value = buffer.ToString(buffer.ReaderIndex, size, Encoding.UTF8);
+            buffer.SetReaderIndex(buffer.ReaderIndex + size);
 
-            return enc.GetString(stringBytes);
+            return value;
         }
 
         /// <summary>
@@ -161,6 +155,16 @@ namespace nMqtt
         public static byte ToByte(this bool input)
         {
             return input ? (byte)1 : (byte)0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] // we don't care about the method being on exception's stack so it's OK to inline
+        static void DecreaseRemainingLength(ref int remainingLength, int minExpectedLength)
+        {
+            if (remainingLength < minExpectedLength)
+            {
+                throw new DecoderException($"Current Remaining Length of {remainingLength} is smaller than expected {minExpectedLength}.");
+            }
+            remainingLength -= minExpectedLength;
         }
     }
 }

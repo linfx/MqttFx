@@ -52,15 +52,22 @@ namespace nMqtt.Packets
 
         public override void Decode(IByteBuffer buffer)
         {
+            int remainingLength = RemaingLength;
+
             //variable header
-            TopicName = buffer.ReadString();
+            TopicName = buffer.ReadString(ref remainingLength);
             if (Qos == MqttQos.AtLeastOnce || Qos == MqttQos.ExactlyOnce)
-                PacketId = buffer.ReadUnsignedShort();
+                PacketId = buffer.ReadUnsignedShort(ref remainingLength);
 
             //playload
-            var len = RemaingLength - (TopicName.Length + 2);
-            Payload = new byte[len];
-            buffer.ReadBytes(Payload, 0, len);
+            if (remainingLength > 0)
+            {
+                Payload = new byte[remainingLength];
+                buffer.ReadBytes(Payload, 0, remainingLength);
+                remainingLength = 0;
+            }
+
+            FixedHeader.RemaingLength = remainingLength;
         }
     }
 

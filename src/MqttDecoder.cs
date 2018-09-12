@@ -42,7 +42,15 @@ namespace nMqtt
                 return false;
             }
 
-            var fixedHeader = new FixedHeader(buffer);
+            byte signature = buffer.ReadByte();
+
+            if (!TryDecodeRemainingLength(buffer, out int remainingLength) || !buffer.IsReadable(remainingLength))
+            {
+                packet = null;
+                return false;
+            }
+
+            var fixedHeader = new FixedHeader(signature, remainingLength);
             switch (fixedHeader.PacketType)
             {
                 case PacketType.CONNECT: packet = new ConnectPacket(); break;
@@ -67,5 +75,57 @@ namespace nMqtt
 
             return true;
         }
+
+        bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
+        {
+            int readable = buffer.ReadableBytes;
+
+            int result = 0;
+            int multiplier = 1;
+            byte digit;
+            int read = 0;
+            do
+            {
+                if (readable < read + 1)
+                {
+                    value = default(int);
+                    return false;
+                }
+                digit = buffer.ReadByte();
+                result += (digit & 0x7f) * multiplier;
+                multiplier <<= 7;
+                read++;
+            }
+            while ((digit & 0x80) != 0 && read < 4);
+
+            if (read == 4 && (digit & 0x80) != 0)
+            {
+                throw new DecoderException("Remaining length exceeds 4 bytes in length");
+            }
+
+            int completeMessageSize = result + 1 + read;
+            if (completeMessageSize > _maxMessageSize)
+            {
+                throw new DecoderException("Message is too big: " + completeMessageSize);
+            }
+
+            value = result;
+            return true;
+        }
+
+        //static int DecodeRemainingLength(IByteBuffer buffer)
+        //{
+        //    byte encodedByte;
+        //    var multiplier = 1;
+        //    var remainingLength = 0;
+        //    do
+        //    {
+        //        encodedByte = buffer.ReadByte();
+        //        remainingLength += (encodedByte & 0x7f) * multiplier;
+        //        multiplier *= 0x80;
+        //    } while ((encodedByte & 0x80) != 0);
+
+        //    return remainingLength;
+        //}
     }
 }

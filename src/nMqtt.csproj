@@ -9,6 +9,7 @@
     <Company />
     <Description>Mqtt Client,   using Dotnetty</Description>
     <PackageProjectUrl>https://github.com/linfx/nMqtt</PackageProjectUrl>
+    <PackageId>nMqtt2</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

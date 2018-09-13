@@ -33,10 +33,7 @@ namespace nMqtt.Packets
             try
             {
                 buf.WriteString(TopicName);
-                if (Qos > MqttQos.AtMostOnce)
-                {
-                    buf.WriteUnsignedShort(PacketId);
-                }
+                EncodePacketId(buf);
                 buf.WriteBytes(Payload, 0, Payload.Length);
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
@@ -56,8 +53,7 @@ namespace nMqtt.Packets
 
             //variable header
             TopicName = buffer.ReadString(ref remainingLength);
-            if (Qos == MqttQos.AtLeastOnce || Qos == MqttQos.ExactlyOnce)
-                PacketId = buffer.ReadUnsignedShort(ref remainingLength);
+            DecodePacketId(buffer, ref remainingLength);
 
             //playload
             if (remainingLength > 0)

@@ -97,6 +97,14 @@ namespace nMqtt
                 packet.UserName = _options.Credentials.Username;
                 packet.Password = _options.Credentials.Username;
             }
+            if(_options.WillMessage != null)
+            {
+                packet.WillFlag = true;
+                packet.WillQos = _options.WillMessage.Qos;
+                packet.WillRetain = _options.WillMessage.Retain;
+                packet.WillTopic = _options.WillMessage.Topic;
+                packet.WillMessage = _options.WillMessage.Payload;
+            }
             return SendAndReceiveAsync<ConnAckPacket>(packet, cancellationToken);
         }
 
@@ -118,29 +126,25 @@ namespace nMqtt
 
         private Task ProcessReceivedPacketAsync(Packet packet)
         {
-            if (packet is PublishPacket publishPacket)
-            {
-                return ProcessReceivedPublishPacketAsync(publishPacket);
-            }
-
-            if(packet is PingReqPacket)
-            {
+            if (packet is PingReqPacket)
                 return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
-            }
 
-            if(packet is DisconnectPacket)
-            {
+            if (packet is DisconnectPacket)
                 return DisconnectAsync();
-            }
+
+            if (packet is PubAckPacket)
+                return Task.CompletedTask;
+
+            if (packet is PublishPacket publishPacket)
+                return ProcessReceivedPublishPacketAsync(publishPacket);
+
+            if (packet is PubRecPacket pubRecPacket)
+                return _clientChannel.WriteAndFlushAsync(new PubRelPacket(pubRecPacket.PacketId));
 
             if (packet is PubRelPacket pubRelPacket)
-            {
                 return _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
-            }
 
-            _packetDispatcher.Dispatch(packet);
-
-            return Task.CompletedTask;
+            return _packetDispatcher.Dispatch(packet);
         }
 
         private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
@@ -203,10 +207,12 @@ namespace nMqtt
         {
             var packet = new PublishPacket(qos)
             {
-                PacketId = _packetIdentifierProvider.GetNewPacketId(),
                 TopicName = topic,
                 Payload = payload
             };
+            if(qos > MqttQos.AtMostOnce)
+                packet.PacketId = _packetIdentifierProvider.GetNewPacketId();
+
             return _clientChannel.WriteAndFlushAsync(packet);
         }
 
@@ -215,13 +221,14 @@ namespace nMqtt
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
-        public Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
+        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
         {
             var packet = new SubscribePacket
             {
                 PacketId = _packetIdentifierProvider.GetNewPacketId(),
             };
             packet.Add(topic, qos);
+
             return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
         }
 
@@ -229,11 +236,12 @@ namespace nMqtt
         /// 取消订阅
         /// </summary>
         /// <param name="topics">主题</param>
-        public Task UnsubscribeAsync(params string[] topics)
+        public Task<UnsubscribeAckMessage> UnsubscribeAsync(params string[] topics)
         {
             var packet = new UnsubscribePacket();
             packet.AddRange(topics);
-            return _clientChannel.WriteAndFlushAsync(packet);
+
+            return SendAndReceiveAsync<UnsubscribeAckMessage>(packet, _cancellationTokenSource.Token); ;
         }
 
         /// <summary>

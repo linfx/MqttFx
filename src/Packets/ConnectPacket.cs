@@ -66,7 +66,7 @@ namespace nMqtt.Packets
         /// <summary>
         /// 遗嘱消息 Will Message
         /// </summary>
-        public string WillMessage { get; set; }
+        public byte[] WillMessage { get; set; }
         /// <summary>
         /// 用户名 User Name
         /// </summary>
@@ -104,7 +104,7 @@ namespace nMqtt.Packets
                 if (WillFlag)
                 {
                     buf.WriteString(WillTopic);
-                    buf.WriteString(WillMessage);
+                    buf.WriteBytes(WillMessage);
                 }
                 if (UsernameFlag && PasswordFlag)
                 {

@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using nMqtt.Protocol;
 using System;
 using System.Collections.Generic;
@@ -63,12 +64,16 @@ namespace nMqtt.Packets
         /// </summary>
         public ushort PacketId { get; set; }
 
+        /// <summary>
+        /// EncodePacketIdVariableHeader
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteUnsignedShort(PacketId);
+                EncodePacketId(buf);
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
@@ -81,11 +86,33 @@ namespace nMqtt.Packets
             }
         }
 
+        /// <summary>
+        /// DecodePacketIdVariableHeader
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
             int remainingLength = RemaingLength;
-            PacketId = buffer.ReadUnsignedShort(ref remainingLength);
+            DecodePacketId(buffer, ref remainingLength);
             FixedHeader.RemaingLength = remainingLength;
+        }
+
+        protected void EncodePacketId(IByteBuffer buffer)
+        {
+            if (Qos > MqttQos.AtMostOnce)
+            {
+                buffer.WriteUnsignedShort(PacketId);
+            }
+        }
+
+        protected void DecodePacketId(IByteBuffer buffer, ref int remainingLength)
+        {
+            if (Qos > MqttQos.AtMostOnce)
+            {
+                PacketId = buffer.ReadUnsignedShort(ref remainingLength);
+                if (PacketId == 0)
+                    throw new DecoderException("[MQTT-2.3.1-1]");
+            }
         }
     }
 

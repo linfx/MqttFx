@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nMqtt.Messages;
+using System;
 
 namespace nMqtt
 {
@@ -20,6 +21,10 @@ namespace nMqtt
         /// 案例凭证
         /// </summary>
         public MqttClientCredentials Credentials { get; set; }
+        /// <summary>
+        /// 遗嘱主题
+        /// </summary>
+        public Message WillMessage { get; set; }
 
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
 

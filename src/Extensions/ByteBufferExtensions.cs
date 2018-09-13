@@ -49,7 +49,7 @@ namespace nMqtt
         /// <param name="value">The string to write.</param>
         public static void WriteString(this IByteBuffer buffer, string value)
         {
-            byte[] stringBytes = System.Text.Encoding.UTF8.GetBytes(value);
+            byte[] stringBytes = Encoding.UTF8.GetBytes(value);
             buffer.WriteShort(stringBytes.Length);
             buffer.WriteBytes(stringBytes, 0, stringBytes.Length);
         }

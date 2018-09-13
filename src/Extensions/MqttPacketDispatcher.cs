@@ -18,14 +18,14 @@ namespace nMqtt.Extensions
             _awaiters.Clear();
         }
 
-        public void Dispatch(Packet packet)
+        public Task Dispatch(Packet packet)
         {
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 
             ushort identifier = 0;
-            if (packet is PacketWithId packetWithIdentifier)
+            if (packet is PacketWithId packetWithId)
             {
-                identifier = packetWithIdentifier.PacketId;
+                identifier = packetWithId.PacketId;
             }
 
             var type = packet.GetType();
@@ -33,8 +33,7 @@ namespace nMqtt.Extensions
 
             if (_awaiters.TryRemove(key, out var awaiter))
             {
-                Task.Run(() => awaiter.TrySetResult(packet)); // Task.Run fixes a dead lock. Without this the client only receives one message.
-                return;
+                return Task.Run(() => awaiter.TrySetResult(packet)); // Task.Run fixes a dead lock. Without this the client only receives one message.
             }
 
             throw new InvalidOperationException($"Packet of type '{type.Name}' not handled or dispatched.");

@@ -21,11 +21,11 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                await client.SubscribeAsync("/World");
+                //await client.SubscribeAsync("/World");
                 while (true)
                 {
                     await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtMostOnce);
-                    await Task.Delay(1000);
+                    await Task.Delay(2000);
                 }
             }
             Console.ReadKey();

@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
-using nMqtt.Protocol;
 
 namespace nMqtt.Packets
 {
     /// <summary>
     /// 取消订阅
     /// </summary>
-    [PacketType(PacketType.UNSUBSCRIBE)]
     public sealed class UnsubscribePacket : PacketWithId
     {
         List<string> _topics = new List<string>();
@@ -44,7 +42,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    [PacketType(PacketType.UNSUBACK)]
     public sealed class UnsubscribeAckMessage : Packet
     {
     }

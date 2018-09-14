@@ -6,7 +6,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 发起连接
     /// </summary>
-    [PacketType(PacketType.CONNECT)]
     internal sealed class ConnectPacket : Packet
     {
         #region Variable header
@@ -127,7 +126,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 连接回执
     /// </summary>
-    [PacketType(PacketType.CONNACK)]
     internal sealed class ConnAckPacket : Packet
     {
         /// <summary>

@@ -10,6 +10,12 @@
             return this;
         }
 
+        public MqttClientOptionsBuilder WithClientId(string clientId)
+        {
+            _options.ClientId = clientId;
+            return this;
+        }
+
         public MqttClientOptionsBuilder WithCredentials(string username, string password = default)
         {
             _options.Credentials = new MqttClientCredentials

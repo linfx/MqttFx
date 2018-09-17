@@ -13,6 +13,8 @@ namespace Echo.Client
         {
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer("118.126.96.166")
+                //.WithClientId("nmqtt_client")
+                //.WithCredentials("linfx", "123456")
                 .Build();
 
             var client = new MqttClient(options);
@@ -21,12 +23,12 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                //await client.SubscribeAsync("/World");
-                while (true)
-                {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtMostOnce);
-                    await Task.Delay(2000);
-                }
+                await client.SubscribeAsync("/World2");
+                //while (true)
+                //{
+                //    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtMostOnce);
+                //    await Task.Delay(2000);
+                //}
             }
             Console.ReadKey();
         }

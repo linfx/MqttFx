@@ -1,8 +1,8 @@
-﻿using DotNetty.Buffers;
+﻿using System.Collections.Generic;
+using DotNetty.Buffers;
 using DotNetty.Codecs;
+using nMqtt.Extensions;
 using nMqtt.Protocol;
-using System;
-using System.Collections.Generic;
 
 namespace nMqtt.Packets
 {
@@ -43,8 +43,8 @@ namespace nMqtt.Packets
 
         public Packet()
         {
-            var att = (PacketTypeAttribute)Attribute.GetCustomAttribute(GetType(), typeof(PacketTypeAttribute));
-            FixedHeader = new FixedHeader(att.PacketType);
+            var packetType = MqttPacketTypeProvider.GetPacketType(GetType());
+            FixedHeader = new FixedHeader(packetType);
         }
 
         public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
@@ -52,6 +52,8 @@ namespace nMqtt.Packets
         public virtual void Encode(IByteBuffer buffer) { }
 
         public virtual void Decode(IByteBuffer buffer) { }
+
+
     }
 
     /// <summary>

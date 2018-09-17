@@ -8,7 +8,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 订阅主题
     /// </summary>
-    [PacketType(PacketType.SUBSCRIBE)]
     public sealed class SubscribePacket : PacketWithId
     {
         /// <summary>
@@ -59,7 +58,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 订阅回执
     /// </summary>
-    [PacketType(PacketType.SUBACK)]
     public class SubAckPacket : PacketWithId
     {
         public IReadOnlyList<SubscribeReturnCode> ReturnCodes { get; set; }

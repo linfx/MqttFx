@@ -6,7 +6,6 @@ namespace nMqtt.Packets
     /// <summary>
     /// 发布消息
     /// </summary>
-    [PacketType(PacketType.PUBLISH)]
     internal sealed class PublishPacket : PacketWithId
     {
         /// <summary>
@@ -18,7 +17,7 @@ namespace nMqtt.Packets
         /// </summary>
         public byte[] Payload { get; set; }
 
-        internal PublishPacket() { }
+        public PublishPacket() { }
 
         public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
         {
@@ -71,7 +70,6 @@ namespace nMqtt.Packets
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    [PacketType(PacketType.PUBACK)]
     internal sealed class PubAckPacket : PacketWithId
     {
         public PubAckPacket(ushort packetId = default)
@@ -84,7 +82,6 @@ namespace nMqtt.Packets
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    [PacketType(PacketType.PUBREC)]
     internal sealed class PubRecPacket : PacketWithId
     {
         public PubRecPacket(ushort packetId = default)
@@ -97,7 +94,6 @@ namespace nMqtt.Packets
     /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
-    [PacketType(PacketType.PUBREL)]
     internal sealed class PubRelPacket : PacketWithId
     {
         public PubRelPacket(ushort packetId = default)
@@ -110,7 +106,6 @@ namespace nMqtt.Packets
     /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
-    [PacketType(PacketType.PUBCOMP)]
     internal sealed class PubCompPacket : PacketWithId
     {
         public PubCompPacket(ushort packetId = default)

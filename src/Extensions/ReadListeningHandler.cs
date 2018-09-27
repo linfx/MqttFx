@@ -15,7 +15,7 @@ namespace nMqtt
         volatile Exception registeredException;
 
         public ReadListeningHandler()
-            : this(TimeSpan.Zero)
+            : this(TimeSpan.FromSeconds(30))
         {
         }
 
@@ -51,7 +51,6 @@ namespace nMqtt
         void SetException(Exception exception)
         {
             registeredException = exception;
-
             lock (_gate)
             {
                 while (_readPromises.Count > 0)
@@ -71,9 +70,7 @@ namespace nMqtt
             lock (_gate)
             {
                 if (_receivedQueue.Count > 0)
-                {
                     return _receivedQueue.Dequeue();
-                }
 
                 _readPromises.Enqueue(promise);
             }

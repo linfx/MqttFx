@@ -17,7 +17,6 @@ namespace nMqtt.Packets
         /// 固定报头
         /// </summary>
         public FixedHeader FixedHeader { protected get; set; }
-
         /// <summary>
         /// 报文类型
         /// </summary>
@@ -52,8 +51,6 @@ namespace nMqtt.Packets
         public virtual void Encode(IByteBuffer buffer) { }
 
         public virtual void Decode(IByteBuffer buffer) { }
-
-
     }
 
     /// <summary>

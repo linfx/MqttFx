@@ -11,6 +11,7 @@ using nMqtt.Messages;
 using nMqtt.Packets;
 using nMqtt.Protocol;
 using nMqtt.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace nMqtt
 {
@@ -32,14 +33,14 @@ namespace nMqtt
         public Action OnDisconnected;
         public Action<Message> OnMessageReceived;
 
-        public MqttClient(MqttClientOptions options,
+        public MqttClient(IOptions<MqttClientOptions> options,
             ILogger<MqttClient> logger = default)
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
             _packetIdentifierProvider = new MqttPacketIdProvider();
             _packetDispatcher = new MqttPacketDispatcher();
-            _options = options;
+            _options = options.Value;
         }
 
         /// <summary>

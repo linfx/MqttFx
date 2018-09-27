@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using nMqtt;
 using nMqtt.Messages;
 using nMqtt.Protocol;
@@ -11,13 +12,21 @@ namespace Echo.Client
     {
         static async Task Main(string[] args)
         {
-            var options = new MqttClientOptionsBuilder()
-                .WithTcpServer("118.126.96.166")
-                //.WithClientId("nmqtt_client")
-                //.WithCredentials("linfx", "123456")
-                .Build();
+            //var options = new MqttClientOptionsBuilder()
+            //    .WithTcpServer("118.126.96.166")
+            //    .WithClientId("nmqtt_client")
+            //    .WithCredentials("linfx", "123456")
+            //    .Build();
 
-            var client = new MqttClient(options);
+            var services = new ServiceCollection();
+            services.AddMqttClient(options =>
+            {
+                options.Server = "118.126.96.166";
+                options.ClientId = "nmqtt_client";
+            });
+            var container = services.BuildServiceProvider();
+
+            var client = container.GetService<MqttClient>();
             client.OnConnected += Connected;
             client.OnDisconnected += Disconnected;
             client.OnMessageReceived += MessageReceived;

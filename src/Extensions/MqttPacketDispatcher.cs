@@ -5,7 +5,7 @@ using nMqtt.Packets;
 
 namespace nMqtt.Extensions
 {
-    public class MqttPacketDispatcher
+    internal class MqttPacketDispatcher
     {
         readonly ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>> _awaiters = new ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>>();
 

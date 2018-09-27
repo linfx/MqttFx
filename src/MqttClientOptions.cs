@@ -25,11 +25,17 @@ namespace nMqtt
         /// 遗嘱主题
         /// </summary>
         public Message WillMessage { get; set; }
-
+        /// <summary>
+        /// 响应超时
+        /// </summary>
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
-
+        /// <summary>
+        /// 服务器
+        /// </summary>
         public string Server { get; set; } = "localhost";
-
+        /// <summary>
+        /// 端口
+        /// </summary>
         public int Port { get; set; } = 1883;
     }
 }

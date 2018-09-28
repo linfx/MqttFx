@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nMqtt.Protocol
+namespace MqttFx.Protocol
 {
     /// <summary>
     /// 服务质量等级

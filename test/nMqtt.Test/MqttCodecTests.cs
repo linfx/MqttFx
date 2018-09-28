@@ -1,10 +1,10 @@
 ﻿//using DotNetty.Buffers;
-//using nMqtt.Packets;
-//using nMqtt.Protocol;
+//using MqttFx.Packets;
+//using MqttFx.Protocol;
 //using System.Collections.Generic;
 //using Xunit;
 
-//namespace nMqtt.Test
+//namespace MqttFx.Test
 //{
 //    public class MqttCodecTests
 //    {

@@ -2,9 +2,9 @@
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using nMqtt;
-using nMqtt.Messages;
-using nMqtt.Protocol;
+using MqttFx;
+using MqttFx.Messages;
+using MqttFx.Protocol;
 
 namespace Echo.Client
 {

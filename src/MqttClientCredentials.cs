@@ -1,4 +1,4 @@
-﻿namespace nMqtt
+﻿namespace MqttFx
 {
     public class MqttClientCredentials
     {

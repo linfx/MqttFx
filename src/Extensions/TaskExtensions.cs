@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace nMqtt.Extensions
+namespace MqttFx.Extensions
 {
     public static class TaskExtensions
     {

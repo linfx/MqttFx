@@ -1,7 +1,7 @@
-﻿using nMqtt.Messages;
+﻿using MqttFx.Messages;
 using System;
 
-namespace nMqtt
+namespace MqttFx
 {
     public class MqttClientOptions
     {

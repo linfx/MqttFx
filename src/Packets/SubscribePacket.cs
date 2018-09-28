@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using nMqtt.Protocol;
+using MqttFx.Protocol;
 
-namespace nMqtt.Packets
+namespace MqttFx.Packets
 {
     /// <summary>
     /// 订阅主题

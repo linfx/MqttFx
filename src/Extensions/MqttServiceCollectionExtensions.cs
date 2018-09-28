@@ -1,5 +1,5 @@
 ﻿using System;
-using nMqtt;
+using MqttFx;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

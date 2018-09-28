@@ -3,10 +3,10 @@ using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
-using nMqtt.Packets;
-using nMqtt.Protocol;
+using MqttFx.Packets;
+using MqttFx.Protocol;
 
-namespace nMqtt
+namespace MqttFx
 {
     public sealed class MqttEncoder : MessageToMessageEncoder<Packet>
     {

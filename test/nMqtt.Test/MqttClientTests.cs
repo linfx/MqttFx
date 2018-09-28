@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace nMqtt.Test
+namespace MqttFx.Test
 {
     public class MqttClientTests
     {

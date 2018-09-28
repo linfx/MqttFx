@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using nMqtt.Extensions;
-using nMqtt.Protocol;
+using MqttFx.Extensions;
+using MqttFx.Protocol;
 
-namespace nMqtt.Packets
+namespace MqttFx.Packets
 {
     /// <summary>
     /// 消息基类

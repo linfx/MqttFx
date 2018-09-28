@@ -1,4 +1,4 @@
-﻿namespace nMqtt.Packets
+﻿namespace MqttFx.Packets
 {
     /// <summary>
     /// 断开连接

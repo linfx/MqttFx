@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nMqtt", "src\nMqtt.csproj", "{E1D3BB74-AD3D-4034-9969-C719F466AEC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttFx", "src\MqttFx.csproj", "{E1D3BB74-AD3D-4034-9969-C719F466AEC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nMqtt.Test", "test\nMqtt.Test\nMqtt.Test.csproj", "{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttFx.Test", "test\nMqtt.Test\MqttFx.Test.csproj", "{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echo.Client", "examples\Echo.Client\Echo.Client.csproj", "{F657D758-2730-44FE-B58D-D41816F90B60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Echo.Client", "examples\Echo.Client\Echo.Client.csproj", "{F657D758-2730-44FE-B58D-D41816F90B60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

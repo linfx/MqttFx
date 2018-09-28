@@ -1,6 +1,6 @@
-﻿using nMqtt.Protocol;
+﻿using MqttFx.Protocol;
 
-namespace nMqtt.Messages
+namespace MqttFx.Messages
 {
     public class Message
     {

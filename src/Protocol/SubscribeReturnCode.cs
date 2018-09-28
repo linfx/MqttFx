@@ -1,4 +1,4 @@
-﻿namespace nMqtt.Protocol
+﻿namespace MqttFx.Protocol
 {
     public enum SubscribeReturnCode
     {

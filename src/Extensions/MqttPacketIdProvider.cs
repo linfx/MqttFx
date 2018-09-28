@@ -1,4 +1,4 @@
-﻿namespace nMqtt.Extensions
+﻿namespace MqttFx.Extensions
 {
     public class MqttPacketIdProvider
     {

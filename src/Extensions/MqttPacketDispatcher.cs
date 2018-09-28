@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using nMqtt.Packets;
+using MqttFx.Packets;
 
-namespace nMqtt.Extensions
+namespace MqttFx.Extensions
 {
     internal class MqttPacketDispatcher
     {

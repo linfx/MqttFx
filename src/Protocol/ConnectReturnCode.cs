@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nMqtt.Protocol
+namespace MqttFx.Protocol
 {
     /// <summary>
     /// 连接返回码

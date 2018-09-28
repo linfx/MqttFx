@@ -2,10 +2,10 @@
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
-using nMqtt.Packets;
-using nMqtt.Protocol;
+using MqttFx.Packets;
+using MqttFx.Protocol;
 
-namespace nMqtt
+namespace MqttFx
 {
     public sealed class MqttDecoder : ByteToMessageDecoder
     {

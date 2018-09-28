@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using nMqtt.Packets;
-using nMqtt.Protocol;
+using MqttFx.Packets;
+using MqttFx.Protocol;
 
-namespace nMqtt.Extensions
+namespace MqttFx.Extensions
 {
     public class MqttPacketTypeProvider
     {

@@ -1,7 +1,7 @@
 ﻿using DotNetty.Buffers;
-using nMqtt.Protocol;
+using MqttFx.Protocol;
 
-namespace nMqtt.Packets
+namespace MqttFx.Packets
 {
     /// <summary>
     /// 发起连接

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nMqtt.Protocol
+namespace MqttFx.Protocol
 {
     /// <summary>
     /// 报文类型

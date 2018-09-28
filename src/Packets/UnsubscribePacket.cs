@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 
-namespace nMqtt.Packets
+namespace MqttFx.Packets
 {
     /// <summary>
     /// 取消订阅

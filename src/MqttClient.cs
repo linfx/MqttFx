@@ -7,13 +7,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels.Sockets;
-using nMqtt.Messages;
-using nMqtt.Packets;
-using nMqtt.Protocol;
-using nMqtt.Extensions;
+using MqttFx.Messages;
+using MqttFx.Packets;
+using MqttFx.Protocol;
+using MqttFx.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace nMqtt
+namespace MqttFx
 {
     /// <summary>
     /// Mqtt客户端

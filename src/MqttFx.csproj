@@ -2,14 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>nMqtt</AssemblyName>
-    <RootNamespace>nMqtt</RootNamespace>
+    <AssemblyName>MqttFx</AssemblyName>
+    <RootNamespace>MqttFx</RootNamespace>
     <Version>0.0.1</Version>
     <Authors>linfx</Authors>
     <Company />
     <Description>Mqtt Client,   using Dotnetty</Description>
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
     <PackageId>MqttFx</PackageId>
+    <Product>MqttFx</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

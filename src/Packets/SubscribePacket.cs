@@ -60,6 +60,9 @@ namespace MqttFx.Packets
     /// </summary>
     public class SubAckPacket : PacketWithId
     {
+        /// <summary>
+        /// 返回代码
+        /// </summary>
         public IReadOnlyList<SubscribeReturnCode> ReturnCodes { get; set; }
 
         public override void Decode(IByteBuffer buffer)

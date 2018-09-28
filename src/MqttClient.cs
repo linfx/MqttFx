@@ -12,6 +12,7 @@ using MqttFx.Packets;
 using MqttFx.Protocol;
 using MqttFx.Extensions;
 using Microsoft.Extensions.Options;
+using MqttFx.Exceptions;
 
 namespace MqttFx
 {
@@ -127,6 +128,8 @@ namespace MqttFx
 
         private Task ProcessReceivedPacketAsync(Packet packet)
         {
+            _logger.LogInformation("ProcessReceivedPacketAsync:" + packet.PacketType);
+
             if (packet is PingReqPacket)
                 return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
 
@@ -181,12 +184,36 @@ namespace MqttFx
                 identifier = packetWithId.PacketId;
             }
 
-            var packetAwaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
+            var awaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
             try
             {
                 await _clientChannel.WriteAndFlushAsync(requestPacket);
-                var respone = await Extensions.TaskExtensions.TimeoutAfterAsync(ct => packetAwaiter.Task, _options.Timeout, cancellationToken);
-                return (TResponsePacket)respone;
+                //var respone = await Extensions.TaskExtensions.TimeoutAfterAsync(ct => packetAwaiter.Task, _options.Timeout, cancellationToken);
+                //return (TResponsePacket)respone;
+
+                using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
+                {
+                    linkedCts.Token.Register(() =>
+                    {
+                        if (!awaiter.Task.IsCompleted && !awaiter.Task.IsFaulted && !awaiter.Task.IsCanceled)
+                            awaiter.TrySetCanceled();
+                    });
+
+                    try
+                    {
+                        var result = await awaiter.Task.ConfigureAwait(false);
+                        timeoutCts.Cancel(false);
+                        return (TResponsePacket)result;
+                    }
+                    catch (OperationCanceledException exception)
+                    {
+                        if (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                            throw new MqttTimeoutException(exception);
+                        else
+                            throw;
+                    }
+                }
             }
             catch (Exception)
             {

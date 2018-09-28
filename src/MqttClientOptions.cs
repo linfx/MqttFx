@@ -8,7 +8,7 @@ namespace MqttFx
         /// <summary>
         /// 客户端标识
         /// </summary>
-        public string ClientId { get; set; } = Guid.NewGuid().ToString("N");
+        public string ClientId { get; set; } = $"MqttFx_{Guid.NewGuid().GetHashCode() & ushort.MaxValue}";
         /// <summary>
         /// 清除标识
         /// </summary>
@@ -28,7 +28,7 @@ namespace MqttFx
         /// <summary>
         /// 响应超时
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
         /// <summary>
         /// 服务器
         /// </summary>

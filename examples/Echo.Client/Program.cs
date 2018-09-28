@@ -22,7 +22,6 @@ namespace Echo.Client
             services.AddMqttClient(options =>
             {
                 options.Server = "118.126.96.166";
-                options.ClientId = "nmqtt_client";
             });
             var container = services.BuildServiceProvider();
 
@@ -32,7 +31,11 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                await client.SubscribeAsync("/World2");
+                var top = "/World";
+                Console.WriteLine("Subscribe:" + top);
+                Console.Write("SubscribeReturnCode: ");
+                var r = await client.SubscribeAsync(top);
+                Console.WriteLine(r.ReturnCodes);
                 //while (true)
                 //{
                 //    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtMostOnce);

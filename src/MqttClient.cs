@@ -12,7 +12,6 @@ using MqttFx.Packets;
 using MqttFx.Protocol;
 using MqttFx.Extensions;
 using Microsoft.Extensions.Options;
-using MqttFx.Exceptions;
 
 namespace MqttFx
 {
@@ -81,7 +80,7 @@ namespace MqttFx
             catch
             {
                 await DisconnectAsync();
-                throw new Exception("BrokerUnavailable");
+                throw new MqttException("BrokerUnavailable");
             }
         }
 
@@ -170,7 +169,7 @@ namespace MqttFx
                 case MqttQos.ExactlyOnce:
                     return _clientChannel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId));
                 default:
-                    throw new Exception("Received a not supported QoS level.");
+                    throw new MqttException("Received a not supported QoS level.");
             }
         }
 

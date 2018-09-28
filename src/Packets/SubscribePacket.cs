@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using MqttFx.Protocol;
 
 namespace MqttFx.Packets
 {
@@ -82,5 +81,13 @@ namespace MqttFx.Packets
             ReturnCodes = returnCodes;
             FixedHeader.RemaingLength = 0;
         }
+    }
+
+    public enum SubscribeReturnCode
+    {
+        SuccessMaximumQoS0 = 0x00,
+        SuccessMaximumQoS1 = 0x01,
+        SuccessMaximumQoS2 = 0x02,
+        Failure = 0x80
     }
 }

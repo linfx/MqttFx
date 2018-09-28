@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using MqttFx.Packets;
-using MqttFx.Protocol;
 
 namespace MqttFx.Extensions
 {
-    public class MqttPacketTypeProvider
+    public class PacketTypeProvider
     {
         static Dictionary<Type, PacketType> _cache = new Dictionary<Type, PacketType>
         {
@@ -32,9 +31,7 @@ namespace MqttFx.Extensions
         public static PacketType GetPacketType(Type type)
         {
             if (!_cache.TryGetValue(type, out PacketType packetType))
-            {
-                throw new Exception("PacketType Error");
-            }
+                throw new MqttException("PacketType Error");
 
             return packetType;
         }

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using MqttFx.Extensions;
-using MqttFx.Protocol;
 
 namespace MqttFx.Packets
 {
@@ -42,7 +42,7 @@ namespace MqttFx.Packets
 
         public Packet()
         {
-            var packetType = MqttPacketTypeProvider.GetPacketType(GetType());
+            var packetType = PacketTypeProvider.GetPacketType(GetType());
             FixedHeader = new FixedHeader(packetType);
         }
 
@@ -180,5 +180,109 @@ namespace MqttFx.Packets
 
             return result.ToArray();
         }
+    }
+
+    /// <summary>
+    /// 服务质量等级
+    /// </summary>
+    [Flags]
+    public enum MqttQos : byte
+    {
+        /// <summary>
+        ///     QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
+        /// </summary>
+        AtMostOnce = 0,
+        /// <summary>
+        ///     QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
+        ///     more than once if network errors occur.
+        /// </summary>
+        AtLeastOnce = 1,
+        /// <summary>
+        ///     QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
+        ///     it is successfully sent..
+        /// </summary>
+        ExactlyOnce = 2,
+    }
+
+    /// <summary>
+    /// 报文类型
+    /// </summary>
+    [Flags]
+    public enum PacketType : byte
+    {
+        /// <summary>
+        /// 发起连接
+        /// </summary>
+        CONNECT = 1,
+        /// <summary>
+        /// 连接回执
+        /// </summary>
+        CONNACK = 2,
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        PUBLISH = 3,
+        /// <summary>
+        /// 发布回执
+        /// </summary>
+        PUBACK = 4,
+        /// <summary>
+        /// QoS2消息回执
+        /// </summary>
+        PUBREC = 5,
+        /// <summary>
+        /// QoS2消息释放
+        /// </summary>
+        PUBREL = 6,
+        /// <summary>
+        /// QoS2消息完成
+        /// </summary>
+        PUBCOMP = 7,
+        /// <summary>
+        /// 订阅主题
+        /// </summary>
+        SUBSCRIBE = 8,
+        /// <summary>
+        /// 订阅回执
+        /// </summary>
+        SUBACK = 9,
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        UNSUBSCRIBE = 10,
+        /// <summary>
+        /// 取消订阅回执
+        /// </summary>
+        UNSUBACK = 11,
+        /// <summary>
+        /// PING请求
+        /// </summary>
+        PINGREQ = 12,
+        /// <summary>
+        /// PING响应
+        /// </summary>
+        PINGRESP = 13,
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        DISCONNECT = 14
+    }
+
+
+    /// <summary>
+    /// 报文类型
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PacketTypeAttribute : Attribute
+    {
+        public PacketTypeAttribute(PacketType packetType)
+        {
+            PacketType = packetType;
+        }
+
+        /// <summary>
+        /// 报文类型
+        /// </summary>
+        public PacketType PacketType { get; set; }
     }
 }

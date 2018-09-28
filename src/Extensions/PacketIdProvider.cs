@@ -1,6 +1,6 @@
 ﻿namespace MqttFx.Extensions
 {
-    public class MqttPacketIdProvider
+    public class PacketIdProvider
     {
         private readonly object _syncRoot = new object();
         private ushort _value;
@@ -11,14 +11,14 @@
                 _value = 0;
         }
 
-        public ushort GetNewPacketId()
+        public ushort GetPacketId()
         {
             lock (_syncRoot)
             {
-                _value++;
+                if (_value == ushort.MaxValue)
+                    _value = 0;
 
-                if (_value == 0)
-                    _value = 1;
+                _value++;
 
                 return _value;
             }

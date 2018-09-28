@@ -3,8 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
-using MqttFx.Messages;
-using MqttFx.Protocol;
+using MqttFx.Packets;
 
 namespace Echo.Client
 {

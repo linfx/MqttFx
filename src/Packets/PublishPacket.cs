@@ -1,5 +1,4 @@
 ﻿using DotNetty.Buffers;
-using MqttFx.Protocol;
 
 namespace MqttFx.Packets
 {

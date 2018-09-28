@@ -4,14 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels.Sockets;
-using MqttFx.Messages;
 using MqttFx.Packets;
-using MqttFx.Protocol;
 using MqttFx.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace MqttFx
 {
@@ -23,8 +21,8 @@ namespace MqttFx
         readonly ILogger _logger;
         readonly IEventLoopGroup _group;
         readonly MqttClientOptions _options;
-        readonly MqttPacketIdProvider _packetIdentifierProvider;
-        readonly MqttPacketDispatcher _packetDispatcher;
+        readonly PacketIdProvider _packetIdentifierProvider;
+        readonly PacketDispatcher _packetDispatcher;
 
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
@@ -38,8 +36,8 @@ namespace MqttFx
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
-            _packetIdentifierProvider = new MqttPacketIdProvider();
-            _packetDispatcher = new MqttPacketDispatcher();
+            _packetIdentifierProvider = new PacketIdProvider();
+            _packetDispatcher = new PacketDispatcher();
             _options = options.Value;
         }
 
@@ -238,7 +236,7 @@ namespace MqttFx
                 Payload = payload
             };
             if(qos > MqttQos.AtMostOnce)
-                packet.PacketId = _packetIdentifierProvider.GetNewPacketId();
+                packet.PacketId = _packetIdentifierProvider.GetPacketId();
 
             return _clientChannel.WriteAndFlushAsync(packet);
         }
@@ -252,7 +250,7 @@ namespace MqttFx
         {
             var packet = new SubscribePacket
             {
-                PacketId = _packetIdentifierProvider.GetNewPacketId(),
+                PacketId = _packetIdentifierProvider.GetPacketId(),
             };
             packet.Add(topic, qos);
 

@@ -1,5 +1,4 @@
-﻿using MqttFx.Messages;
-using System;
+﻿using System;
 
 namespace MqttFx
 {

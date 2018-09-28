@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 
-namespace MqttFx
+namespace MqttFx.Extensions
 {
     internal class MqttEncoding : ASCIIEncoding
     {

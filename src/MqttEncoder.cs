@@ -4,7 +4,6 @@ using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using MqttFx.Packets;
-using MqttFx.Protocol;
 
 namespace MqttFx
 {

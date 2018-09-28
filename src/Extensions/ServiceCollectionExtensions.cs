@@ -3,7 +3,7 @@ using MqttFx;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class MqttServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
         {

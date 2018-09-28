@@ -5,7 +5,7 @@ using MqttFx.Packets;
 
 namespace MqttFx.Extensions
 {
-    internal class MqttPacketDispatcher
+    internal class PacketDispatcher
     {
         readonly ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>> _awaiters = new ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>>();
 

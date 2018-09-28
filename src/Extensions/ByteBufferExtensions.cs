@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
+using MqttFx.Extensions;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;

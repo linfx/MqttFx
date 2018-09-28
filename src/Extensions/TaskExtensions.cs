@@ -17,12 +17,12 @@ namespace MqttFx.Extensions
                 {
                     await action(linkedCts.Token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException exception)
                 {
                     var timeoutReached = timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested;
                     if (timeoutReached)
                     {
-                        //throw new MqttCommunicationTimedOutException(exception);
+                        throw new MqttTimeoutException(exception);
                     }
                     throw;
                 }
@@ -40,12 +40,12 @@ namespace MqttFx.Extensions
                 {
                     return await action(linkedCts.Token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException exception)
                 {
                     var timeoutReached = timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested;
                     if (timeoutReached)
                     {
-                        //throw new MqttCommunicationTimedOutException(exception);
+                        throw new MqttTimeoutException(exception);
                     }
                     throw;
                 }

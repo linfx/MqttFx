@@ -1,11 +1,11 @@
-# nMqtt
+# MqttFx
 ```
 c# mqtt 3.1.1 client
 ```
 
 ## Install
 
-`PM> Install-Package nMqtt2`
+`PM> Install-Package MqttFx`
 
 
 ## Examples

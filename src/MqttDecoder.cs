@@ -49,6 +49,7 @@ namespace MqttFx
                 return false;
             }
 
+            //DecodePacketInternal
             var fixedHeader = new FixedHeader(signature, remainingLength);
             switch (fixedHeader.PacketType)
             {
@@ -72,6 +73,9 @@ namespace MqttFx
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
 
+            if (remainingLength > 0)
+                throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
+
             return true;
         }
 
@@ -87,7 +91,7 @@ namespace MqttFx
             {
                 if (readable < read + 1)
                 {
-                    value = default(int);
+                    value = default;
                     return false;
                 }
                 digit = buffer.ReadByte();
@@ -98,15 +102,11 @@ namespace MqttFx
             while ((digit & 0x80) != 0 && read < 4);
 
             if (read == 4 && (digit & 0x80) != 0)
-            {
                 throw new DecoderException("Remaining length exceeds 4 bytes in length");
-            }
 
             int completeMessageSize = result + 1 + read;
             if (completeMessageSize > _maxMessageSize)
-            {
                 throw new DecoderException("Message is too big: " + completeMessageSize);
-            }
 
             value = result;
             return true;

@@ -8,6 +8,10 @@ namespace MqttFx.Packets
     /// </summary>
     public sealed class UnsubscribePacket : PacketWithId
     {
+        public UnsubscribePacket() : base(PacketType.UNSUBSCRIBE)
+        {
+        }
+
         List<string> _topics = new List<string>();
 
         public override void Encode(IByteBuffer buffer)
@@ -42,7 +46,10 @@ namespace MqttFx.Packets
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    public sealed class UnsubscribeAckMessage : Packet
+    public sealed class UnsubscribeAckPacket : Packet
     {
+        public UnsubscribeAckPacket() : base(PacketType.UNSUBACK)
+        {
+        }
     }
 }

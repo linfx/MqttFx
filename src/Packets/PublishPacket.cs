@@ -7,6 +7,11 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PublishPacket : PacketWithId
     {
+        public PublishPacket() : base(PacketType.PUBLISH)
+        {
+
+        }
+
         /// <summary>
         /// 主题
         /// </summary>
@@ -16,9 +21,8 @@ namespace MqttFx.Packets
         /// </summary>
         public byte[] Payload { get; set; }
 
-        public PublishPacket() { }
-
         public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
+            : this()
         {
             FixedHeader.Qos = qos;
             FixedHeader.Dup = dup;
@@ -71,7 +75,7 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubAckPacket : PacketWithId
     {
-        public PubAckPacket(ushort packetId = default)
+        public PubAckPacket(ushort packetId = default) : base(PacketType.PUBACK)
         {
             PacketId = packetId;
         }
@@ -83,7 +87,7 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubRecPacket : PacketWithId
     {
-        public PubRecPacket(ushort packetId = default)
+        public PubRecPacket(ushort packetId = default) : base(PacketType.PUBREC)
         {
             PacketId = packetId;
         }
@@ -95,7 +99,7 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubRelPacket : PacketWithId
     {
-        public PubRelPacket(ushort packetId = default)
+        public PubRelPacket(ushort packetId = default) : base(PacketType.PUBREL)
         {
             PacketId = packetId;
         }
@@ -107,7 +111,7 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubCompPacket : PacketWithId
     {
-        public PubCompPacket(ushort packetId = default)
+        public PubCompPacket(ushort packetId = default) : base(PacketType.PUBCOMP)
         {
             PacketId = packetId;
         }

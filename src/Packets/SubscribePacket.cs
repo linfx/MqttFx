@@ -9,6 +9,10 @@ namespace MqttFx.Packets
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
+        public SubscribePacket() : base(PacketType.SUBSCRIBE)
+        {
+        }
+
         /// <summary>
         /// 主题列表
         /// </summary>
@@ -59,6 +63,10 @@ namespace MqttFx.Packets
     /// </summary>
     public class SubAckPacket : PacketWithId
     {
+        public SubAckPacket() : base(PacketType.SUBACK)
+        {
+        }
+
         /// <summary>
         /// 返回代码
         /// </summary>

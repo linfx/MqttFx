@@ -8,6 +8,11 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class ConnectPacket : Packet
     {
+        public ConnectPacket()
+            : base(PacketType.CONNECT)
+        {
+        }
+
         #region Variable header
 
         /// <summary>
@@ -128,6 +133,10 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class ConnAckPacket : Packet
     {
+        public ConnAckPacket() : base (PacketType.CONNACK)
+        {
+        }
+
         /// <summary>
         /// 当前会话
         /// </summary>

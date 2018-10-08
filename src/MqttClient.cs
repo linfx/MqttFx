@@ -261,12 +261,12 @@ namespace MqttFx
         /// 取消订阅
         /// </summary>
         /// <param name="topics">主题</param>
-        public Task<UnsubscribeAckMessage> UnsubscribeAsync(params string[] topics)
+        public Task<UnsubscribeAckPacket> UnsubscribeAsync(params string[] topics)
         {
             var packet = new UnsubscribePacket();
             packet.AddRange(topics);
 
-            return SendAndReceiveAsync<UnsubscribeAckMessage>(packet, _cancellationTokenSource.Token); ;
+            return SendAndReceiveAsync<UnsubscribeAckPacket>(packet, _cancellationTokenSource.Token); ;
         }
 
         /// <summary>

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using MqttFx.Extensions;
 
 namespace MqttFx.Packets
 {
@@ -40,13 +39,7 @@ namespace MqttFx.Packets
 
         #endregion
 
-        public Packet()
-        {
-            var packetType = PacketTypeProvider.GetPacketType(GetType());
-            FixedHeader = new FixedHeader(packetType);
-        }
-
-        public Packet(PacketType msgType) => FixedHeader = new FixedHeader(msgType);
+        public Packet(PacketType packetType) => FixedHeader = new FixedHeader(packetType);
 
         public virtual void Encode(IByteBuffer buffer) { }
 
@@ -58,6 +51,10 @@ namespace MqttFx.Packets
     /// </summary>
     public abstract class PacketWithId : Packet
     {
+        public PacketWithId(PacketType packetType) : base(packetType)
+        {
+        }
+
         /// <summary>
         /// 报文标识符
         /// </summary>
@@ -266,23 +263,5 @@ namespace MqttFx.Packets
         /// 断开连接
         /// </summary>
         DISCONNECT = 14
-    }
-
-
-    /// <summary>
-    /// 报文类型
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public class PacketTypeAttribute : Attribute
-    {
-        public PacketTypeAttribute(PacketType packetType)
-        {
-            PacketType = packetType;
-        }
-
-        /// <summary>
-        /// 报文类型
-        /// </summary>
-        public PacketType PacketType { get; set; }
     }
 }

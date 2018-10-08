@@ -5,6 +5,9 @@
     /// </summary>
     internal sealed class PingReqPacket : Packet
     {
+        public PingReqPacket() : base(PacketType.PINGREQ)
+        {
+        }
     }
 
     /// <summary>
@@ -12,5 +15,8 @@
     /// </summary>
     internal class PingRespPacket : Packet
     {
+        public PingRespPacket() : base(PacketType.PINGRESP)
+        {
+        }
     }
 }

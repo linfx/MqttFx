@@ -2,7 +2,7 @@
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 订阅主题

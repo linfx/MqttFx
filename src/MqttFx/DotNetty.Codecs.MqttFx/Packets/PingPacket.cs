@@ -1,4 +1,4 @@
-﻿namespace MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// PING请求

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using MqttFx.Packets;
+using DotNetty.Codecs.MqttFx.Packets;
 
 namespace MqttFx.Extensions
 {

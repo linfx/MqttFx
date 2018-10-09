@@ -8,7 +8,8 @@ using Microsoft.Extensions.Options;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels.Sockets;
-using MqttFx.Packets;
+using DotNetty.Codecs.MqttFx;
+using DotNetty.Codecs.MqttFx.Packets;
 using MqttFx.Extensions;
 
 namespace MqttFx

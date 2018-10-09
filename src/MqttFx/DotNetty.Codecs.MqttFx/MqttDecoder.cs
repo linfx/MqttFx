@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
-using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
-using MqttFx.Packets;
+using DotNetty.Codecs.MqttFx.Packets;
 
-namespace MqttFx
+namespace DotNetty.Codecs.MqttFx
 {
     public sealed class MqttDecoder : ByteToMessageDecoder
     {

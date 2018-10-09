@@ -1,4 +1,4 @@
-﻿using MqttFx.Packets;
+﻿using DotNetty.Codecs.MqttFx.Packets;
 
 namespace MqttFx
 {

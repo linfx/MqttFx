@@ -1,5 +1,5 @@
 ﻿//using DotNetty.Buffers;
-//using MqttFx.Packets;
+//using DotNetty.Codecs.MqttFx.Packets;
 //using MqttFx.Protocol;
 //using System.Collections.Generic;
 //using Xunit;

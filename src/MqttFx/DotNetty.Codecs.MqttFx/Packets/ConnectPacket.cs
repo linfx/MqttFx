@@ -2,7 +2,7 @@
 using DotNetty.Common.Utilities;
 using System;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 发起连接
@@ -127,6 +127,48 @@ namespace MqttFx.Packets
                 buf = null;
             }
         }
+
+        public override void Encode(IByteBufferAllocator byteBufferAllocator)
+        {
+            IByteBuffer buf = null;
+            try
+            {
+                buf = byteBufferAllocator.Buffer(123);
+
+                //variable header
+                buf.WriteString(ProtocolName);        //byte 1 - 8
+                buf.WriteByte(ProtocolLevel);         //byte 9
+
+                //connect flags;                      //byte 10
+                var flags = UsernameFlag.ToByte() << 7;
+                flags |= PasswordFlag.ToByte() << 6;
+                flags |= WillRetain.ToByte() << 5;
+                flags |= ((byte)WillQos) << 3;
+                flags |= WillFlag.ToByte() << 2;
+                flags |= CleanSession.ToByte() << 1;
+                buf.WriteByte((byte)flags);
+
+                //keep alive
+                buf.WriteShort(KeepAlive);            //byte 11 - 12
+
+                //payload
+                buf.WriteString(ClientId);
+                if (WillFlag)
+                {
+                    buf.WriteString(WillTopic);
+                    buf.WriteBytes(WillMessage);
+                }
+                if (UsernameFlag && PasswordFlag)
+                {
+                    buf.WriteString(UserName);
+                    buf.WriteString(Password);
+                }
+            }
+            finally
+            {
+                buf?.SafeRelease();
+            }
+        }
     }
 
     /// <summary>
@@ -134,7 +176,8 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class ConnAckPacket : Packet
     {
-        public ConnAckPacket() : base (PacketType.CONNACK)
+        public ConnAckPacket() 
+            : base (PacketType.CONNACK)
         {
         }
 

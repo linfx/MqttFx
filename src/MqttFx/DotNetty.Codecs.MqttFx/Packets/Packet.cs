@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotNetty.Buffers;
-using DotNetty.Codecs;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 消息基类
@@ -41,9 +40,11 @@ namespace MqttFx.Packets
 
         public Packet(PacketType packetType) => FixedHeader = new FixedHeader(packetType);
 
+        public virtual void Decode(IByteBuffer buffer) { }
+
         public virtual void Encode(IByteBuffer buffer) { }
 
-        public virtual void Decode(IByteBuffer buffer) { }
+        public virtual void Encode(IByteBufferAllocator byteBufferAllocator) { }
     }
 
     /// <summary>

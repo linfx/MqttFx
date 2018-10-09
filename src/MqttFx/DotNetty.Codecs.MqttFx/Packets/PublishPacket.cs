@@ -1,6 +1,6 @@
 ﻿using DotNetty.Buffers;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 发布消息

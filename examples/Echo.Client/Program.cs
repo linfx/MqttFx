@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
-using MqttFx.Packets;
+using DotNetty.Codecs.MqttFx.Packets;
 
 namespace Echo.Client
 {
@@ -33,7 +33,7 @@ namespace Echo.Client
                 var top = "/World";
                 Console.WriteLine("Subscribe:" + top);
                 Console.Write("SubscribeReturnCode: ");
-                var r = await client.SubscribeAsync(top);
+                var r = await client.SubscribeAsync(top, MqttQos.ExactlyOnce);
                 Console.WriteLine(r.ReturnCodes);
                 //while (true)
                 //{

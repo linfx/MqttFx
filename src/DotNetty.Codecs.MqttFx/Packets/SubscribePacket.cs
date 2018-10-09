@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
-using DotNetty.Codecs;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -17,11 +16,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 主题列表
         /// </summary>
-        IList<TopicQos> Topics = new List<TopicQos>();
+        IList<TopicQos> _topics = new List<TopicQos>();
 
         public void Add(string topic, MqttQos qos)
         {
-            Topics.Add(new TopicQos
+            _topics.Add(new TopicQos
             {
                 Topic = topic,
                 Qos = qos,
@@ -41,7 +40,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 buf.WriteUnsignedShort(PacketId);
 
-                foreach (var item in Topics)
+                foreach (var item in _topics)
                 {
                     buf.WriteString(item.Topic);
                     buf.WriteByte((byte)item.Qos);

@@ -50,7 +50,7 @@ namespace DotNetty.Codecs.MqttFx
         {
             byte[] stringBytes = Encoding.UTF8.GetBytes(value);
             buffer.WriteShort(stringBytes.Length);
-            buffer.WriteBytes(stringBytes, 0, stringBytes.Length);
+            buffer.WriteBytes(stringBytes);
         }
 
         /// <summary>

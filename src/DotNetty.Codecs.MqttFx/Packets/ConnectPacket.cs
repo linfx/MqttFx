@@ -120,49 +120,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-            }
-            finally
-            {
-                buf?.SafeRelease();
                 buf = null;
-            }
-        }
-
-        public override void Encode(IByteBufferAllocator byteBufferAllocator)
-        {
-            IByteBuffer buf = null;
-            try
-            {
-                buf = byteBufferAllocator.Buffer(123);
-
-                //variable header
-                buf.WriteString(ProtocolName);        //byte 1 - 8
-                buf.WriteByte(ProtocolLevel);         //byte 9
-
-                //connect flags;                      //byte 10
-                var flags = UsernameFlag.ToByte() << 7;
-                flags |= PasswordFlag.ToByte() << 6;
-                flags |= WillRetain.ToByte() << 5;
-                flags |= ((byte)WillQos) << 3;
-                flags |= WillFlag.ToByte() << 2;
-                flags |= CleanSession.ToByte() << 1;
-                buf.WriteByte((byte)flags);
-
-                //keep alive
-                buf.WriteShort(KeepAlive);            //byte 11 - 12
-
-                //payload
-                buf.WriteString(ClientId);
-                if (WillFlag)
-                {
-                    buf.WriteString(WillTopic);
-                    buf.WriteBytes(WillMessage);
-                }
-                if (UsernameFlag && PasswordFlag)
-                {
-                    buf.WriteString(UserName);
-                    buf.WriteString(Password);
-                }
             }
             finally
             {

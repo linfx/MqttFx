@@ -43,8 +43,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public virtual void Decode(IByteBuffer buffer) { }
 
         public virtual void Encode(IByteBuffer buffer) { }
-
-        public virtual void Encode(IByteBufferAllocator byteBufferAllocator) { }
     }
 
     /// <summary>

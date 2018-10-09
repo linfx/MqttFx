@@ -7,19 +7,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class PublishPacket : PacketWithId
     {
-        public PublishPacket() : base(PacketType.PUBLISH)
+        public PublishPacket()
+            : base(PacketType.PUBLISH)
         {
-
         }
-
-        /// <summary>
-        /// 主题
-        /// </summary>
-        public string TopicName { get; set; }
-        /// <summary>
-        /// 有效载荷
-        /// </summary>
-        public byte[] Payload { get; set; }
 
         public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
             : this()
@@ -28,6 +19,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
             FixedHeader.Dup = dup;
             FixedHeader.Retain = retain;
         }
+
+        /// <summary>
+        /// 主题
+        /// </summary>
+        public string TopicName { get; set; }
+
+        /// <summary>
+        /// 有效载荷
+        /// </summary>
+        public byte[] Payload { get; set; }
 
         public override void Encode(IByteBuffer buffer)
         {
@@ -75,7 +76,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class PubAckPacket : PacketWithId
     {
-        public PubAckPacket(ushort packetId = default) : base(PacketType.PUBACK)
+        public PubAckPacket(ushort packetId = default)
+            : base(PacketType.PUBACK)
         {
             PacketId = packetId;
         }
@@ -87,7 +89,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class PubRecPacket : PacketWithId
     {
-        public PubRecPacket(ushort packetId = default) 
+        public PubRecPacket(ushort packetId = default)
             : base(PacketType.PUBREC)
         {
             PacketId = packetId;
@@ -113,7 +115,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class PubCompPacket : PacketWithId
     {
-        public PubCompPacket(ushort packetId = default) 
+        public PubCompPacket(ushort packetId = default)
             : base(PacketType.PUBCOMP)
         {
             PacketId = packetId;

@@ -15,6 +15,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         List<string> _topics = new List<string>();
 
+        public void AddRange(params string[] topics)
+        {
+            _topics.AddRange(topics);
+        }
+
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
@@ -36,11 +41,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 buf?.Release();
             }
-        }
-
-        public void AddRange(params string[] topics)
-        {
-            _topics.AddRange(topics);
         }
     }
 

@@ -74,8 +74,18 @@ namespace DotNetty.Codecs.MqttFx
                 return false;
             }
 
-            //DecodePacketInternal
-            var fixedHeader = new FixedHeader(signature, remainingLength);
+            packet = DecodePacketInternal(buffer, signature, ref remainingLength);
+
+            //if (remainingLength > 0)
+            //    throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
+
+            return true;
+        }
+
+        Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
+        {
+            Packet packet;
+            var fixedHeader = new FixedHeader(packetSignature, remainingLength);
             switch (fixedHeader.PacketType)
             {
                 case PacketType.CONNECT: packet = new ConnectPacket(); break;
@@ -97,11 +107,7 @@ namespace DotNetty.Codecs.MqttFx
             }
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
-
-            //if (remainingLength > 0)
-            //    throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
-
-            return true;
+            return packet;
         }
 
         bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)

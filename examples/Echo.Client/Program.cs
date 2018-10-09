@@ -30,16 +30,16 @@ namespace Echo.Client
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                var top = "/World";
-                Console.WriteLine("Subscribe:" + top);
-                Console.Write("SubscribeReturnCode: ");
-                var r = await client.SubscribeAsync(top, MqttQos.ExactlyOnce);
-                Console.WriteLine(r.ReturnCodes);
-                //while (true)
-                //{
-                //    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtMostOnce);
-                //    await Task.Delay(2000);
-                //}
+                //var top = "/World";
+                //Console.WriteLine("Subscribe:" + top);
+                //Console.Write("SubscribeReturnCode: ");
+                //var r = await client.SubscribeAsync(top, MqttQos.ExactlyOnce);
+                //Console.WriteLine(r.ReturnCodes);
+                while (true)
+                {
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtLeastOnce);
+                    await Task.Delay(2000);
+                }
             }
             Console.ReadKey();
         }

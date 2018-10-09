@@ -125,7 +125,7 @@ namespace MqttFx
 
         private Task ProcessReceivedPacketAsync(Packet packet)
         {
-            _logger.LogInformation("ProcessReceivedPacketAsync:" + packet.PacketType);
+            _logger.LogInformation("【ProcessReceivedPacketAsync】: " + packet.PacketType);
 
             if (packet is PingReqPacket)
                 return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
@@ -185,9 +185,6 @@ namespace MqttFx
             try
             {
                 await _clientChannel.WriteAndFlushAsync(requestPacket);
-                //var respone = await Extensions.TaskExtensions.TimeoutAfterAsync(ct => packetAwaiter.Task, _options.Timeout, cancellationToken);
-                //return (TResponsePacket)respone;
-
                 using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
                 {
@@ -212,9 +209,9 @@ namespace MqttFx
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw new MqttException(ex.Message, ex);
             }
             finally
             {
@@ -261,12 +258,12 @@ namespace MqttFx
         /// 取消订阅
         /// </summary>
         /// <param name="topics">主题</param>
-        public Task<UnsubscribeAckPacket> UnsubscribeAsync(params string[] topics)
+        public Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics)
         {
             var packet = new UnsubscribePacket();
             packet.AddRange(topics);
 
-            return SendAndReceiveAsync<UnsubscribeAckPacket>(packet, _cancellationTokenSource.Token); ;
+            return SendAndReceiveAsync<UnsubAckPacket>(packet, _cancellationTokenSource.Token); ;
         }
 
         /// <summary>

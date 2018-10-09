@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Common.Utilities;
 using System;
 
 namespace MqttFx.Packets
@@ -122,7 +123,7 @@ namespace MqttFx.Packets
             }
             finally
             {
-                buf?.Release();
+                buf?.SafeRelease();
                 buf = null;
             }
         }

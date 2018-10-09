@@ -87,7 +87,8 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubRecPacket : PacketWithId
     {
-        public PubRecPacket(ushort packetId = default) : base(PacketType.PUBREC)
+        public PubRecPacket(ushort packetId = default) 
+            : base(PacketType.PUBREC)
         {
             PacketId = packetId;
         }
@@ -99,7 +100,8 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubRelPacket : PacketWithId
     {
-        public PubRelPacket(ushort packetId = default) : base(PacketType.PUBREL)
+        public PubRelPacket(ushort packetId = default)
+            : base(PacketType.PUBREL)
         {
             PacketId = packetId;
         }
@@ -111,7 +113,8 @@ namespace MqttFx.Packets
     /// </summary>
     internal sealed class PubCompPacket : PacketWithId
     {
-        public PubCompPacket(ushort packetId = default) : base(PacketType.PUBCOMP)
+        public PubCompPacket(ushort packetId = default) 
+            : base(PacketType.PUBCOMP)
         {
             PacketId = packetId;
         }

@@ -40,6 +40,10 @@ namespace MqttFx
             }
         }
 
+        /// <summary>
+        /// 不活动
+        /// </summary>
+        /// <param name="context"></param>
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             SetException(new InvalidOperationException("Channel is closed."));

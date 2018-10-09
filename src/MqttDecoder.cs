@@ -73,8 +73,8 @@ namespace MqttFx
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
 
-            if (remainingLength > 0)
-                throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
+            //if (remainingLength > 0)
+            //    throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
 
             return true;
         }

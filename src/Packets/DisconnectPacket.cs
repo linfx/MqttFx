@@ -5,7 +5,8 @@
     /// </summary>
     internal sealed class DisconnectPacket : Packet
     {
-        public DisconnectPacket() : base(PacketType.DISCONNECT)
+        public DisconnectPacket() 
+            : base(PacketType.DISCONNECT)
         {
         }
     }

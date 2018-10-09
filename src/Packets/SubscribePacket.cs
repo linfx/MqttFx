@@ -9,7 +9,8 @@ namespace MqttFx.Packets
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
-        public SubscribePacket() : base(PacketType.SUBSCRIBE)
+        public SubscribePacket() 
+            : base(PacketType.SUBSCRIBE)
         {
         }
 
@@ -63,7 +64,8 @@ namespace MqttFx.Packets
     /// </summary>
     public class SubAckPacket : PacketWithId
     {
-        public SubAckPacket() : base(PacketType.SUBACK)
+        public SubAckPacket()
+            : base(PacketType.SUBACK)
         {
         }
 

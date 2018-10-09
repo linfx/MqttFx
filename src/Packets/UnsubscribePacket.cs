@@ -8,7 +8,8 @@ namespace MqttFx.Packets
     /// </summary>
     public sealed class UnsubscribePacket : PacketWithId
     {
-        public UnsubscribePacket() : base(PacketType.UNSUBSCRIBE)
+        public UnsubscribePacket() 
+            : base(PacketType.UNSUBSCRIBE)
         {
         }
 
@@ -46,9 +47,10 @@ namespace MqttFx.Packets
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    public sealed class UnsubscribeAckPacket : Packet
+    public sealed class UnsubAckPacket : Packet
     {
-        public UnsubscribeAckPacket() : base(PacketType.UNSUBACK)
+        public UnsubAckPacket()
+            : base(PacketType.UNSUBACK)
         {
         }
     }

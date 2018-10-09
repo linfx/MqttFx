@@ -51,7 +51,8 @@ namespace MqttFx.Packets
     /// </summary>
     public abstract class PacketWithId : Packet
     {
-        public PacketWithId(PacketType packetType) : base(packetType)
+        public PacketWithId(PacketType packetType) 
+            : base(packetType)
         {
         }
 

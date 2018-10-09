@@ -3,6 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
+    <Authors>linfx</Authors>
+    <Company>LinFx</Company>
+    <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/linfx/MqttFx</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>mqtt</PackageTags>
+    <Copyright>(c) LinFx 2015 - 2018</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

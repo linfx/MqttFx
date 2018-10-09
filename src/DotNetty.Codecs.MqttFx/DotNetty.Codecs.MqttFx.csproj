@@ -10,6 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>mqtt</PackageTags>
     <Copyright>(c) LinFx 2015 - 2018</Copyright>
+    <Version>0.5.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

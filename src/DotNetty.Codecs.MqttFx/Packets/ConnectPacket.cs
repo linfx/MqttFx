@@ -7,7 +7,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 发起连接
     /// </summary>
-    internal sealed class ConnectPacket : Packet
+    public sealed class ConnectPacket : Packet
     {
         public ConnectPacket()
             : base(PacketType.CONNECT)
@@ -174,7 +174,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 连接回执
     /// </summary>
-    internal sealed class ConnAckPacket : Packet
+    public sealed class ConnAckPacket : Packet
     {
         public ConnAckPacket() 
             : base (PacketType.CONNACK)

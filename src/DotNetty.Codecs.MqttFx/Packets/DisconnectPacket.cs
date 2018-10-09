@@ -3,7 +3,7 @@
     /// <summary>
     /// 断开连接
     /// </summary>
-    internal sealed class DisconnectPacket : Packet
+    public sealed class DisconnectPacket : Packet
     {
         public DisconnectPacket() 
             : base(PacketType.DISCONNECT)

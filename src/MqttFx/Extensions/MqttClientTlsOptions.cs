@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace MqttFx
+namespace MqttFx.Extensions
 {
     public class MqttClientTlsOptions
     {

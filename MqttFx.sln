@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Echo.Client", "examples\Ech
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttFx", "src\MqttFx\MqttFx.csproj", "{F065401D-3021-402E-BC0D-F28C96E91277}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetty.Codecs.MqttFx", "src\DotNetty.Codecs.MqttFx\DotNetty.Codecs.MqttFx.csproj", "{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F065401D-3021-402E-BC0D-F28C96E91277}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F065401D-3021-402E-BC0D-F28C96E91277}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F065401D-3021-402E-BC0D-F28C96E91277}.Release|Any CPU.Build.0 = Release|Any CPU
+		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

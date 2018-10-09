@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 发布消息
     /// </summary>
-    internal sealed class PublishPacket : PacketWithId
+    public sealed class PublishPacket : PacketWithId
     {
         public PublishPacket() : base(PacketType.PUBLISH)
         {
@@ -73,7 +73,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    internal sealed class PubAckPacket : PacketWithId
+    public sealed class PubAckPacket : PacketWithId
     {
         public PubAckPacket(ushort packetId = default) : base(PacketType.PUBACK)
         {
@@ -85,7 +85,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    internal sealed class PubRecPacket : PacketWithId
+    public sealed class PubRecPacket : PacketWithId
     {
         public PubRecPacket(ushort packetId = default) 
             : base(PacketType.PUBREC)
@@ -98,7 +98,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
-    internal sealed class PubRelPacket : PacketWithId
+    public sealed class PubRelPacket : PacketWithId
     {
         public PubRelPacket(ushort packetId = default)
             : base(PacketType.PUBREL)
@@ -111,7 +111,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
-    internal sealed class PubCompPacket : PacketWithId
+    public sealed class PubCompPacket : PacketWithId
     {
         public PubCompPacket(ushort packetId = default) 
             : base(PacketType.PUBCOMP)

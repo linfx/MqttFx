@@ -1,4 +1,4 @@
-﻿namespace MqttFx
+﻿namespace MqttFx.Extensions
 {
     public class MqttClientCredentials
     {

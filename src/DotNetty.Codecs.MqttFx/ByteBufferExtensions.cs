@@ -1,5 +1,4 @@
 ﻿using DotNetty.Buffers;
-using MqttFx.Extensions;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;

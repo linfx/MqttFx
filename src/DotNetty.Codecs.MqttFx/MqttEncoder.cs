@@ -6,6 +6,9 @@ using DotNetty.Codecs.MqttFx.Packets;
 
 namespace DotNetty.Codecs.MqttFx
 {
+    /// <summary>
+    /// 编码器
+    /// </summary>
     public sealed class MqttEncoder : MessageToMessageEncoder<Packet>
     {
         public static readonly MqttEncoder Instance = new MqttEncoder();

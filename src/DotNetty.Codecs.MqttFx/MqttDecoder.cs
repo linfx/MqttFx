@@ -2,15 +2,26 @@
 using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
 using DotNetty.Codecs.MqttFx.Packets;
+using System;
 
 namespace DotNetty.Codecs.MqttFx
 {
-    public sealed class MqttDecoder : ByteToMessageDecoder
+    /// <summary>
+    /// 解码器
+    /// </summary>
+    public sealed class MqttDecoder : ReplayingDecoder<MqttDecoder.ParseState>
     {
+        public enum ParseState
+        {
+            Ready,
+            Failed
+        }
+
         readonly bool _isServer;
         readonly int _maxMessageSize;
 
         public MqttDecoder(bool isServer, int maxMessageSize)
+            : base(ParseState.Ready)
         {
             _isServer = isServer;
             _maxMessageSize = maxMessageSize;
@@ -20,14 +31,29 @@ namespace DotNetty.Codecs.MqttFx
         {
             try
             {
-                if (!TryDecodePacket(context, input, out Packet packet))
-                    return;
-
-                output.Add(packet);
+                switch (State)
+                {
+                    case ParseState.Ready:
+                        if (!TryDecodePacket(context, input, out Packet packet))
+                        {
+                            RequestReplay();
+                            return;
+                        }
+                        output.Add(packet);
+                        Checkpoint();
+                        break;
+                    case ParseState.Failed:
+                        // read out data until connection is closed
+                        input.SkipBytes(input.ReadableBytes);
+                        return;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             catch (DecoderException)
             {
                 input.SkipBytes(input.ReadableBytes);
+                Checkpoint(ParseState.Failed);
                 throw;
             }
         }

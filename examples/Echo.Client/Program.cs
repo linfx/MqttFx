@@ -11,12 +11,6 @@ namespace Echo.Client
     {
         static async Task Main(string[] args)
         {
-            //var options = new MqttClientOptionsBuilder()
-            //    .WithTcpServer("118.126.96.166")
-            //    .WithClientId("nmqtt_client")
-            //    .WithCredentials("linfx", "123456")
-            //    .Build();
-
             var services = new ServiceCollection();
             services.AddMqttClient(options =>
             {

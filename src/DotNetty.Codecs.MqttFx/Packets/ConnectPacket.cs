@@ -148,10 +148,36 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
 
+        public override void Encode(IByteBuffer buffer)
+        {
+            var buf = Unpooled.Buffer();
+            try
+            {
+                if (SessionPresent)
+                    buf.WriteByte(1);  // 7 reserved 0-bits and SP = 1
+                else
+                    buf.WriteByte(0);  // 7 reserved 0-bits and SP = 0
+
+                buf.WriteByte((byte)ConnectReturnCode);
+
+                FixedHeader.RemaingLength = buf.ReadableBytes;
+                FixedHeader.WriteTo(buffer);
+                buffer.WriteBytes(buf);
+                buf = null;
+            }
+            finally
+            {
+                buf?.SafeRelease();
+            }
+        }
+
         public override void Decode(IByteBuffer buffer)
         {
-            SessionPresent = (buffer.ReadByte() & 0x01) == 1;
-            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
+            int remainingLength = RemaingLength;
+            int ackData = buffer.ReadUnsignedShort(ref remainingLength);
+            SessionPresent = ((ackData >> 8) & 0x1) != 0;
+            ConnectReturnCode = (ConnectReturnCode)(ackData & 0xFF);
+            FixedHeader.RemaingLength = remainingLength;
         }
     }
 

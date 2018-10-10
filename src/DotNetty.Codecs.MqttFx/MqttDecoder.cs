@@ -76,8 +76,8 @@ namespace DotNetty.Codecs.MqttFx
 
             packet = DecodePacketInternal(buffer, signature, ref remainingLength);
 
-            //if (remainingLength > 0)
-            //    throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
+            if (remainingLength > 0)
+                throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
 
             return true;
         }
@@ -107,6 +107,7 @@ namespace DotNetty.Codecs.MqttFx
             }
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
+            remainingLength = packet.RemaingLength;
             return packet;
         }
 

@@ -13,9 +13,9 @@ c# mqtt 3.1.1 client
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using nMqtt;
-using nMqtt.Messages;
-using nMqtt.Protocol;
+using Microsoft.Extensions.DependencyInjection;
+using MqttFx;
+using DotNetty.Codecs.MqttFx.Packets;
 
 namespace Echo.Client
 {
@@ -23,21 +23,29 @@ namespace Echo.Client
     {
         static async Task Main(string[] args)
         {
-            var options = new MqttClientOptionsBuilder()
-                .WithTcpServer("118.126.96.166")
-                .Build();
+            var services = new ServiceCollection();
+            services.AddMqttClient(options =>
+            {
+                options.Server = "118.126.96.166";
+            });
+            var container = services.BuildServiceProvider();
 
-            var client = new MqttClient(options);
+            var client = container.GetService<MqttClient>();
             client.OnConnected += Connected;
+            client.OnDisconnected += Disconnected;
             client.OnMessageReceived += MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                await client.SubscribeAsync("/World2");
-                //while (true)
-                //{
-                //    await client.PublishAsync("/World2", Encoding.UTF8.GetBytes("A"));
-                //    await Task.Delay(1000);
-                //}
+                //var top = "/World";
+                //Console.WriteLine("Subscribe:" + top);
+                //Console.Write("SubscribeReturnCode: ");
+                //var r = await client.SubscribeAsync(top, MqttQos.ExactlyOnce);
+                //Console.WriteLine(r.ReturnCodes);
+                while (true)
+                {
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtLeastOnce);
+                    await Task.Delay(2000);
+                }
             }
             Console.ReadKey();
         }
@@ -47,6 +55,11 @@ namespace Echo.Client
             Console.WriteLine("Connected Ssuccessful!, ConnectReturnCode: " + connectResponse);
         }
 
+        private static void Disconnected()
+        {
+            Console.WriteLine("Disconnected");
+        }
+
         private static void MessageReceived(Message message)
         {
             var result = Encoding.UTF8.GetString(message.Payload);
@@ -54,6 +67,7 @@ namespace Echo.Client
         }
     }
 }
+
 ```
 
 

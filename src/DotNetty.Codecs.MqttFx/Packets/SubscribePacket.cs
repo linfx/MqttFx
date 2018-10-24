@@ -71,17 +71,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 返回代码
         /// </summary>
-        public IReadOnlyList<SubscribeReturnCode> ReturnCodes { get; set; }
+        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
 
         public override void Decode(IByteBuffer buffer)
         {
             base.Decode(buffer);
 
-            var returnCodes = new SubscribeReturnCode[RemaingLength];
+            var returnCodes = new MqttQos[RemaingLength];
             for (int i = 0; i < RemaingLength; i++)
             {
-                var returnCode = (SubscribeReturnCode)buffer.ReadByte();
-                if (returnCode > SubscribeReturnCode.SuccessMaximumQoS2 && returnCode != SubscribeReturnCode.Failure)
+                var returnCode = (MqttQos)buffer.ReadByte();
+                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
                 {
                     throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
                 }
@@ -90,13 +90,5 @@ namespace DotNetty.Codecs.MqttFx.Packets
             ReturnCodes = returnCodes;
             FixedHeader.RemaingLength = 0;
         }
-    }
-
-    public enum SubscribeReturnCode
-    {
-        SuccessMaximumQoS0 = 0x00,
-        SuccessMaximumQoS1 = 0x01,
-        SuccessMaximumQoS2 = 0x02,
-        Failure = 0x80
     }
 }

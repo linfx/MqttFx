@@ -19,9 +19,9 @@ namespace Echo.Client
             var container = services.BuildServiceProvider();
 
             var client = container.GetService<MqttClient>();
-            client.OnConnected += Connected;
-            client.OnDisconnected += Disconnected;
-            client.OnMessageReceived += MessageReceived;
+            client.Connected += Client_Connected;
+            client.Disconnected += Client_Disconnected;
+            client.MessageReceived += Client_MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
                 //var top = "/World";
@@ -38,19 +38,19 @@ namespace Echo.Client
             Console.ReadKey();
         }
 
-        private static void Connected(ConnectReturnCode connectResponse)
+        private static void Client_Connected(object sender, MqttClientConnectedEventArgs e)
         {
-            Console.WriteLine("Connected Ssuccessful!, ConnectReturnCode: " + connectResponse);
+            Console.WriteLine("Connected Ssuccessful!");
         }
 
-        private static void Disconnected()
+        private static void Client_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
         {
             Console.WriteLine("Disconnected");
         }
 
-        private static void MessageReceived(Message message)
+        private static void Client_MessageReceived(object sender, MqttMessageReceivedEventArgs e)
         {
-            var result = Encoding.UTF8.GetString(message.Payload);
+            var result = Encoding.UTF8.GetString(e.Message.Payload);
             Console.WriteLine(result);
         }
     }

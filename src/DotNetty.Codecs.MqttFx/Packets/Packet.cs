@@ -188,17 +188,21 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         ///     QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
         /// </summary>
-        AtMostOnce = 0,
+        AtMostOnce = 0x00,
         /// <summary>
         ///     QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
         ///     more than once if network errors occur.
         /// </summary>
-        AtLeastOnce = 1,
+        AtLeastOnce = 0x01,
         /// <summary>
         ///     QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
         ///     it is successfully sent..
         /// </summary>
-        ExactlyOnce = 2,
+        ExactlyOnce = 0x02,
+        /// <summary>
+        ///    Failure
+        /// </summary>
+        Failure = 0x80
     }
 
     /// <summary>

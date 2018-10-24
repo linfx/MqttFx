@@ -28,9 +28,9 @@ namespace MqttFx
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public Action<ConnectReturnCode> OnConnected;
-        public Action OnDisconnected;
-        public Action<Message> OnMessageReceived;
+        public event EventHandler<MqttClientConnectedEventArgs> Connected;
+        public event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
+        public event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
 
         public MqttClient(IOptions<MqttClientOptions> options,
             ILogger<MqttClient> logger = default)
@@ -72,7 +72,7 @@ namespace MqttFx
                 var connectResponse = await AuthenticateAsync(clientReadListener, _cancellationTokenSource.Token); ;
                 if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
                 {
-                    OnConnected?.Invoke(connectResponse.ConnectReturnCode);
+                    Connected.Invoke(this, new MqttClientConnectedEventArgs(connectResponse.SessionPresent));
                 }
                 return connectResponse.ConnectReturnCode;
             }
@@ -151,13 +151,7 @@ namespace MqttFx
 
         private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
         {
-            OnMessageReceived?.Invoke(new Message
-            {
-                Topic = publishPacket.TopicName,
-                Payload = publishPacket.Payload,
-                Qos = publishPacket.Qos,
-                Retain = publishPacket.Retain
-            });
+            OnMessageReceived(_options.ClientId, publishPacket.ToMessage());
 
             switch (publishPacket.Qos)
             {
@@ -275,7 +269,12 @@ namespace MqttFx
         {
             await _clientChannel.CloseAsync();
             await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
-            OnDisconnected?.Invoke();
+            //OnDisconnected?.Invoke();
+        }
+
+        void OnMessageReceived(string clientId, Message message)
+        {
+            MessageReceived?.Invoke(this, new MqttMessageReceivedEventArgs(clientId, message));
         }
     }
 }

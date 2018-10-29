@@ -19,15 +19,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 协议名
         /// </summary>
-        public string ProtocolName { get; } = "MQTT";
+        public string ProtocolName { get; set; } = "MQTT";
         /// <summary>
         /// 协议级别
         /// </summary>
-        public byte ProtocolLevel { get; } = 0x04;
+        public byte ProtocolLevel { get; set; } = 0x04;
         /// <summary>
         /// 保持连接 
         /// </summary>
-        public short KeepAlive { get; set; }
+        public ushort KeepAlive { get; set; }
 
         #region Connect Flags
         /// <summary>
@@ -194,7 +194,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 连接已拒绝，不支持的协议版本
         /// </summary>
-        UnacceptedProtocolVersion = 0x01,
+        UnacceptableProtocolVersion = 0x01,
         /// <summary>
         /// 接已拒绝，不合格的客户端标识符
         /// </summary>

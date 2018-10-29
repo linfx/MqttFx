@@ -16,21 +16,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 主题列表
         /// </summary>
-        IList<TopicQos> _topics = new List<TopicQos>();
+        List<SubscriptionRequest> _subscribeTopics = new List<SubscriptionRequest>();
 
         public void Add(string topic, MqttQos qos)
         {
-            _topics.Add(new TopicQos
-            {
-                Topic = topic,
-                Qos = qos,
-            });
+            _subscribeTopics.Add(new SubscriptionRequest(topic, qos));
         }
 
-        struct TopicQos
+        public void Add(params SubscriptionRequest[] requests)
         {
-            public string Topic { get; set; }
-            public MqttQos Qos { get; set; }
+            _subscribeTopics.AddRange(requests);
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -40,7 +35,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 buf.WriteUnsignedShort(PacketId);
 
-                foreach (var item in _topics)
+                foreach (var item in _subscribeTopics)
                 {
                     buf.WriteString(item.Topic);
                     buf.WriteByte((byte)item.Qos);
@@ -90,5 +85,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
             ReturnCodes = returnCodes;
             FixedHeader.RemaingLength = 0;
         }
+    }
+
+    public class SubscriptionRequest
+    {
+        public SubscriptionRequest(string topic, MqttQos qos)
+        {
+            Topic = topic;
+            Qos = qos;
+        }
+
+        public string Topic { get; set; }
+        public MqttQos Qos { get; set; }
     }
 }

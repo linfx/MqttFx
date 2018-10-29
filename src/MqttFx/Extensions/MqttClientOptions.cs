@@ -15,7 +15,7 @@ namespace MqttFx.Extensions
         /// <summary>
         /// 保持连接 
         /// </summary>
-        public short KeepAlive { get; set; } = 60;
+        public ushort KeepAlive { get; set; } = 60;
         /// <summary>
         /// 案例凭证
         /// </summary>

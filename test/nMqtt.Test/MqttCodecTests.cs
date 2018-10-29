@@ -28,7 +28,7 @@ namespace MqttFx.Test
         [Theory]
         [InlineData(false, ConnectReturnCode.ConnectionAccepted)]
         [InlineData(true, ConnectReturnCode.ConnectionAccepted)]
-        [InlineData(false, ConnectReturnCode.UnacceptedProtocolVersion)]
+        [InlineData(false, ConnectReturnCode.UnacceptableProtocolVersion)]
         [InlineData(false, ConnectReturnCode.IdentifierRejected)]
         [InlineData(false, ConnectReturnCode.BrokerUnavailable)]
         [InlineData(false, ConnectReturnCode.BadUsernameOrPassword)]

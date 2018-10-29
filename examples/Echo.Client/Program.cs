@@ -24,15 +24,15 @@ namespace Echo.Client
             client.MessageReceived += Client_MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                //var top = "/World";
-                //Console.WriteLine("Subscribe:" + top);
-                //Console.Write("SubscribeReturnCode: ");
-                //var r = await client.SubscribeAsync(top, MqttQos.ExactlyOnce);
-                //Console.WriteLine(r.ReturnCodes);
-                while (true)
+                var top = "/World";
+                Console.WriteLine("Subscribe:" + top);
+                await client.SubscribeAsync(top, MqttQos.AtMostOnce);
+
+                for (int i = 1; i < 3; i++)
                 {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes("Hello World!"), MqttQos.AtLeastOnce);
-                    await Task.Delay(2000);
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.ExactlyOnce);
+                    await Task.Delay(1000);
+                    //Console.ReadKey();
                 }
             }
             Console.ReadKey();

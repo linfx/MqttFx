@@ -5,6 +5,8 @@
     /// </summary>
     public sealed class PingReqPacket : Packet
     {
+        public static readonly PingReqPacket Instance = new PingReqPacket();
+
         public PingReqPacket() 
             : base(PacketType.PINGREQ)
         {
@@ -16,6 +18,8 @@
     /// </summary>
     public class PingRespPacket : Packet
     {
+        public static readonly PingRespPacket Instance = new PingRespPacket();
+
         public PingRespPacket() 
             : base(PacketType.PINGRESP)
         {

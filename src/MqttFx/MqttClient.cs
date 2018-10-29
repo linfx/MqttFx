@@ -57,7 +57,7 @@ namespace MqttFx
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;
-                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024), clientReadListener);
+                    pipeline.AddLast(MqttEncoder2.Instance, new MqttDecoder2(false, 256 * 1024), clientReadListener);
                 }));
 
             try
@@ -129,7 +129,7 @@ namespace MqttFx
             _logger.LogInformation("【ProcessReceivedPacketAsync】: " + packet.PacketType);
 
             if (packet is PingReqPacket)
-                return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
+                return _clientChannel.WriteAndFlushAsync(PingRespPacket.Instance);
 
             if (packet is DisconnectPacket)
                 return DisconnectAsync();
@@ -145,6 +145,9 @@ namespace MqttFx
 
             if (packet is PubRelPacket pubRelPacket)
                 return _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
+
+            if (packet is PubCompPacket)
+                return Task.CompletedTask;
 
             return _packetDispatcher.Dispatch(packet);
         }
@@ -166,20 +169,25 @@ namespace MqttFx
             }
         }
 
-        private async Task<TResponsePacket> SendAndReceiveAsync<TResponsePacket>(Packet requestPacket, CancellationToken cancellationToken) where TResponsePacket : Packet
+        private Task SendAsync(Packet packet, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return _clientChannel.WriteAndFlushAsync(packet);
+        }
+
+        private async Task<TResponsePacket> SendAndReceiveAsync<TResponsePacket>(Packet packet, CancellationToken cancellationToken) where TResponsePacket : Packet
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             ushort identifier = 0;
-            if (requestPacket is PacketWithId packetWithId)
-            {
+            if (packet is PacketWithId packetWithId)
                 identifier = packetWithId.PacketId;
-            }
 
             var awaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
             try
             {
-                await _clientChannel.WriteAndFlushAsync(requestPacket);
+                await _clientChannel.WriteAndFlushAsync(packet);
                 using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
                 {

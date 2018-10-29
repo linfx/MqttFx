@@ -15,7 +15,7 @@ namespace MqttFx
         volatile Exception registeredException;
 
         public ReadListeningHandler()
-            : this(TimeSpan.FromSeconds(30))
+            : this(TimeSpan.Zero)
         {
         }
 

@@ -167,3 +167,43 @@ mosquitto_pub -t a/b/c -m hello -q 1
 |PINGREQ	|12	  |PING请求		  |
 |PINGRESP	|13	  |PING响应		  |
 |DISCONNECT	|14	  |断开连接		  |
+
+### PUBLISH发布消息
+PUBLISH报文承载客户端与服务器间双向的发布消息。 PUBACK报文用于接收端确认QoS1报文，PUBREC/PUBREL/PUBCOMP报文用于QoS2消息流程。
+
+### PINGREQ/PINGRESP心跳
+客户端在无报文发送时，按保活周期(KeepAlive)定时向服务端发送PINGREQ心跳报文，服务端响应PINGRESP报文。PINGREQ/PINGRESP报文均2个字节。
+
+### MQTT消息QoS
+MQTT发布消息QoS保证不是端到端的，是客户端与服务器之间的。订阅者收到MQTT消息的QoS级别，最终取决于发布消息的QoS和主题订阅的QoS。
+
+### Qos0消息发布订阅
+![Image text](http://www.emqtt.com/docs/v2/_images/qos0_seq.png)
+
+### Qos1消息发布订阅
+![Image text](http://www.emqtt.com/docs/v2/_images/qos1_seq.png)
+
+### Qos2消息发布订阅
+![Image text](http://www.emqtt.com/docs/v2/_images/qos2_seq.png)
+
+### MQTT会话(Clean Session)
+MQTT客户端向服务器发起CONNECT请求时，可以通过’Clean Session’标志设置会话。
+
+‘Clean Session’设置为0，表示创建一个持久会话，在客户端断开连接时，会话仍然保持并保存离线消息，直到会话超时注销。
+
+‘Clean Session’设置为1，表示创建一个新的临时会话，在客户端断开时，会话自动销毁。
+
+### MQTT连接保活心跳
+MQTT客户端向服务器发起CONNECT请求时，通过KeepAlive参数设置保活周期。
+
+客户端在无报文发送时，按KeepAlive周期定时发送2字节的PINGREQ心跳报文，服务端收到PINGREQ报文后，回复2字节的PINGRESP报文。
+
+服务端在1.5个心跳周期内，既没有收到客户端发布订阅报文，也没有收到PINGREQ心跳报文时，主动心跳超时断开客户端TCP连接。
+
+### MQTT遗愿消息(Last Will)
+MQTT客户端向服务器端CONNECT请求时，可以设置是否发送遗愿消息(Will Message)标志，和遗愿消息主题(Topic)与内容(Payload)。
+
+MQTT客户端异常下线时(客户端断开前未向服务器发送DISCONNECT消息)，MQTT消息服务器会发布遗愿消息。
+
+### MQTT保留消息(Retained Message)
+MQTT客户端向服务器发布(PUBLISH)消息时，可以设置保留消息(Retained Message)标志。保留消息(Retained Message)会驻留在消息服务器，后来的订阅者订阅主题时仍可以接收该消息。

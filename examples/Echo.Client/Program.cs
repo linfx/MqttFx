@@ -28,9 +28,9 @@ namespace Echo.Client
                 Console.WriteLine("Subscribe:" + top);
                 await client.SubscribeAsync(top, MqttQos.AtMostOnce);
 
-                for (int i = 1; i < 3; i++)
+                for (int i = 1; i < int.MaxValue; i++)
                 {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.ExactlyOnce);
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.AtLeastOnce);
                     await Task.Delay(1000);
                     //Console.ReadKey();
                 }

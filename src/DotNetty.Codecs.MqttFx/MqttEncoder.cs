@@ -33,6 +33,9 @@ namespace DotNetty.Codecs.MqttFx
         }
     }
 
+    /// <summary>
+    /// DotNetty.Codecs.Mqtt
+    /// </summary>
     public sealed class MqttEncoder2 : MessageToMessageEncoder<Packet>
     {
         public static readonly MqttEncoder Instance = new MqttEncoder();

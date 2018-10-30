@@ -162,6 +162,9 @@ namespace DotNetty.Codecs.MqttFx
         //}
     }
 
+    /// <summary>
+    /// DotNetty.Codecs.Mqtt
+    /// </summary>
     public sealed class MqttDecoder2 : ReplayingDecoder<MqttDecoder2.ParseState>
     {
         public enum ParseState

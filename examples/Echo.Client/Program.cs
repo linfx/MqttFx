@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 namespace Echo.Client
 {
@@ -14,7 +16,7 @@ namespace Echo.Client
             var services = new ServiceCollection();
             services.AddMqttClient(options =>
             {
-                options.Server = "118.126.96.166";
+                options.Server = "127.0.0.1";
             });
             var container = services.BuildServiceProvider();
 
@@ -24,9 +26,15 @@ namespace Echo.Client
             client.MessageReceived += Client_MessageReceived;
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                var top = "/World";
+                var top = "$SYS/brokers/+/clients/#";
                 Console.WriteLine("Subscribe:" + top);
-                await client.SubscribeAsync(top, MqttQos.AtMostOnce);
+
+                var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
+
+                foreach (var rc in rcs)
+                {
+                    Console.WriteLine(rc);
+                }
 
                 for (int i = 1; i < int.MaxValue; i++)
                 {
@@ -50,8 +58,31 @@ namespace Echo.Client
 
         private static void Client_MessageReceived(object sender, MqttMessageReceivedEventArgs e)
         {
-            var result = Encoding.UTF8.GetString(e.Message.Payload);
-            Console.WriteLine(result);
+            //$SYS/brokers/+/clients/+/connected
+            //$SYS/brokers/+/clients/+/disconnected
+            //$SYS/brokers/+/clients/#
+            var message = e.Message;
+            var payload = Encoding.UTF8.GetString(message.Payload);
+
+            if (new Regex(@"\$SYS/brokers/.+?/connected").Match(message.Topic).Success)
+            {
+                //{ "clientid":"mqtt.fx","username":"mqtt.fx","ipaddress":"127.0.0.1","clean_sess":true,"protocol":4,"connack":0,"ts":1540949660}
+
+                var obj = JObject.Parse(payload);
+                Console.WriteLine($"【Client Connected】 client_id:{obj.Value<string>("clientid")}, ipaddress:{obj.Value<string>("ipaddress")}");
+
+            }
+            else if (new Regex(@"\$SYS/brokers/.+?/disconnected").Match(message.Topic).Success)
+            {
+                //{"clientid":"mqtt.fx","username":"mqtt.fx","reason":"normal","ts":1540949658}
+
+                var obj = JObject.Parse(payload);
+                Console.WriteLine($"【Client Disconnected】 client_id:{obj.Value<string>("clientid")}");
+            }
+            else
+            {
+                Console.WriteLine(payload);
+            }
         }
     }
 }

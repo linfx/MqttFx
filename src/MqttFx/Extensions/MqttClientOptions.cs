@@ -29,7 +29,7 @@ namespace MqttFx.Extensions
         /// </summary>
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
         /// <summary>
-        /// 服务器
+        /// HostNameOrAddress
         /// </summary>
         public string Server { get; set; } = "localhost";
         /// <summary>

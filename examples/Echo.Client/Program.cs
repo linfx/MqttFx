@@ -16,7 +16,7 @@ namespace Echo.Client
             var services = new ServiceCollection();
             services.AddMqttClient(options =>
             {
-                options.Server = "127.0.0.1";
+                options.Server = "118.126.96.166";
             });
             var container = services.BuildServiceProvider();
 

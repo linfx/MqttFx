@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ namespace MqttFx
     public class MqttClient
     {
         readonly ILogger _logger;
-        readonly IEventLoopGroup _group;
+        readonly IEventLoopGroup _eventLoopGroup;
         readonly MqttClientOptions _options;
         readonly PacketIdProvider _packetIdentifierProvider;
         readonly PacketDispatcher _packetDispatcher;
@@ -36,7 +35,7 @@ namespace MqttFx
             ILogger<MqttClient> logger = default)
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
-            _group = new MultithreadEventLoopGroup();
+            _eventLoopGroup = new MultithreadEventLoopGroup();
             _packetIdentifierProvider = new PacketIdProvider();
             _packetDispatcher = new PacketDispatcher();
             _options = options.Value;
@@ -51,7 +50,7 @@ namespace MqttFx
             var clientReadListener = new ReadListeningHandler();
             var bootstrap = new Bootstrap();
             bootstrap
-                .Group(_group)
+                .Group(_eventLoopGroup)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
@@ -130,7 +129,7 @@ namespace MqttFx
             _logger.LogInformation("【ProcessReceivedPacketAsync】: " + packet.PacketType);
 
             if (packet is PingReqPacket)
-                return _clientChannel.WriteAndFlushAsync(PingRespPacket.Instance);
+                return SendAsync(PingRespPacket.Instance);
 
             if (packet is DisconnectPacket)
                 return DisconnectAsync();
@@ -142,10 +141,10 @@ namespace MqttFx
                 return ProcessReceivedPublishPacketAsync(publishPacket);
 
             if (packet is PubRecPacket pubRecPacket)
-                return _clientChannel.WriteAndFlushAsync(new PubRelPacket(pubRecPacket.PacketId));
+                return SendAsync(new PubRelPacket(pubRecPacket.PacketId));
 
             if (packet is PubRelPacket pubRelPacket)
-                return _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
+                return SendAsync(new PubCompPacket(pubRelPacket.PacketId));
 
             if (packet is PubCompPacket)
                 return Task.CompletedTask;
@@ -162,18 +161,16 @@ namespace MqttFx
                 case MqttQos.AtMostOnce:
                     return Task.CompletedTask;
                 case MqttQos.AtLeastOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubAckPacket(publishPacket.PacketId));
+                    return SendAsync(new PubAckPacket(publishPacket.PacketId));
                 case MqttQos.ExactlyOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId));
+                    return SendAsync(new PubRecPacket(publishPacket.PacketId));
                 default:
                     throw new MqttException("Received a not supported QoS level.");
             }
         }
 
-        private Task SendAsync(Packet packet, CancellationToken cancellationToken)
+        private Task SendAsync(Packet packet)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             return _clientChannel.WriteAndFlushAsync(packet);
         }
 
@@ -188,7 +185,7 @@ namespace MqttFx
             var awaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
             try
             {
-                await _clientChannel.WriteAndFlushAsync(packet);
+                await SendAsync(packet);
                 using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
                 using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
                 {
@@ -239,7 +236,7 @@ namespace MqttFx
             if(qos > MqttQos.AtMostOnce)
                 packet.PacketId = _packetIdentifierProvider.GetPacketId();
 
-            return _clientChannel.WriteAndFlushAsync(packet);
+            return SendAsync(packet);
         }
 
         /// <summary>
@@ -277,8 +274,7 @@ namespace MqttFx
         public async Task DisconnectAsync()
         {
             await _clientChannel.CloseAsync();
-            await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
-            //OnDisconnected?.Invoke();
+            await _eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 
         void OnMessageReceived(string clientId, Message message)

@@ -31,7 +31,7 @@ namespace MqttFx.Extensions
         /// <summary>
         /// HostNameOrAddress
         /// </summary>
-        public string Server { get; set; } = "localhost";
+        public string Host { get; set; } = "localhost";
         /// <summary>
         /// 端口
         /// </summary>

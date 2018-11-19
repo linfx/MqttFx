@@ -65,7 +65,7 @@ namespace MqttFx
                 _packetIdentifierProvider.Reset();
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                _clientChannel = await bootstrap.ConnectAsync(_options.Server, _options.Port);
+                _clientChannel = await bootstrap.ConnectAsync(_options.Host, _options.Port);
 
                 StartReceivingPackets(clientReadListener, _cancellationTokenSource.Token);
 

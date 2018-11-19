@@ -28,7 +28,7 @@
 
         public MqttClientOptionsBuilder WithTcpServer(string server, int port = 1883)
         {
-            _options.Server = server;
+            _options.Host = server;
             _options.Port = port;
             return this;
         }

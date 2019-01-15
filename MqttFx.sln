@@ -11,6 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttFx", "src\MqttFx\MqttFx
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetty.Codecs.MqttFx", "src\DotNetty.Codecs.MqttFx\DotNetty.Codecs.MqttFx.csproj", "{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{541B0DD0-22BE-4B97-B80E-23C75868D1E2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{64378755-ADF3-471A-905F-08F1D14B9F79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6FF4C7B2-AC10-40F8-9337-827636A50892}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +42,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE} = {6FF4C7B2-AC10-40F8-9337-827636A50892}
+		{F657D758-2730-44FE-B58D-D41816F90B60} = {64378755-ADF3-471A-905F-08F1D14B9F79}
+		{F065401D-3021-402E-BC0D-F28C96E91277} = {541B0DD0-22BE-4B97-B80E-23C75868D1E2}
+		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886} = {541B0DD0-22BE-4B97-B80E-23C75868D1E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E0A9EB4-1E55-4389-96A4-EC45F5D31A1C}

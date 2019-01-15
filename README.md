@@ -1,7 +1,10 @@
 # MqttFx
-```
+
 c# mqtt 3.1.1 client
-```
+
+官方交流群: 241445317
+
+***
 
 ## Install
 

@@ -31,7 +31,8 @@ namespace MqttFx
         public event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
         public event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
 
-        public MqttClient(IOptions<MqttClientOptions> options,
+        public MqttClient(
+            IOptions<MqttClientOptions> options,
             ILogger<MqttClient> logger = default)
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
@@ -275,6 +276,7 @@ namespace MqttFx
         {
             await _clientChannel.CloseAsync();
             await _eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            Disconnected?.Invoke(this, new MqttClientDisconnectedEventArgs(_options.ClientId));
         }
 
         void OnMessageReceived(string clientId, Message message)

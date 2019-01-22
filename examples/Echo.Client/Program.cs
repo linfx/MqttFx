@@ -16,11 +16,11 @@ namespace Echo.Client
             var services = new ServiceCollection();
             services.AddMqttClient(options =>
             {
-                options.Host = "118.126.96.166";
+                options.Host = "m2m.eclipse.org";
             });
             var container = services.BuildServiceProvider();
 
-            var client = container.GetService<MqttClient>();
+            var client = container.GetService<IMqttClient>();
             client.Connected += Client_Connected;
             client.Disconnected += Client_Disconnected;
             client.MessageReceived += Client_MessageReceived;

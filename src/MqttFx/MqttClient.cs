@@ -27,6 +27,8 @@ namespace MqttFx
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
 
+        public bool IsConnected => _clientChannel == null && _clientChannel.Open;
+
         public event EventHandler<MqttClientConnectedEventArgs> Connected;
         public event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
         public event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;

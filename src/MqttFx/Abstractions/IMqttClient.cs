@@ -1,4 +1,5 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
+using System;
 using System.Threading.Tasks;
 
 namespace MqttFx
@@ -34,5 +35,10 @@ namespace MqttFx
         /// <param name="topics">主题</param>
         /// <returns></returns>
         Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics);
+
+        bool IsConnected { get; }
+        event EventHandler<MqttClientConnectedEventArgs> Connected;
+        event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
+        event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
     }
 }

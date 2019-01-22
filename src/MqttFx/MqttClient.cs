@@ -16,7 +16,7 @@ namespace MqttFx
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public class MqttClient
+    public class MqttClient : IMqttClient
     {
         readonly ILogger _logger;
         readonly IEventLoopGroup _eventLoopGroup;
@@ -84,6 +84,64 @@ namespace MqttFx
             }
         }
 
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        /// <param name="topic">主题</param>
+        /// <param name="payload">有效载荷</param>
+        /// <param name="qos">服务质量等级</param>
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
+        {
+            var packet = new PublishPacket(qos)
+            {
+                TopicName = topic,
+                Payload = payload
+            };
+            if(qos > MqttQos.AtMostOnce)
+                packet.PacketId = _packetIdentifierProvider.GetPacketId();
+
+            return SendAsync(packet);
+        }
+
+        /// <summary>
+        /// 订阅主题
+        /// </summary>
+        /// <param name="topic">主题</param>
+        /// <param name="qos">服务质量等级</param>
+        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
+        {
+            var packet = new SubscribePacket
+            {
+                PacketId = _packetIdentifierProvider.GetPacketId(),
+            };
+            packet.Add(topic, qos);
+
+            return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
+        }
+
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="topics">主题</param>
+        public Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics)
+        {
+            var packet = new UnsubscribePacket();
+            packet.AddRange(topics);
+
+            return SendAndReceiveAsync<UnsubAckPacket>(packet, _cancellationTokenSource.Token); ;
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        /// <returns></returns>
+        public async Task DisconnectAsync()
+        {
+            await _clientChannel.CloseAsync();
+            await _eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            Disconnected?.Invoke(this, new MqttClientDisconnectedEventArgs(_options.ClientId));
+        }
+
         private Task<ConnAckPacket> AuthenticateAsync(ReadListeningHandler readListener, CancellationToken cancellationToken)
         {
             var packet = new ConnectPacket
@@ -98,7 +156,7 @@ namespace MqttFx
                 packet.UserName = _options.Credentials.Username;
                 packet.Password = _options.Credentials.Username;
             }
-            if(_options.WillMessage != null)
+            if (_options.WillMessage != null)
             {
                 packet.WillFlag = true;
                 packet.WillQos = _options.WillMessage.Qos;
@@ -221,65 +279,7 @@ namespace MqttFx
             }
         }
 
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="payload">有效载荷</param>
-        /// <param name="qos">服务质量等级</param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
-        {
-            var packet = new PublishPacket(qos)
-            {
-                TopicName = topic,
-                Payload = payload
-            };
-            if(qos > MqttQos.AtMostOnce)
-                packet.PacketId = _packetIdentifierProvider.GetPacketId();
-
-            return SendAsync(packet);
-        }
-
-        /// <summary>
-        /// 订阅主题
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="qos">服务质量等级</param>
-        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
-        {
-            var packet = new SubscribePacket
-            {
-                PacketId = _packetIdentifierProvider.GetPacketId(),
-            };
-            packet.Add(topic, qos);
-
-            return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
-        }
-
-        /// <summary>
-        /// 取消订阅
-        /// </summary>
-        /// <param name="topics">主题</param>
-        public Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics)
-        {
-            var packet = new UnsubscribePacket();
-            packet.AddRange(topics);
-
-            return SendAndReceiveAsync<UnsubAckPacket>(packet, _cancellationTokenSource.Token); ;
-        }
-
-        /// <summary>
-        /// 断开连接
-        /// </summary>
-        /// <returns></returns>
-        public async Task DisconnectAsync()
-        {
-            await _clientChannel.CloseAsync();
-            await _eventLoopGroup.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
-            Disconnected?.Invoke(this, new MqttClientDisconnectedEventArgs(_options.ClientId));
-        }
-
-        void OnMessageReceived(string clientId, Message message)
+        private void OnMessageReceived(string clientId, Message message)
         {
             MessageReceived?.Invoke(this, new MqttMessageReceivedEventArgs(clientId, message));
         }

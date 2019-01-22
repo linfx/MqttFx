@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MqttFx.Extensions
+namespace MqttFx
 {
     public class MqttClientOptions
     {

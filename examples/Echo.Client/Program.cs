@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
 namespace Echo.Client

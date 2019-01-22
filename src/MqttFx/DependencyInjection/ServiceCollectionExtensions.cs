@@ -1,6 +1,5 @@
 ﻿using System;
 using MqttFx;
-using MqttFx.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -8,10 +7,15 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
         {
+            if(optionsAction == null)
+            {
+                throw new ArgumentNullException("optionsAction");
+            }
+
             services.AddLogging();
             services.AddOptions();
             services.Configure(optionsAction);
-            services.AddSingleton<MqttClient>();
+            services.AddSingleton<IMqttClient, MqttClient >();
             return services;
         }
     }

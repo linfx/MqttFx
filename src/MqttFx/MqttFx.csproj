@@ -5,9 +5,9 @@
     <AssemblyName>MqttFx</AssemblyName>
     <RootNamespace>MqttFx</RootNamespace>
     <Version>3.0.1</Version>
-    <Authors>linfx</Authors>
-    <Company />
-    <Description>Mqtt Client,   using Dotnetty</Description>
+    <Authors>强悍的抽屉</Authors>
+    <Company>LinFx</Company>
+    <Description>MqttFx is a mqtt v3.1.1 client using DotNetty</Description>
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
     <PackageId>MqttFx</PackageId>
     <Product>MqttFx</Product>

@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Authors>linfx</Authors>
+    <Authors>强悍的抽屉</Authors>
     <Company>LinFx</Company>
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/linfx/MqttFx</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>mqtt</PackageTags>
-    <Copyright>(c) LinFx 2015 - 2018</Copyright>
-    <Version>0.5.0</Version>
+    <Copyright>(c) LinFx 2019</Copyright>
+    <Version>0.5.1</Version>
     <Description>General purpose codecs for DotNetty、MqttFx</Description>
   </PropertyGroup>
 

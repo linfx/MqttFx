@@ -4,8 +4,7 @@
     {
         public const string ProtocolName = "MQTT";
         public const int ProtocolLevel = 4;
-
-        static readonly char[] TopicWildcards = { '#', '+' };
+        private static readonly char[] TopicWildcards = { '#', '+' };
 
         public static void ValidateTopicName(string topicName)
         {

@@ -18,20 +18,20 @@ namespace MqttFx
     /// </summary>
     public class MqttClient : IMqttClient
     {
-        readonly ILogger _logger;
-        readonly IEventLoopGroup _eventLoopGroup;
-        readonly MqttClientOptions _options;
-        readonly PacketIdProvider _packetIdentifierProvider;
-        readonly PacketDispatcher _packetDispatcher;
+        private readonly ILogger _logger;
+        private readonly IEventLoopGroup _eventLoopGroup;
+        private readonly MqttClientOptions _options;
+        private readonly PacketIdProvider _packetIdentifierProvider;
+        private readonly PacketDispatcher _packetDispatcher;
 
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public bool IsConnected => _clientChannel == null && _clientChannel.Open;
-
         public event EventHandler<MqttClientConnectedEventArgs> Connected;
         public event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
         public event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
+
+        public bool IsConnected => _clientChannel == null && _clientChannel.Open;
 
         public MqttClient(
             IOptions<MqttClientOptions> options,

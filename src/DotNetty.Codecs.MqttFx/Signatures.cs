@@ -6,7 +6,6 @@ namespace DotNetty.Codecs.MqttFx
     static class Signatures
     {
         const byte QoS1Signature = (int)MqttQos.AtLeastOnce << 1;
-
         // most often used (anticipated) come first
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

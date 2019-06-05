@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using MqttFx.Packets;
-using MqttFx.Protocol;
+using System.Collections.Generic;
 
 namespace MqttFx
 {
+    /// <summary>
+    /// Mqtt编码器
+    /// </summary>
     public sealed class MqttEncoder : MessageToMessageEncoder<Packet>
     {
         public static readonly MqttEncoder Instance = new MqttEncoder();
@@ -16,7 +18,7 @@ namespace MqttFx
 
         public static void DoEncode(IByteBufferAllocator bufferAllocator, Packet packet, List<object> output)
         {
-            IByteBuffer  buffer = bufferAllocator.Buffer();
+            IByteBuffer buffer = bufferAllocator.Buffer();
             try
             {
                 packet.Encode(buffer);

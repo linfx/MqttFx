@@ -1,30 +1,30 @@
-﻿using System;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using DotNetty.Transport.Bootstrapping;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using DotNetty.Transport.Channels;
-using DotNetty.Transport.Bootstrapping;
-using DotNetty.Transport.Channels.Sockets;
+using Microsoft.Extensions.Options;
+using MqttFx.Extensions;
 using MqttFx.Messages;
 using MqttFx.Packets;
 using MqttFx.Protocol;
-using MqttFx.Extensions;
-using Microsoft.Extensions.Options;
+using System;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MqttFx
 {
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public class MqttClient
+    public class MqttClient : IMqttClient
     {
-        readonly ILogger _logger;
-        readonly IEventLoopGroup _group;
-        readonly MqttClientOptions _options;
-        readonly MqttPacketIdProvider _packetIdentifierProvider;
-        readonly MqttPacketDispatcher _packetDispatcher;
+        private readonly ILogger _logger;
+        private readonly IEventLoopGroup _group;
+        private readonly MqttClientOptions _options;
+        private readonly MqttPacketIdProvider _packetIdentifierProvider;
+        private readonly MqttPacketDispatcher _packetDispatcher;
 
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
@@ -33,14 +33,15 @@ namespace MqttFx
         public Action OnDisconnected;
         public Action<Message> OnMessageReceived;
 
-        public MqttClient(IOptions<MqttClientOptions> options,
-            ILogger<MqttClient> logger = default)
+        public MqttClient(
+            IOptions<MqttClientOptions> options,
+            ILogger<MqttClient> logger)
         {
             _logger = logger ?? NullLogger<MqttClient>.Instance;
+            _options = options.Value;
             _group = new MultithreadEventLoopGroup();
             _packetIdentifierProvider = new MqttPacketIdProvider();
             _packetDispatcher = new MqttPacketDispatcher();
-            _options = options.Value;
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace MqttFx
                 packet.UserName = _options.Credentials.Username;
                 packet.Password = _options.Credentials.Username;
             }
-            if(_options.WillMessage != null)
+            if (_options.WillMessage != null)
             {
                 packet.WillFlag = true;
                 packet.WillQos = _options.WillMessage.Qos;
@@ -237,7 +238,7 @@ namespace MqttFx
                 TopicName = topic,
                 Payload = payload
             };
-            if(qos > MqttQos.AtMostOnce)
+            if (qos > MqttQos.AtMostOnce)
                 packet.PacketId = _packetIdentifierProvider.GetNewPacketId();
 
             return _clientChannel.WriteAndFlushAsync(packet);

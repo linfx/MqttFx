@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using MqttFx.Packets;
 using MqttFx.Protocol;
+using System.Collections.Generic;
 
 namespace MqttFx
 {
+    /// <summary>
+    /// Mqtt解码器
+    /// </summary>
     public sealed class MqttDecoder : ByteToMessageDecoder
     {
         readonly bool _isServer;

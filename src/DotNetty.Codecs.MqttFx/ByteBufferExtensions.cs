@@ -1,11 +1,10 @@
 ﻿using DotNetty.Buffers;
-using DotNetty.Codecs;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace MqttFx
+namespace DotNetty.Codecs.MqttFx
 {
     internal static class ByteBufferExtensions
     {
@@ -51,7 +50,7 @@ namespace MqttFx
         {
             byte[] stringBytes = Encoding.UTF8.GetBytes(value);
             buffer.WriteShort(stringBytes.Length);
-            buffer.WriteBytes(stringBytes, 0, stringBytes.Length);
+            buffer.WriteBytes(stringBytes);
         }
 
         /// <summary>

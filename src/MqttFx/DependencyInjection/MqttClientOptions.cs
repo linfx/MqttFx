@@ -1,5 +1,4 @@
-﻿using MqttFx.Messages;
-using System;
+﻿using System;
 
 namespace MqttFx
 {
@@ -16,7 +15,7 @@ namespace MqttFx
         /// <summary>
         /// 保持连接 
         /// </summary>
-        public short KeepAlive { get; set; } = 60;
+        public ushort KeepAlive { get; set; } = 60;
         /// <summary>
         /// 案例凭证
         /// </summary>
@@ -30,9 +29,9 @@ namespace MqttFx
         /// </summary>
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
         /// <summary>
-        /// 服务器
+        /// HostNameOrAddress
         /// </summary>
-        public string Server { get; set; } = "localhost";
+        public string Host { get; set; } = "localhost";
         /// <summary>
         /// 端口
         /// </summary>

@@ -1,33 +1,31 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
-using DotNetty.Codecs;
-using MqttFx.Protocol;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 订阅主题
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
+        public SubscribePacket() 
+            : base(PacketType.SUBSCRIBE)
+        {
+        }
+
         /// <summary>
         /// 主题列表
         /// </summary>
-        IList<TopicQos> Topics = new List<TopicQos>();
+        List<SubscriptionRequest> _subscribeTopics = new List<SubscriptionRequest>();
 
         public void Add(string topic, MqttQos qos)
         {
-            Topics.Add(new TopicQos
-            {
-                Topic = topic,
-                Qos = qos,
-            });
+            _subscribeTopics.Add(new SubscriptionRequest(topic, qos));
         }
 
-        struct TopicQos
+        public void Add(params SubscriptionRequest[] requests)
         {
-            public string Topic { get; set; }
-            public MqttQos Qos { get; set; }
+            _subscribeTopics.AddRange(requests);
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -37,7 +35,7 @@ namespace MqttFx.Packets
             {
                 buf.WriteUnsignedShort(PacketId);
 
-                foreach (var item in Topics)
+                foreach (var item in _subscribeTopics)
                 {
                     buf.WriteString(item.Topic);
                     buf.WriteByte((byte)item.Qos);
@@ -60,20 +58,25 @@ namespace MqttFx.Packets
     /// </summary>
     public class SubAckPacket : PacketWithId
     {
+        public SubAckPacket()
+            : base(PacketType.SUBACK)
+        {
+        }
+
         /// <summary>
         /// 返回代码
         /// </summary>
-        public IReadOnlyList<SubscribeReturnCode> ReturnCodes { get; set; }
+        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
 
         public override void Decode(IByteBuffer buffer)
         {
             base.Decode(buffer);
 
-            var returnCodes = new SubscribeReturnCode[RemaingLength];
+            var returnCodes = new MqttQos[RemaingLength];
             for (int i = 0; i < RemaingLength; i++)
             {
-                var returnCode = (SubscribeReturnCode)buffer.ReadByte();
-                if (returnCode > SubscribeReturnCode.SuccessMaximumQoS2 && returnCode != SubscribeReturnCode.Failure)
+                var returnCode = (MqttQos)buffer.ReadByte();
+                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
                 {
                     throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
                 }
@@ -82,5 +85,17 @@ namespace MqttFx.Packets
             ReturnCodes = returnCodes;
             FixedHeader.RemaingLength = 0;
         }
+    }
+
+    public class SubscriptionRequest
+    {
+        public SubscriptionRequest(string topic, MqttQos qos)
+        {
+            Topic = topic;
+            Qos = qos;
+        }
+
+        public string Topic { get; set; }
+        public MqttQos Qos { get; set; }
     }
 }

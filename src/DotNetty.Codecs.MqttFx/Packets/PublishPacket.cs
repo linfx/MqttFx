@@ -1,30 +1,34 @@
 ﻿using DotNetty.Buffers;
-using MqttFx.Protocol;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 发布消息
     /// </summary>
-    internal sealed class PublishPacket : PacketWithId
+    public sealed class PublishPacket : PacketWithId
     {
-        /// <summary>
-        /// 主题
-        /// </summary>
-        public string TopicName { get; set; }
-        /// <summary>
-        /// 有效载荷
-        /// </summary>
-        public byte[] Payload { get; set; }
-
-        public PublishPacket() { }
+        public PublishPacket()
+            : base(PacketType.PUBLISH)
+        {
+        }
 
         public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
+            : this()
         {
             FixedHeader.Qos = qos;
             FixedHeader.Dup = dup;
             FixedHeader.Retain = retain;
         }
+
+        /// <summary>
+        /// 主题
+        /// </summary>
+        public string TopicName { get; set; }
+
+        /// <summary>
+        /// 有效载荷
+        /// </summary>
+        public byte[] Payload { get; set; }
 
         public override void Encode(IByteBuffer buffer)
         {
@@ -70,9 +74,10 @@ namespace MqttFx.Packets
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    internal sealed class PubAckPacket : PacketWithId
+    public sealed class PubAckPacket : PacketWithId
     {
         public PubAckPacket(ushort packetId = default)
+            : base(PacketType.PUBACK)
         {
             PacketId = packetId;
         }
@@ -82,9 +87,10 @@ namespace MqttFx.Packets
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    internal sealed class PubRecPacket : PacketWithId
+    public sealed class PubRecPacket : PacketWithId
     {
         public PubRecPacket(ushort packetId = default)
+            : base(PacketType.PUBREC)
         {
             PacketId = packetId;
         }
@@ -94,9 +100,10 @@ namespace MqttFx.Packets
     /// QoS2消息释放
     /// QoS 2 publish received, part 2
     /// </summary>
-    internal sealed class PubRelPacket : PacketWithId
+    public sealed class PubRelPacket : PacketWithId
     {
         public PubRelPacket(ushort packetId = default)
+            : base(PacketType.PUBREL)
         {
             PacketId = packetId;
         }
@@ -106,9 +113,10 @@ namespace MqttFx.Packets
     /// QoS2消息完成
     /// QoS 2 publish received, part 3
     /// </summary>
-    internal sealed class PubCompPacket : PacketWithId
+    public sealed class PubCompPacket : PacketWithId
     {
         public PubCompPacket(ushort packetId = default)
+            : base(PacketType.PUBCOMP)
         {
             PacketId = packetId;
         }

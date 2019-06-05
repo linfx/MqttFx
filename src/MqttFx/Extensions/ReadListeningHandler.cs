@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 
-namespace MqttFx
+namespace MqttFx.Extensions
 {
     public sealed class ReadListeningHandler : ChannelHandlerAdapter
     {
@@ -15,7 +15,7 @@ namespace MqttFx
         volatile Exception registeredException;
 
         public ReadListeningHandler()
-            : this(TimeSpan.FromSeconds(30))
+            : this(TimeSpan.Zero)
         {
         }
 
@@ -40,6 +40,10 @@ namespace MqttFx
             }
         }
 
+        /// <summary>
+        /// 不活动
+        /// </summary>
+        /// <param name="context"></param>
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             SetException(new InvalidOperationException("Channel is closed."));

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using MqttFx.Packets;
+using DotNetty.Codecs.MqttFx.Packets;
 
 namespace MqttFx.Extensions
 {
-    internal class MqttPacketDispatcher
+    internal class PacketDispatcher
     {
         readonly ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>> _awaiters = new ConcurrentDictionary<Tuple<ushort, Type>, TaskCompletionSource<Packet>>();
 

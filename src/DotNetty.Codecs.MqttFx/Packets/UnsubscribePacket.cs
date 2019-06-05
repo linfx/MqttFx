@@ -1,14 +1,24 @@
 ﻿using System.Collections.Generic;
 using DotNetty.Buffers;
 
-namespace MqttFx.Packets
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 取消订阅
     /// </summary>
     public sealed class UnsubscribePacket : PacketWithId
     {
+        public UnsubscribePacket() 
+            : base(PacketType.UNSUBSCRIBE)
+        {
+        }
+
         List<string> _topics = new List<string>();
+
+        public void AddRange(params string[] topics)
+        {
+            _topics.AddRange(topics);
+        }
 
         public override void Encode(IByteBuffer buffer)
         {
@@ -32,17 +42,16 @@ namespace MqttFx.Packets
                 buf?.Release();
             }
         }
-
-        public void AddRange(params string[] topics)
-        {
-            _topics.AddRange(topics);
-        }
     }
 
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    public sealed class UnsubscribeAckMessage : Packet
+    public sealed class UnsubAckPacket : PacketWithId
     {
+        public UnsubAckPacket()
+            : base(PacketType.UNSUBACK)
+        {
+        }
     }
 }

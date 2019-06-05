@@ -2,7 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 
-namespace MqttFx
+namespace DotNetty.Codecs.MqttFx
 {
     internal class MqttEncoding : ASCIIEncoding
     {

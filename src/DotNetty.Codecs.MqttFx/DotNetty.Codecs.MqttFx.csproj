@@ -10,7 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>mqtt</PackageTags>
     <Copyright>(c) LinFx 2019</Copyright>
-    <Version>0.5.1</Version>
+    <Version>0.6</Version>
     <Description>General purpose codecs for DotNetty、MqttFx</Description>
   </PropertyGroup>
 

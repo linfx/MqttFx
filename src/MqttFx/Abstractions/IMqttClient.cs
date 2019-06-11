@@ -29,16 +29,16 @@ namespace MqttFx
         /// <returns></returns>
         Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce);
 
-        /// <summary>
-        /// 取消订阅
-        /// </summary>
-        /// <param name="topics">主题</param>
-        /// <returns></returns>
-        Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics);
+        ///// <summary>
+        ///// 取消订阅
+        ///// </summary>
+        ///// <param name="topics">主题</param>
+        ///// <returns></returns>
+        //Task<UnsubAckPacket> UnsubscribeAsync(params string[] topics);
 
-        bool IsConnected { get; }
-        event EventHandler<MqttClientConnectedEventArgs> Connected;
-        event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
-        event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
+        //bool IsConnected { get; }
+        //event EventHandler<MqttClientConnectedEventArgs> Connected;
+        //event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
+        //event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
     }
 }

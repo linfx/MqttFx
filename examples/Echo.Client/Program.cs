@@ -16,14 +16,15 @@ namespace Echo.Client
             var services = new ServiceCollection();
             services.AddMqttClient(options =>
             {
-                options.Host = "m2m.eclipse.org";
+                options.Host = "198.41.30.241";
             });
             var container = services.BuildServiceProvider();
 
             var client = container.GetService<IMqttClient>();
-            client.Connected += Client_Connected;
-            client.Disconnected += Client_Disconnected;
-            client.MessageReceived += Client_MessageReceived;
+            //client.Connected += Client_Connected;
+            //client.Disconnected += Client_Disconnected;
+            //client.MessageReceived += Client_MessageReceived;
+
             if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
                 var top = "$SYS/brokers/+/clients/#";

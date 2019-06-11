@@ -1,6 +1,6 @@
 ﻿namespace DotNetty.Codecs.MqttFx
 {
-    static class Util
+    public static class Util
     {
         public const string ProtocolName = "MQTT";
         public const int ProtocolLevel = 4;

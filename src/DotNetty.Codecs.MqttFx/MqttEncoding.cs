@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 
 namespace DotNetty.Codecs.MqttFx
 {
-    internal class MqttEncoding : ASCIIEncoding
+    public class MqttEncoding : ASCIIEncoding
     {
         public override byte[] GetBytes(string s)
         {

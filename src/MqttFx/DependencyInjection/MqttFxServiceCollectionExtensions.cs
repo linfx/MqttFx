@@ -7,9 +7,9 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
         {
-            if(optionsAction == null)
+            if (optionsAction == null)
             {
-                throw new ArgumentNullException("optionsAction");
+                throw new ArgumentNullException(nameof(optionsAction));
             }
 
             services.AddLogging();

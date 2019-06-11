@@ -36,7 +36,7 @@ namespace DotNetty.Codecs.MqttFx
         /// <param name="value">The string to write.</param>
         public static void WriteString(this Stream stream, string value)
         {
-            System.Text.Encoding enc = new MqttEncoding();
+            Encoding enc = new MqttEncoding();
             byte[] stringBytes = enc.GetBytes(value);
             stream.Write(stringBytes, 0, stringBytes.Length);
         }

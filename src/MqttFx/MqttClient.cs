@@ -1,13 +1,12 @@
-﻿using DotNetty.Transport.Bootstrapping;
+﻿using DotNetty.Codecs.MqttFx;
+using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MqttFx.Extensions;
-using MqttFx.Messages;
-using MqttFx.Packets;
-using MqttFx.Protocol;
+using MqttFx.Internal;
 using System;
 using System.Net;
 using System.Threading;
@@ -23,8 +22,8 @@ namespace MqttFx
         private readonly ILogger _logger;
         private readonly IEventLoopGroup _group;
         private readonly MqttClientOptions _options;
-        private readonly MqttPacketIdProvider _packetIdentifierProvider;
-        private readonly MqttPacketDispatcher _packetDispatcher;
+        private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
+        private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
 
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
@@ -34,14 +33,12 @@ namespace MqttFx
         public Action<Message> OnMessageReceived;
 
         public MqttClient(
-            IOptions<MqttClientOptions> options,
-            ILogger<MqttClient> logger)
+            ILogger<MqttClient> logger,
+            IOptions<MqttClientOptions> options)
         {
-            _logger = logger ?? NullLogger<MqttClient>.Instance;
             _options = options.Value;
+            _logger = logger ?? NullLogger<MqttClient>.Instance;
             _group = new MultithreadEventLoopGroup();
-            _packetIdentifierProvider = new MqttPacketIdProvider();
-            _packetDispatcher = new MqttPacketDispatcher();
         }
 
         /// <summary>
@@ -65,9 +62,9 @@ namespace MqttFx
             try
             {
                 _packetDispatcher.Reset();
-                _packetIdentifierProvider.Reset();
+                _packetIdProvider.Reset();
                 _cancellationTokenSource = new CancellationTokenSource();
-                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Server), _options.Port));
+                _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port));
 
                 StartReceivingPackets(clientReadListener, _cancellationTokenSource.Token);
 
@@ -78,9 +75,10 @@ namespace MqttFx
                 }
                 return connectResponse.ConnectReturnCode;
             }
-            catch
+            catch(Exception ex)
             {
                 await DisconnectAsync();
+                _logger.LogError(ex.Message, ex);
                 throw new MqttException("BrokerUnavailable");
             }
         }
@@ -239,7 +237,7 @@ namespace MqttFx
                 Payload = payload
             };
             if (qos > MqttQos.AtMostOnce)
-                packet.PacketId = _packetIdentifierProvider.GetNewPacketId();
+                packet.PacketId = _packetIdProvider.GetNewPacketId();
 
             return _clientChannel.WriteAndFlushAsync(packet);
         }
@@ -253,24 +251,24 @@ namespace MqttFx
         {
             var packet = new SubscribePacket
             {
-                PacketId = _packetIdentifierProvider.GetNewPacketId(),
+                PacketId = _packetIdProvider.GetNewPacketId(),
             };
             packet.Add(topic, qos);
 
             return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
         }
 
-        /// <summary>
-        /// 取消订阅
-        /// </summary>
-        /// <param name="topics">主题</param>
-        public Task<UnsubscribeAckMessage> UnsubscribeAsync(params string[] topics)
-        {
-            var packet = new UnsubscribePacket();
-            packet.AddRange(topics);
+        ///// <summary>
+        ///// 取消订阅
+        ///// </summary>
+        ///// <param name="topics">主题</param>
+        //public Task<UnsubscribeAckMessage> UnsubscribeAsync(params string[] topics)
+        //{
+        //    var packet = new UnsubscribePacket();
+        //    packet.AddRange(topics);
 
-            return SendAndReceiveAsync<UnsubscribeAckMessage>(packet, _cancellationTokenSource.Token); ;
-        }
+        //    return SendAndReceiveAsync<UnsubscribeAckMessage>(packet, _cancellationTokenSource.Token);
+        //}
 
         /// <summary>
         /// 断开连接
@@ -278,7 +276,8 @@ namespace MqttFx
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            await _clientChannel.CloseAsync();
+            if(_clientChannel != null)
+                await _clientChannel.CloseAsync();
             await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             OnDisconnected?.Invoke();
         }

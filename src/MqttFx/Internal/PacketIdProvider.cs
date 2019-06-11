@@ -1,6 +1,6 @@
-﻿namespace MqttFx.Extensions
+﻿namespace MqttFx.Internal
 {
-    public class PacketIdProvider
+    internal class PacketIdProvider
     {
         private readonly object _syncRoot = new object();
         private ushort _value;
@@ -11,7 +11,7 @@
                 _value = 0;
         }
 
-        public ushort GetPacketId()
+        public ushort GetNewPacketId()
         {
             lock (_syncRoot)
             {

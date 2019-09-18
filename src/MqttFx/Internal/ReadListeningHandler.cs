@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 
-namespace MqttFx.Extensions
+namespace MqttFx.Internal
 {
-    public sealed class ReadListeningHandler : ChannelHandlerAdapter
+    internal sealed class ReadListeningHandler : ChannelHandlerAdapter
     {
         readonly Queue<object> _receivedQueue = new Queue<object>();
         readonly Queue<TaskCompletionSource<object>> _readPromises = new Queue<TaskCompletionSource<object>>();

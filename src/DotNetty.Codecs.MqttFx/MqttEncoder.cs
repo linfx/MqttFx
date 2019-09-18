@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
-using DotNetty.Codecs.MqttFx.Packets;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace DotNetty.Codecs.MqttFx

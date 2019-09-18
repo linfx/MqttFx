@@ -134,8 +134,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class ConnAckPacket : Packet
     {
-        public ConnAckPacket() 
-            : base (PacketType.CONNACK)
+        public ConnAckPacket()
+            : base(PacketType.CONNACK)
         {
         }
 

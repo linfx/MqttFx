@@ -2,6 +2,9 @@
 
 namespace MqttFx
 {
+    /// <summary>
+    /// Options for <see cref="MqttClient"/>
+    /// </summary>
     public class MqttClientOptions
     {
         /// <summary>

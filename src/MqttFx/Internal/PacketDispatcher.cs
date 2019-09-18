@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using DotNetty.Codecs.MqttFx.Packets;
 
-namespace MqttFx.Extensions
+namespace MqttFx.Internal
 {
     internal class PacketDispatcher
     {

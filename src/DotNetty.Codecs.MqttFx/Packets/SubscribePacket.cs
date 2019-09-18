@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
+using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -8,7 +8,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
-        public SubscribePacket() 
+        public SubscribePacket()
             : base(PacketType.SUBSCRIBE)
         {
         }

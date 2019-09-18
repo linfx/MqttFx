@@ -1,6 +1,6 @@
-﻿using System;
+﻿using DotNetty.Buffers;
+using System;
 using System.Collections.Generic;
-using DotNetty.Buffers;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -50,7 +50,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public abstract class PacketWithId : Packet
     {
-        public PacketWithId(PacketType packetType) 
+        public PacketWithId(PacketType packetType)
             : base(packetType)
         {
         }

@@ -6,7 +6,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MqttFx.Internal;
+using MqttFx.Extensions;
 using System;
 using System.Net;
 using System.Threading;
@@ -75,7 +75,7 @@ namespace MqttFx
                 }
                 return connectResponse.ConnectReturnCode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await DisconnectAsync();
                 _logger.LogError(ex.Message, ex);
@@ -276,7 +276,7 @@ namespace MqttFx
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if(_clientChannel != null)
+            if (_clientChannel != null)
                 await _clientChannel.CloseAsync();
             await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             OnDisconnected?.Invoke();

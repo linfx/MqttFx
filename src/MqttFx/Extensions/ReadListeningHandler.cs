@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetty.Transport.Channels;
 
-namespace MqttFx.Internal
+namespace MqttFx.Extensions
 {
     internal sealed class ReadListeningHandler : ChannelHandlerAdapter
     {

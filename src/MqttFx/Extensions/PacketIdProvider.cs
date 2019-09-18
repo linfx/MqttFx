@@ -1,4 +1,4 @@
-﻿namespace MqttFx.Internal
+﻿namespace MqttFx.Extensions
 {
     internal class PacketIdProvider
     {

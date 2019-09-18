@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,10 +11,6 @@
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
     <PackageId>MqttFx</PackageId>
     <Product>MqttFx</Product>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\nMqtt.xml</DocumentationFile>
     <NoWarn>1701;1702;1591;</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>

@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "SimpleClient": {
+      "commandName": "Project"
+    }
+  }
+}

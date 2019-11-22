@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MqttFx.Test", "test\nMqtt.Test\MqttFx.Test.csproj", "{C1DCC6CB-29BE-4B12-8CE5-9126039EE3EE}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{64378755-ADF3-471A-905F-08F1D14B9F79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6FF4C7B2-AC10-40F8-9337-827636A50892}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleClient", "examples\SimpleClient\SimpleClient.csproj", "{98C7DCBA-025A-47E1-AC2B-69067DD1641E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98C7DCBA-025A-47E1-AC2B-69067DD1641E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C7DCBA-025A-47E1-AC2B-69067DD1641E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98C7DCBA-025A-47E1-AC2B-69067DD1641E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98C7DCBA-025A-47E1-AC2B-69067DD1641E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 		{F657D758-2730-44FE-B58D-D41816F90B60} = {64378755-ADF3-471A-905F-08F1D14B9F79}
 		{F065401D-3021-402E-BC0D-F28C96E91277} = {541B0DD0-22BE-4B97-B80E-23C75868D1E2}
 		{316B0FD8-15E4-40D9-AFFB-259EBE1E6886} = {541B0DD0-22BE-4B97-B80E-23C75868D1E2}
+		{98C7DCBA-025A-47E1-AC2B-69067DD1641E} = {64378755-ADF3-471A-905F-08F1D14B9F79}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E0A9EB4-1E55-4389-96A4-EC45F5D31A1C}

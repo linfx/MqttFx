@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using DotNetty.Codecs.MqttFx.Packets;
 
-namespace MqttFx.Internal
+namespace MqttFx.Utils
 {
     internal class PacketDispatcher
     {
@@ -18,7 +18,7 @@ namespace MqttFx.Internal
             _awaiters.Clear();
         }
 
-        public Task Dispatch(Packet packet)
+        public void Dispatch(Packet packet)
         {
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 
@@ -33,7 +33,7 @@ namespace MqttFx.Internal
 
             if (_awaiters.TryRemove(key, out var awaiter))
             {
-                return Task.Run(() => awaiter.TrySetResult(packet)); // Task.Run fixes a dead lock. Without this the client only receives one message.
+                Task.Run(() => awaiter.TrySetResult(packet)); // Task.Run fixes a dead lock. Without this the client only receives one message.
             }
 
             throw new InvalidOperationException($"Packet of type '{type.Name}' not handled or dispatched.");
@@ -53,7 +53,7 @@ namespace MqttFx.Internal
                 identifier = 0;
             }
 
-            var key = new Tuple<ushort, Type>(identifier ?? 0, typeof(TResponsePacket));
+            var key = new Tuple<ushort, Type>(identifier.Value, typeof(TResponsePacket));
             if (!_awaiters.TryAdd(key, tcs))
             {
                 throw new InvalidOperationException($"The packet dispatcher already has an awaiter for packet of type '{key.Item2.Name}' with identifier {key.Item1}.");
@@ -69,7 +69,7 @@ namespace MqttFx.Internal
                 identifier = 0;
             }
 
-            var key = new Tuple<ushort, Type>(identifier ?? 0, typeof(TResponsePacket));
+            var key = new Tuple<ushort, Type>(identifier.Value, typeof(TResponsePacket));
             _awaiters.TryRemove(key, out _);
         }
     }

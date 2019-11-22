@@ -1,5 +1,5 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
-using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MqttFx
@@ -26,8 +26,9 @@ namespace MqttFx
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce);
+        Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce, CancellationToken cancellationToken = default);
 
         ///// <summary>
         ///// 取消订阅

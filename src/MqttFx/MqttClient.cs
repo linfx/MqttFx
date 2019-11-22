@@ -1,12 +1,13 @@
 ﻿using DotNetty.Codecs.MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MqttFx.Internal;
+using MqttFx.Utils;
 using System;
 using System.Net;
 using System.Threading;
@@ -17,7 +18,7 @@ namespace MqttFx
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public class MqttClient : IMqttClient
+    public class MqttClient
     {
         private readonly ILogger _logger;
         private readonly IEventLoopGroup _group;
@@ -27,6 +28,7 @@ namespace MqttFx
 
         private IChannel _clientChannel;
         private CancellationTokenSource _cancellationTokenSource;
+        private Task _packetReceiverTask;
 
         public Action<ConnectReturnCode> OnConnected;
         public Action OnDisconnected;
@@ -53,10 +55,9 @@ namespace MqttFx
                 .Group(_group)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
-                .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
+                .Handler(new ActionChannelInitializer<ISocketChannel>(ch =>
                 {
-                    var pipeline = channel.Pipeline;
-                    pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024), clientReadListener);
+                    ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024), clientReadListener);
                 }));
 
             try
@@ -66,24 +67,31 @@ namespace MqttFx
                 _cancellationTokenSource = new CancellationTokenSource();
                 _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port));
 
-                StartReceivingPackets(clientReadListener, _cancellationTokenSource.Token);
+                _packetReceiverTask = Task.Run(() => TryReceivePacketsAsync(clientReadListener, _cancellationTokenSource.Token));
 
-                var connectResponse = await AuthenticateAsync(clientReadListener, _cancellationTokenSource.Token); ;
+                var connectResponse = await AuthenticateAsync().ConfigureAwait(false);
                 if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
                 {
                     OnConnected?.Invoke(connectResponse.ConnectReturnCode);
                 }
                 return connectResponse.ConnectReturnCode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw new MqttException("BrokerUnavailable");
+            }
+            finally
             {
                 await DisconnectAsync();
-                _logger.LogError(ex.Message, ex);
-                throw new MqttException("BrokerUnavailable");
             }
         }
 
-        private Task<ConnAckPacket> AuthenticateAsync(ReadListeningHandler readListener, CancellationToken cancellationToken)
+        /// <summary>
+        /// 认证
+        /// </summary>
+        /// <returns></returns>
+        private Task<ConnAckPacket> AuthenticateAsync()
         {
             var packet = new ConnectPacket
             {
@@ -105,48 +113,84 @@ namespace MqttFx
                 packet.WillTopic = _options.WillMessage.Topic;
                 packet.WillMessage = _options.WillMessage.Payload;
             }
-            return SendAndReceiveAsync<ConnAckPacket>(packet, cancellationToken);
+            return this.SendAndReceiveAsync<ConnAckPacket>(packet);
         }
 
-        private void StartReceivingPackets(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
+        /// <summary>
+        /// 读取Packet
+        /// </summary>
+        /// <param name="clientReadListener"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task TryReceivePacketsAsync(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
         {
-            Task.Run(() => ReceivePacketsAsync(clientReadListener, cancellationToken));
-        }
-
-        private async Task ReceivePacketsAsync(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                if (await clientReadListener.ReceiveAsync() is Packet packet)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    await ProcessReceivedPacketAsync(packet);
+                    if (await clientReadListener.ReceiveAsync() is Packet packet)
+                    {
+                        await TryProcessReceivedPacketAsync(packet);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception while receiving packets.");
             }
         }
 
-        private Task ProcessReceivedPacketAsync(Packet packet)
+        /// <summary>
+        /// 处理Packet
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <returns></returns>
+        private async Task TryProcessReceivedPacketAsync(Packet packet)
         {
-            _logger.LogInformation("ProcessReceivedPacketAsync:" + packet.PacketType);
+            _logger.LogDebug("Try process received packet: {0}", packet.PacketType);
 
-            if (packet is PingReqPacket)
-                return _clientChannel.WriteAndFlushAsync(new PingRespPacket());
+            try
+            {
+                if (packet is PingReqPacket)
+                {
+                    await _clientChannel.WriteAndFlushAsync(new PingRespPacket());
+                    return;
+                }
 
-            if (packet is DisconnectPacket)
-                return DisconnectAsync();
+                if (packet is DisconnectPacket)
+                {
+                    await DisconnectAsync();
+                    return;
+                }
 
-            if (packet is PubAckPacket)
-                return Task.CompletedTask;
+                if (packet is PubAckPacket)
+                    return;
 
-            if (packet is PublishPacket publishPacket)
-                return ProcessReceivedPublishPacketAsync(publishPacket);
+                if (packet is PublishPacket publishPacket)
+                {
+                    await ProcessReceivedPublishPacketAsync(publishPacket);
+                    return;
+                }
 
-            if (packet is PubRecPacket pubRecPacket)
-                return _clientChannel.WriteAndFlushAsync(new PubRelPacket(pubRecPacket.PacketId));
+                if (packet is PubRecPacket pubRecPacket)
+                {
+                    await _clientChannel.WriteAndFlushAsync(new PubRelPacket(pubRecPacket.PacketId));
+                    return;
+                }
 
-            if (packet is PubRelPacket pubRelPacket)
-                return _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
+                if (packet is PubRelPacket pubRelPacket)
+                {
+                    await _clientChannel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
+                    return;
+                }
 
-            return _packetDispatcher.Dispatch(packet);
+                _packetDispatcher.Dispatch(packet);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception while process packets.");
+                _packetDispatcher.Dispatch(ex);
+            }
         }
 
         private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
@@ -172,54 +216,45 @@ namespace MqttFx
             }
         }
 
-        private async Task<TResponsePacket> SendAndReceiveAsync<TResponsePacket>(Packet requestPacket, CancellationToken cancellationToken) where TResponsePacket : Packet
+        internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken) where TPacket : Packet
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             ushort identifier = 0;
-            if (requestPacket is PacketWithId packetWithId)
+            if (packet is PacketWithId packetWithId)
             {
                 identifier = packetWithId.PacketId;
             }
 
-            var awaiter = _packetDispatcher.AddPacketAwaiter<TResponsePacket>(identifier);
-            try
-            {
-                await _clientChannel.WriteAndFlushAsync(requestPacket);
-                //var respone = await Extensions.TaskExtensions.TimeoutAfterAsync(ct => packetAwaiter.Task, _options.Timeout, cancellationToken);
-                //return (TResponsePacket)respone;
+            var awaiter = _packetDispatcher.AddPacketAwaiter<TPacket>(identifier);
 
-                using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
-                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
+            await _clientChannel.WriteAndFlushAsync(packet);
+
+            using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
+            {
+                linkedCts.Token.Register(() =>
                 {
-                    linkedCts.Token.Register(() =>
-                    {
-                        if (!awaiter.Task.IsCompleted && !awaiter.Task.IsFaulted && !awaiter.Task.IsCanceled)
-                            awaiter.TrySetCanceled();
-                    });
+                    if (!awaiter.Task.IsCompleted && !awaiter.Task.IsFaulted && !awaiter.Task.IsCanceled)
+                        awaiter.TrySetCanceled();
+                });
 
-                    try
-                    {
-                        var result = await awaiter.Task.ConfigureAwait(false);
-                        timeoutCts.Cancel(false);
-                        return (TResponsePacket)result;
-                    }
-                    catch (OperationCanceledException exception)
-                    {
-                        if (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-                            throw new MqttTimeoutException(exception);
-                        else
-                            throw;
-                    }
+                try
+                {
+                    var result = await awaiter.Task.ConfigureAwait(false);
+                    timeoutCts.Cancel(false);
+                    return (TPacket)result;
                 }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                _packetDispatcher.RemovePacketAwaiter<TResponsePacket>(identifier);
+                catch (OperationCanceledException ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    _packetDispatcher.RemovePacketAwaiter<TPacket>(identifier);
+
+                    if (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                        throw new MqttTimeoutException(ex);
+                    else
+                        throw;
+                }
             }
         }
 
@@ -229,7 +264,7 @@ namespace MqttFx
         /// <param name="topic">主题</param>
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce)
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos)
         {
             var packet = new PublishPacket(qos)
             {
@@ -247,7 +282,8 @@ namespace MqttFx
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
-        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce)
+        /// <param name="cancellationToken"></param>
+        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
         {
             var packet = new SubscribePacket
             {
@@ -255,7 +291,7 @@ namespace MqttFx
             };
             packet.Add(topic, qos);
 
-            return SendAndReceiveAsync<SubAckPacket>(packet, _cancellationTokenSource.Token);
+            return SendAndReceiveAsync<SubAckPacket>(packet, cancellationToken);
         }
 
         ///// <summary>
@@ -276,7 +312,7 @@ namespace MqttFx
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if(_clientChannel != null)
+            if (_clientChannel != null)
                 await _clientChannel.CloseAsync();
             await _group.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
             OnDisconnected?.Invoke();

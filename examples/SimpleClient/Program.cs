@@ -19,7 +19,7 @@ namespace SimpleClient
                 {
                     services.AddMqttClient(options =>
                     {
-                        options.Host = "47.107.40.15";
+                        options.Host = "127.0.0.1";
                     });
                     services.AddHostedService<Services>();
                 });

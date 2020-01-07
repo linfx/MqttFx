@@ -1,6 +1,5 @@
 ﻿using DotNetty.Codecs.MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
-using DotNetty.Handlers.Logging;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;

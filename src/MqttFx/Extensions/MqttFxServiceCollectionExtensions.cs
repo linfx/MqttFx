@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class MqttFxServiceCollectionExtensions
     {
-        public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
+        public static IServiceCollection AddMqttFx(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
         {
             if (optionsAction == null)
                 throw new ArgumentNullException(nameof(optionsAction));
@@ -15,6 +15,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(optionsAction);
             services.AddSingleton<MqttClient>();
             return services;
+        }
+
+        [Obsolete("Use AddMqttFx")]
+        public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
+        {
+            return AddMqttFx(services, optionsAction);
         }
     }
 }

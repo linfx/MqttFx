@@ -88,11 +88,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                //variable header
+                // variable header
                 buf.WriteString(ProtocolName);        //byte 1 - 8
                 buf.WriteByte(ProtocolLevel);         //byte 9
 
-                //connect flags;                      //byte 10
+                // connect flags;                      //byte 10
                 var flags = UsernameFlag.ToByte() << 7;
                 flags |= PasswordFlag.ToByte() << 6;
                 flags |= WillRetain.ToByte() << 5;
@@ -101,10 +101,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 flags |= CleanSession.ToByte() << 1;
                 buf.WriteByte((byte)flags);
 
-                //keep alive
+                // keep alive
                 buf.WriteShort(KeepAlive);            //byte 11 - 12
 
-                //payload
+                // payload
                 buf.WriteString(ClientId);
                 if (WillFlag)
                 {
@@ -120,7 +120,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {
@@ -143,6 +142,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 当前会话
         /// </summary>
         public bool SessionPresent { get; set; }
+
         /// <summary>
         /// 连接返回码
         /// </summary>
@@ -163,7 +163,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {
@@ -191,26 +190,32 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 连接已接受
         /// </summary>
         ConnectionAccepted = 0x00,
+
         /// <summary>
         /// 连接已拒绝，不支持的协议版本
         /// </summary>
         UnacceptableProtocolVersion = 0x01,
+
         /// <summary>
         /// 接已拒绝，不合格的客户端标识符
         /// </summary>
         IdentifierRejected = 0x02,
+
         /// <summary>
         /// 连接已拒绝，服务端不可用
         /// </summary>
         BrokerUnavailable = 0x03,
+
         /// <summary>
         /// 连接已拒绝，无效的用户名或密码
         /// </summary>
         BadUsernameOrPassword = 0x04,
+
         /// <summary>
         /// 连接已拒绝，未授权
         /// </summary>
         NotAuthorized = 0x05,
+
         /// <summary>
         /// RefusedNotAuthorized
         /// </summary>

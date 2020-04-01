@@ -8,12 +8,12 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class UnsubscribePacket : PacketWithId
     {
+        private readonly List<string> _topics = new List<string>();
+
         public UnsubscribePacket() 
             : base(PacketType.UNSUBSCRIBE)
         {
         }
-
-        List<string> _topics = new List<string>();
 
         public void AddRange(params string[] topics)
         {
@@ -35,7 +35,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {

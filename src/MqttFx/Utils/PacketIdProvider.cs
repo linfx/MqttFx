@@ -11,7 +11,7 @@
                 _value = 0;
         }
 
-        public ushort GetNewPacketId()
+        public ushort NewPacketId()
         {
             lock (_syncRoot)
             {

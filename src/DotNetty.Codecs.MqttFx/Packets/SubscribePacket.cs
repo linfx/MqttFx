@@ -8,24 +8,29 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
+        /// <summary>
+        /// 主题列表
+        /// </summary>
+        private readonly List<SubscriptionRequest> _subscribeTopics = new List<SubscriptionRequest>();
+
         public SubscribePacket()
             : base(PacketType.SUBSCRIBE)
         {
         }
 
         /// <summary>
-        /// 主题列表
+        /// 订阅主题
         /// </summary>
-        List<SubscriptionRequest> _subscribeTopics = new List<SubscriptionRequest>();
-
+        /// <param name="topic">主题</param>
+        /// <param name="qos">服务质量等级</param>
         public void Add(string topic, MqttQos qos)
         {
             _subscribeTopics.Add(new SubscriptionRequest(topic, qos));
         }
 
-        public void Add(params SubscriptionRequest[] requests)
+        public void Add(params SubscriptionRequest[] request)
         {
-            _subscribeTopics.AddRange(requests);
+            _subscribeTopics.AddRange(request);
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -44,7 +49,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {

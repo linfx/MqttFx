@@ -15,22 +15,27 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 固定报头
         /// </summary>
         public FixedHeader FixedHeader { protected get; set; }
+
         /// <summary>
         /// 报文类型
         /// </summary>
         public PacketType PacketType => FixedHeader.PacketType;
+
         /// <summary>
         /// 重发标志
         /// </summary>
         public bool Dup => FixedHeader.Dup;
+
         /// <summary>
         /// 服务质量等级
         /// </summary>
         public MqttQos Qos => FixedHeader.Qos;
+
         /// <summary>
         /// 保留标志
         /// </summary>
         public bool Retain => FixedHeader.Retain;
+
         /// <summary>
         /// 剩余长度
         /// </summary>
@@ -96,9 +101,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         protected void EncodePacketId(IByteBuffer buffer)
         {
             if (Qos > MqttQos.AtMostOnce)
-            {
                 buffer.WriteUnsignedShort(PacketId);
-            }
         }
 
         protected void DecodePacketId(IByteBuffer buffer, ref int remainingLength)
@@ -121,18 +124,22 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 报文类型
         /// </summary>
         public PacketType PacketType { get; set; }
+
         /// <summary>
         /// 重发标志
         /// </summary>
         public bool Dup { get; set; }
+
         /// <summary>
         /// 服务质量等级
         /// </summary>
         public MqttQos Qos { get; set; }
+
         /// <summary>
         /// 保留标志
         /// </summary>
         public bool Retain { get; set; }
+
         /// <summary>
         /// 剩余长度
         /// </summary>
@@ -186,21 +193,24 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public enum MqttQos : byte
     {
         /// <summary>
-        ///     QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
+        /// QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
         /// </summary>
         AtMostOnce = 0x00,
+
         /// <summary>
-        ///     QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
-        ///     more than once if network errors occur.
+        /// QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
+        /// more than once if network errors occur.
         /// </summary>
         AtLeastOnce = 0x01,
+
         /// <summary>
-        ///     QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
-        ///     it is successfully sent..
+        /// QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
+        /// it is successfully sent..
         /// </summary>
         ExactlyOnce = 0x02,
+
         /// <summary>
-        ///    Failure
+        /// Failure
         /// </summary>
         Failure = 0x80
     }

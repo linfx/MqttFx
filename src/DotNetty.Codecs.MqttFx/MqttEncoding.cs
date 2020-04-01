@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DotNetty.Codecs.MqttFx
 {
+    /// <summary>
+    /// 编码
+    /// </summary>
     public class MqttEncoding : ASCIIEncoding
     {
         public override byte[] GetBytes(string s)

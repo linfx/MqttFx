@@ -70,9 +70,8 @@ namespace MqttFx
 
                 var connectResponse = await AuthenticateAsync().ConfigureAwait(false);
                 if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
-                {
                     OnConnected?.Invoke(connectResponse.ConnectReturnCode);
-                }
+
                 return connectResponse.ConnectReturnCode;
             }
             catch (Exception ex)
@@ -128,9 +127,7 @@ namespace MqttFx
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     if (await clientReadListener.ReceiveAsync() is Packet packet)
-                    {
                         await TryProcessReceivedPacketAsync(packet);
-                    }
                 }
             }
             catch (Exception ex)
@@ -202,17 +199,13 @@ namespace MqttFx
                 Retain = publishPacket.Retain
             });
 
-            switch (publishPacket.Qos)
+            return publishPacket.Qos switch
             {
-                case MqttQos.AtMostOnce:
-                    return Task.CompletedTask;
-                case MqttQos.AtLeastOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubAckPacket(publishPacket.PacketId));
-                case MqttQos.ExactlyOnce:
-                    return _clientChannel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId));
-                default:
-                    throw new MqttException("Received a not supported QoS level.");
-            }
+                MqttQos.AtMostOnce => Task.CompletedTask,
+                MqttQos.AtLeastOnce => _clientChannel.WriteAndFlushAsync(new PubAckPacket(publishPacket.PacketId)),
+                MqttQos.ExactlyOnce => _clientChannel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId)),
+                _ => throw new MqttException("Received a not supported QoS level."),
+            };
         }
 
         internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken) where TPacket : Packet
@@ -221,9 +214,7 @@ namespace MqttFx
 
             ushort identifier = 0;
             if (packet is PacketWithId packetWithId)
-            {
                 identifier = packetWithId.PacketId;
-            }
 
             var awaiter = _packetDispatcher.AddPacketAwaiter<TPacket>(identifier);
 
@@ -271,7 +262,7 @@ namespace MqttFx
                 Payload = payload
             };
             if (qos > MqttQos.AtMostOnce)
-                packet.PacketId = _packetIdProvider.GetNewPacketId();
+                packet.PacketId = _packetIdProvider.NewPacketId();
 
             return _clientChannel.WriteAndFlushAsync(packet);
         }
@@ -286,7 +277,7 @@ namespace MqttFx
         {
             var packet = new SubscribePacket
             {
-                PacketId = _packetIdProvider.GetNewPacketId(),
+                PacketId = _packetIdProvider.NewPacketId(),
             };
             packet.Add(topic, qos);
 

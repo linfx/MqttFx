@@ -14,7 +14,7 @@ namespace Echo.Client
         static async Task Main(string[] args)
         {
             var services = new ServiceCollection();
-            services.AddMqttClient(options =>
+            services.AddMqttFx(options =>
             {
                 options.Host = "198.41.30.241";
             });

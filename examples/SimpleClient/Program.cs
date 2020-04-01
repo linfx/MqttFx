@@ -17,7 +17,7 @@ namespace SimpleClient
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddMqttClient(options =>
+                    services.AddMqttFx(options =>
                     {
                         options.Host = "127.0.0.1";
                     });

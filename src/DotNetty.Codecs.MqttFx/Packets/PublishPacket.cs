@@ -7,11 +7,19 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class PublishPacket : PacketWithId
     {
+        /// <summary>
+        /// 发布消息
+        /// </summary>
         public PublishPacket()
             : base(PacketType.PUBLISH)
-        {
-        }
+        { }
 
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        /// <param name="qos">服务质量等级</param>
+        /// <param name="dup">重发标志</param>
+        /// <param name="retain">保留标志</param>
         public PublishPacket(MqttQos qos, bool dup = false, bool retain = false)
             : this()
         {
@@ -42,7 +50,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);
-                buf = null;
             }
             finally
             {
@@ -54,11 +61,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             int remainingLength = RemaingLength;
 
-            //variable header
+            // variable header
             TopicName = buffer.ReadString(ref remainingLength);
             DecodePacketId(buffer, ref remainingLength);
 
-            //playload
+            // playload
             if (remainingLength > 0)
             {
                 Payload = new byte[remainingLength];

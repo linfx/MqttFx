@@ -89,11 +89,7 @@ namespace DotNetty.Codecs.MqttFx
             var lengthBytes = new byte[2];
             var bytesRead = stream.Read(lengthBytes, 0, 2);
             if (bytesRead < 2)
-            {
-                throw new ArgumentException(
-                    "The stream did not have enough bytes to describe the length of the string",
-                    "stringStream");
-            }
+                throw new ArgumentException("The stream did not have enough bytes to describe the length of the string", "stringStream");
 
             var enc = new MqttEncoding();
             var stringLength = (ushort)enc.GetCharCount(lengthBytes);
@@ -134,9 +130,7 @@ namespace DotNetty.Codecs.MqttFx
             //}
 
             if (size == 0)
-            {
                 return string.Empty;
-            }
 
             DecreaseRemainingLength(ref remainingLength, size);
 
@@ -160,9 +154,8 @@ namespace DotNetty.Codecs.MqttFx
         static void DecreaseRemainingLength(ref int remainingLength, int minExpectedLength)
         {
             if (remainingLength < minExpectedLength)
-            {
                 throw new DecoderException($"Current Remaining Length of {remainingLength} is smaller than expected {minExpectedLength}.");
-            }
+
             remainingLength -= minExpectedLength;
         }
     }

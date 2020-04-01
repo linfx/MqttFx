@@ -1,5 +1,8 @@
 ﻿namespace MqttFx
 {
+    /// <summary>
+    /// 凭证
+    /// </summary>
     public class MqttClientCredentials
     {
         /// <summary>

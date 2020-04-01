@@ -17,8 +17,8 @@ namespace DotNetty.Codecs.MqttFx
             Failed
         }
 
-        readonly bool _isServer;
-        readonly int _maxMessageSize;
+        private readonly bool _isServer;
+        private readonly int _maxMessageSize;
 
         public MqttDecoder(bool isServer, int maxMessageSize)
             : base(ParseState.Ready)

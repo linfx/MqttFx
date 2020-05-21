@@ -10,7 +10,7 @@ namespace MqttFx
         /// 连接
         /// </summary>
         /// <returns></returns>
-        Task<ConnectReturnCode> ConnectAsync();
+        Task<MqttConnectResult> ConnectAsync();
 
         /// <summary>
         /// 发布消息
@@ -19,7 +19,7 @@ namespace MqttFx
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
         /// <returns></returns>
-        Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce);
+        Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce, bool retain = false);
 
         /// <summary>
         /// 订阅主题

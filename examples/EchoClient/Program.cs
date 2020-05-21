@@ -1,13 +1,13 @@
-﻿using System;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using Microsoft.Extensions.DependencyInjection;
+using MqttFx;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MqttFx;
-using DotNetty.Codecs.MqttFx.Packets;
-using Newtonsoft.Json.Linq;
 
-namespace Echo.Client
+namespace EchoClient
 {
     class Program
     {
@@ -25,7 +25,8 @@ namespace Echo.Client
             //client.Disconnected += Client_Disconnected;
             //client.MessageReceived += Client_MessageReceived;
 
-            if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
+            var result = await client.ConnectAsync();
+            if (result.Succeeded)
             {
                 var top = "$SYS/brokers/+/clients/#";
                 Console.WriteLine("Subscribe:" + top);

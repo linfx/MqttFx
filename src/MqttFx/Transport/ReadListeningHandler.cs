@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DotNetty.Transport.Channels;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DotNetty.Transport.Channels;
 
-namespace MqttFx.Extensions
+namespace MqttFx.Transport
 {
     internal sealed class ReadListeningHandler : ChannelHandlerAdapter
     {
@@ -65,6 +65,11 @@ namespace MqttFx.Extensions
             }
         }
 
+        /// <summary>
+        /// 读取
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
         public async Task<object> ReceiveAsync(TimeSpan timeout = default)
         {
             if (registeredException != null)

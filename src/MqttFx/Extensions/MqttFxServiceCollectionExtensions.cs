@@ -13,14 +13,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddLogging();
             services.AddOptions();
             services.Configure(optionsAction);
-            services.AddSingleton<MqttClient>();
+            services.AddSingleton<IMqttClient, MqttClient>();
             return services;
-        }
-
-        [Obsolete("Use AddMqttFx")]
-        public static IServiceCollection AddMqttClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
-        {
-            return AddMqttFx(services, optionsAction);
         }
     }
 }

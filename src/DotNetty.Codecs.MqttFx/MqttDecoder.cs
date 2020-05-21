@@ -85,7 +85,7 @@ namespace DotNetty.Codecs.MqttFx
         Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
         {
             Packet packet;
-            var fixedHeader = new FixedHeader(packetSignature, remainingLength);
+            var fixedHeader = new MqttFixedHeader(packetSignature, remainingLength);
             switch (fixedHeader.PacketType)
             {
                 case PacketType.CONNECT: packet = new ConnectPacket(); break;

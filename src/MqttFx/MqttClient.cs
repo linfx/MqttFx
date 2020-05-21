@@ -220,31 +220,30 @@ namespace MqttFx
 
             await _clientChannel.WriteAndFlushAsync(packet);
 
-            using (var timeoutCts = new CancellationTokenSource(_options.Timeout))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token))
+            using var timeoutCts = new CancellationTokenSource(_options.Timeout);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+            linkedCts.Token.Register(() =>
             {
-                linkedCts.Token.Register(() =>
-                {
-                    if (!awaiter.Task.IsCompleted && !awaiter.Task.IsFaulted && !awaiter.Task.IsCanceled)
-                        awaiter.TrySetCanceled();
-                });
+                if (!awaiter.Task.IsCompleted && !awaiter.Task.IsFaulted && !awaiter.Task.IsCanceled)
+                    awaiter.TrySetCanceled();
+            });
 
-                try
-                {
-                    var result = await awaiter.Task.ConfigureAwait(false);
-                    timeoutCts.Cancel(false);
-                    return (TPacket)result;
-                }
-                catch (OperationCanceledException ex)
-                {
-                    _logger.LogError(ex, ex.Message);
-                    _packetDispatcher.RemovePacketAwaiter<TPacket>(identifier);
+            try
+            {
+                var result = await awaiter.Task.ConfigureAwait(false);
+                timeoutCts.Cancel(false);
+                return (TPacket)result;
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                _packetDispatcher.RemovePacketAwaiter<TPacket>(identifier);
 
-                    if (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-                        throw new MqttTimeoutException(ex);
-                    else
-                        throw;
-                }
+                if (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                    throw new MqttTimeoutException(ex);
+                else
+                    throw;
             }
         }
 

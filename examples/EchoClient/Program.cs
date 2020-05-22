@@ -16,7 +16,7 @@ namespace EchoClient
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
             {
-                options.Host = "198.41.30.241";
+                options.Host = "10.0.1.111";
             });
             var container = services.BuildServiceProvider();
 

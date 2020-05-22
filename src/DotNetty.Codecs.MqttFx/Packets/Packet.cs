@@ -42,10 +42,22 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         #endregion
 
+        /// <summary>
+        /// 消息基类
+        /// </summary>
+        /// <param name="packetType"></param>
         public Packet(PacketType packetType) => FixedHeader = new MqttFixedHeader(packetType);
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public virtual void Decode(IByteBuffer buffer) { }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
         public virtual void Encode(IByteBuffer buffer) { }
     }
 

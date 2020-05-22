@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MqttFx.Handlers
+namespace MqttFx.Channels
 {
     class MqttPingHandler
     {

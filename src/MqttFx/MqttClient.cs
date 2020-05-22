@@ -5,7 +5,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MqttFx.Transport;
+using MqttFx.Channels;
 using MqttFx.Utils;
 using System;
 using System.Net;
@@ -54,17 +54,18 @@ namespace MqttFx
                 .Group(eventLoop)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
-                .Handler(new MqttChannelInitializer());
+                .RemoteAddress(new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port))
+                .Handler(new MqttChannelInitializer(this, connectFuture));
 
             try
             {
                 _packetDispatcher.Reset();
                 _packetIdProvider.Reset();
-                var future = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port));
+                var future = await bootstrap.ConnectAsync();
 
-                if (future.Active)
+                if(future.Open)
                     channel = future;
-                
+
                 //_packetReceiverTask = Task.Run(() => TryReceivePacketsAsync(clientReadListener, _cancellationTokenSource.Token));
 
                 //var connectResponse = await AuthenticateAsync().ConfigureAwait(false);
@@ -75,10 +76,6 @@ namespace MqttFx
             {
                 _logger.LogError(ex, ex.Message);
                 throw new MqttException("BrokerUnavailable");
-            }
-            finally
-            {
-                await DisconnectAsync();
             }
 
             return connectFuture;
@@ -270,7 +267,7 @@ namespace MqttFx
             };
         }
 
-        internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken) where TPacket : Packet
+        internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -309,7 +306,6 @@ namespace MqttFx
             }
         }
 
-
         private Task SendAndFlushPacketAsync(Packet packet)
         {
             if (channel == null)
@@ -319,14 +315,6 @@ namespace MqttFx
                 return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
-        }
-
-        class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
-        {
-            protected override void InitChannel(ISocketChannel ch)
-            {
-                //ch.Pipeline.AddLast("mqttDecoder")
-            }
         }
 
         #endregion

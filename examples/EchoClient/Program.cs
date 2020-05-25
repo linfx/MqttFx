@@ -1,5 +1,7 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Common.Internal.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Console;
 using MqttFx;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,10 +15,14 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
+            InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
             {
-                options.Host = "10.0.1.111";
+                //options.Host = "127.0.0.1";
+                options.Host = "broker.hivemq.com";
+                options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
 
@@ -28,17 +34,17 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                var top = "$SYS/brokers/+/clients/#";
-                Console.WriteLine("Subscribe:" + top);
+                //var top = "$SYS/brokers/+/clients/#";
+                //Console.WriteLine("Subscribe:" + top);
 
-                var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
+                //var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
 
-                foreach (var rc in rcs)
-                {
-                    Console.WriteLine(rc);
-                }
+                //foreach (var rc in rcs)
+                //{
+                //    Console.WriteLine(rc);
+                //}
 
-                for (int i = 1; i < int.MaxValue; i++)
+                for (int i = 1; i <= 1; i++)
                 {
                     await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.AtLeastOnce);
                     await Task.Delay(1000);

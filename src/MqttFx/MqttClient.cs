@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using MqttFx.Channels;
 using MqttFx.Utils;
 using System;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +19,6 @@ namespace MqttFx
     public class MqttClient : IMqttClient
     {
         private readonly ILogger _logger;
-        private readonly MqttClientOptions _options;
         private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
         private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
 
@@ -35,7 +33,7 @@ namespace MqttFx
             ILogger<MqttClient> logger,
             IOptions<MqttClientOptions> options)
         {
-            _options = options.Value;
+            Config = options.Value;
             _logger = logger ?? NullLogger<MqttClient>.Instance;
         }
 
@@ -48,37 +46,31 @@ namespace MqttFx
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
 
-            var connectFuture = new MqttConnectResult();
-            var bootstrap = new Bootstrap();
-            bootstrap
-                .Group(eventLoop)
-                .Channel<TcpSocketChannel>()
-                .Option(ChannelOption.TcpNodelay, true)
-                .RemoteAddress(new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port))
-                .Handler(new MqttChannelInitializer(this, connectFuture));
-
             try
             {
-                _packetDispatcher.Reset();
-                _packetIdProvider.Reset();
-                var future = await bootstrap.ConnectAsync();
+                var connectPromise = new TaskCompletionSource<MqttConnectResult>();
+                var bootstrap = new Bootstrap();
+                bootstrap
+                    .Group(eventLoop)
+                    .Channel<TcpSocketChannel>()
+                    .Option(ChannelOption.TcpNodelay, true)
+                    .RemoteAddress(Config.Host, Config.Port)
+                    .Handler(new MqttChannelInitializer(this, connectPromise));
 
-                if(future.Open)
-                    channel = future;
-
-                //_packetReceiverTask = Task.Run(() => TryReceivePacketsAsync(clientReadListener, _cancellationTokenSource.Token));
-
-                //var connectResponse = await AuthenticateAsync().ConfigureAwait(false);
-                //if (connectResponse.ConnectReturnCode == ConnectReturnCode.ConnectionAccepted)
-                //    OnConnected?.Invoke(connectResponse.ConnectReturnCode);
+                var clientChannel = await bootstrap.ConnectAsync();
+                if (clientChannel.Open)
+                {
+                    _packetDispatcher.Reset();
+                    _packetIdProvider.Reset();
+                    channel = clientChannel;
+                }
+                return await connectPromise.Task;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
                 throw new MqttException("BrokerUnavailable");
             }
-
-            return connectFuture;
         }
 
         /// <summary>
@@ -142,130 +134,12 @@ namespace MqttFx
             OnDisconnected?.Invoke();
         }
 
+        /// <summary>
+        /// 配置
+        /// </summary>
+        public MqttClientOptions Config { get; }
+
         #region ==================== PRIVATE API ====================
-
-        /// <summary>
-        /// 认证
-        /// </summary>
-        /// <returns></returns>
-        private Task<ConnAckPacket> AuthenticateAsync()
-        {
-            var packet = new ConnectPacket
-            {
-                ClientId = _options.ClientId,
-                CleanSession = _options.CleanSession,
-                KeepAlive = _options.KeepAlive,
-            };
-            if (_options.Credentials != null)
-            {
-                packet.UsernameFlag = true;
-                packet.UserName = _options.Credentials.Username;
-                packet.Password = _options.Credentials.Username;
-            }
-            if (_options.WillMessage != null)
-            {
-                packet.WillFlag = true;
-                packet.WillQos = _options.WillMessage.Qos;
-                packet.WillRetain = _options.WillMessage.Retain;
-                packet.WillTopic = _options.WillMessage.Topic;
-                packet.WillMessage = _options.WillMessage.Payload;
-            }
-            return this.SendAndReceiveAsync<ConnAckPacket>(packet);
-        }
-
-        /// <summary>
-        /// 读取Packet
-        /// </summary>
-        /// <param name="clientReadListener"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task TryReceivePacketsAsync(ReadListeningHandler clientReadListener, CancellationToken cancellationToken)
-        {
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    if (await clientReadListener.ReceiveAsync() is Packet packet)
-                        await TryProcessReceivedPacketAsync(packet);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled exception while receiving packets.");
-            }
-        }
-
-        /// <summary>
-        /// 处理Packet
-        /// </summary>
-        /// <param name="packet"></param>
-        /// <returns></returns>
-        private async Task TryProcessReceivedPacketAsync(Packet packet)
-        {
-            _logger.LogDebug("Try process received packet: {0}", packet.PacketType);
-
-            try
-            {
-                if (packet is PingReqPacket)
-                {
-                    await channel.WriteAndFlushAsync(new PingRespPacket());
-                    return;
-                }
-
-                if (packet is DisconnectPacket)
-                {
-                    await DisconnectAsync();
-                    return;
-                }
-
-                if (packet is PubAckPacket)
-                    return;
-
-                if (packet is PublishPacket publishPacket)
-                {
-                    await ProcessReceivedPublishPacketAsync(publishPacket);
-                    return;
-                }
-
-                if (packet is PubRecPacket pubRecPacket)
-                {
-                    await channel.WriteAndFlushAsync(new PubRelPacket(pubRecPacket.PacketId));
-                    return;
-                }
-
-                if (packet is PubRelPacket pubRelPacket)
-                {
-                    await channel.WriteAndFlushAsync(new PubCompPacket(pubRelPacket.PacketId));
-                    return;
-                }
-
-                _packetDispatcher.Dispatch(packet);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled exception while process packets.");
-                _packetDispatcher.Dispatch(ex);
-            }
-        }
-
-        private Task ProcessReceivedPublishPacketAsync(PublishPacket publishPacket)
-        {
-            OnMessageReceived?.Invoke(new Message
-            {
-                Topic = publishPacket.TopicName,
-                Payload = publishPacket.Payload,
-                Qos = publishPacket.Qos,
-                Retain = publishPacket.Retain
-            });
-
-            return publishPacket.Qos switch
-            {
-                MqttQos.AtMostOnce => Task.CompletedTask,
-                MqttQos.AtLeastOnce => channel.WriteAndFlushAsync(new PubAckPacket(publishPacket.PacketId)),
-                MqttQos.ExactlyOnce => channel.WriteAndFlushAsync(new PubRecPacket(publishPacket.PacketId)),
-                _ => throw new MqttException("Received a not supported QoS level."),
-            };
-        }
 
         internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
         {
@@ -279,7 +153,7 @@ namespace MqttFx
 
             await channel.WriteAndFlushAsync(packet);
 
-            using var timeoutCts = new CancellationTokenSource(_options.Timeout);
+            using var timeoutCts = new CancellationTokenSource(Config.Timeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
             linkedCts.Token.Register(() =>

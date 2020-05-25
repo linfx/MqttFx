@@ -4,8 +4,16 @@ using System.Threading.Tasks;
 
 namespace MqttFx
 {
+    /// <summary>
+    /// Mqtt客户端
+    /// </summary>
     public interface IMqttClient
     {
+        /// <summary>
+        /// 配置
+        /// </summary>
+        MqttClientOptions Config { get; }
+
         /// <summary>
         /// 连接
         /// </summary>

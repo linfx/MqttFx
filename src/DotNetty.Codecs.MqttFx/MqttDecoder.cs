@@ -11,14 +11,10 @@ namespace DotNetty.Codecs.MqttFx
     /// </summary>
     public sealed class MqttDecoder : ReplayingDecoder<MqttDecoder.ParseState>
     {
-        public enum ParseState
-        {
-            Ready,
-            Failed
-        }
-
         private readonly bool _isServer;
         private readonly int _maxMessageSize;
+
+        public enum ParseState { Ready, Failed }
 
         public MqttDecoder(bool isServer, int maxMessageSize)
             : base(ParseState.Ready)
@@ -84,27 +80,25 @@ namespace DotNetty.Codecs.MqttFx
 
         Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
         {
-            Packet packet;
             var fixedHeader = new MqttFixedHeader(packetSignature, remainingLength);
-            switch (fixedHeader.PacketType)
+            Packet packet = fixedHeader.PacketType switch
             {
-                case PacketType.CONNECT: packet = new ConnectPacket(); break;
-                case PacketType.CONNACK: packet = new ConnAckPacket(); break;
-                case PacketType.DISCONNECT: packet = new DisconnectPacket(); break;
-                case PacketType.PINGREQ: packet = new PingReqPacket(); break;
-                case PacketType.PINGRESP: packet = new PingRespPacket(); break;
-                case PacketType.PUBACK: packet = new PubAckPacket(); break;
-                case PacketType.PUBCOMP: packet = new PubCompPacket(); break;
-                case PacketType.PUBLISH: packet = new PublishPacket(); break;
-                case PacketType.PUBREC: packet = new PubRecPacket(); break;
-                case PacketType.PUBREL: packet = new PubRelPacket(); break;
-                case PacketType.SUBSCRIBE: packet = new SubscribePacket(); break;
-                case PacketType.SUBACK: packet = new SubAckPacket(); break;
-                case PacketType.UNSUBSCRIBE: packet = new UnsubscribePacket(); break;
-                case PacketType.UNSUBACK: packet = new UnsubscribePacket(); break;
-                default:
-                    throw new DecoderException("Unsupported Message Type");
-            }
+                PacketType.CONNECT => new ConnectPacket(),
+                PacketType.CONNACK => new ConnAckPacket(),
+                PacketType.DISCONNECT => new DisconnectPacket(),
+                PacketType.PINGREQ => new PingReqPacket(),
+                PacketType.PINGRESP => new PingRespPacket(),
+                PacketType.PUBACK => new PubAckPacket(),
+                PacketType.PUBCOMP => new PubCompPacket(),
+                PacketType.PUBLISH => new PublishPacket(),
+                PacketType.PUBREC => new PubRecPacket(),
+                PacketType.PUBREL => new PubRelPacket(),
+                PacketType.SUBSCRIBE => new SubscribePacket(),
+                PacketType.SUBACK => new SubAckPacket(),
+                PacketType.UNSUBSCRIBE => new UnsubscribePacket(),
+                PacketType.UNSUBACK => new UnsubscribePacket(),
+                _ => throw new DecoderException("Unsupported Message Type"),
+            };
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
             remainingLength = packet.RemaingLength;
@@ -114,7 +108,6 @@ namespace DotNetty.Codecs.MqttFx
         bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
         {
             int readable = buffer.ReadableBytes;
-
             int result = 0;
             int multiplier = 1;
             byte digit;
@@ -155,7 +148,6 @@ namespace DotNetty.Codecs.MqttFx
         //        remainingLength += (encodedByte & 0x7f) * multiplier;
         //        multiplier *= 0x80;
         //    } while ((encodedByte & 0x80) != 0);
-
         //    return remainingLength;
         //}
     }

@@ -21,7 +21,7 @@ namespace MqttFx.Channels
         protected override void InitChannel(ISocketChannel ch)
         {
             ch.Pipeline.AddLast(new LoggingHandler());
-            ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(true, 256 * 1024), new MqttChannelHandler(client.Config, connectPromise));
+            ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(true, 256 * 1024), new MqttChannelHandler(client, connectPromise));
             //ch.pipeline().addLast("idleStateHandler", new IdleStateHandler(MqttClientImpl.this.clientConfig.getTimeoutSeconds(), MqttClientImpl.this.clientConfig.getTimeoutSeconds(), 0));
             //ch.pipeline().addLast("mqttPingHandler", new MqttPingHandler(MqttClientImpl.this.clientConfig.getTimeoutSeconds()));
         }

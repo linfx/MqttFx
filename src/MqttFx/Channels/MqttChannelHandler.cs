@@ -6,12 +6,12 @@ namespace MqttFx.Channels
 {
     public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
-        private readonly MqttClientOptions config;
+        private readonly IMqttClient client;
         private readonly TaskCompletionSource<MqttConnectResult> connectPromise;
 
-        public MqttChannelHandler(MqttClientOptions config, TaskCompletionSource<MqttConnectResult> connectPromise)
+        public MqttChannelHandler(IMqttClient client, TaskCompletionSource<MqttConnectResult> connectPromise)
         {
-            this.config = config;
+            this.client = client;
             this.connectPromise = connectPromise;
         }
 
@@ -19,23 +19,23 @@ namespace MqttFx.Channels
         {
             var packet = new ConnectPacket
             {
-                ClientId = config.ClientId,
-                CleanSession = config.CleanSession,
-                KeepAlive = config.KeepAlive,
+                ClientId = client.Config.ClientId,
+                CleanSession = client.Config.CleanSession,
+                KeepAlive = client.Config.KeepAlive,
             };
-            if (config.Credentials != null)
+            if (client.Config.Credentials != null)
             {
                 packet.UsernameFlag = true;
-                packet.UserName = config.Credentials.Username;
-                packet.Password = config.Credentials.Username;
+                packet.UserName = client.Config.Credentials.Username;
+                packet.Password = client.Config.Credentials.Username;
             }
-            if (config.WillMessage != null)
+            if (client.Config.WillMessage != null)
             {
                 packet.WillFlag = true;
-                packet.WillQos = config.WillMessage.Qos;
-                packet.WillRetain = config.WillMessage.Retain;
-                packet.WillTopic = config.WillMessage.Topic;
-                packet.WillMessage = config.WillMessage.Payload;
+                packet.WillQos = client.Config.WillMessage.Qos;
+                packet.WillRetain = client.Config.WillMessage.Retain;
+                packet.WillTopic = client.Config.WillMessage.Topic;
+                packet.WillMessage = client.Config.WillMessage.Payload;
             }
             context.WriteAndFlushAsync(packet);
         }
@@ -54,16 +54,19 @@ namespace MqttFx.Channels
                     HandlePublish(ctx.Channel, (PublishPacket)msg);
                     break;
                 case PacketType.PUBACK:
+                    HandlePuback((PubAckPacket)msg);
                     break;
                 case PacketType.PUBREC:
+                    HandlePubrel(ctx.Channel, msg);
                     break;
                 case PacketType.PUBREL:
+                    HandlePubrec(ctx.Channel, msg);
                     break;
                 case PacketType.PUBCOMP:
+                    HandlePubcomp(msg);
                     break;
                 case PacketType.SUBSCRIBE:
                     break;
-
                 case PacketType.UNSUBSCRIBE:
                     break;
                 case PacketType.UNSUBACK:
@@ -74,13 +77,7 @@ namespace MqttFx.Channels
                     break;
                 case PacketType.DISCONNECT:
                     break;
-                default:
-                    break;
             }
-        }
-
-        private void InvokeHandlersForIncomingPublish(PublishPacket message)
-        {
         }
 
         private void HandleConack(IChannel channel, ConnAckPacket message)

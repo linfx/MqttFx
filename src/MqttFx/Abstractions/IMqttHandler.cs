@@ -2,6 +2,6 @@
 {
     public interface IMqttHandler
     {
-        void OnMessage(Message message);
+        void OnMesage(string topic, byte[] payload);
     }
 }

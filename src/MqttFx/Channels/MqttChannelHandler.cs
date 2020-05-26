@@ -7,12 +7,12 @@ namespace MqttFx.Channels
     public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
         private readonly IMqttClient client;
-        private readonly TaskCompletionSource<MqttConnectResult> connectPromise;
+        private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
 
-        public MqttChannelHandler(IMqttClient client, TaskCompletionSource<MqttConnectResult> connectPromise)
+        public MqttChannelHandler(IMqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
         {
             this.client = client;
-            this.connectPromise = connectPromise;
+            this.connectFuture = connectFuture;
         }
 
         public override void ChannelActive(IChannelHandlerContext context)
@@ -71,10 +71,6 @@ namespace MqttFx.Channels
                     break;
                 case PacketType.UNSUBACK:
                     break;
-                case PacketType.PINGREQ:
-                    break;
-                case PacketType.PINGRESP:
-                    break;
                 case PacketType.DISCONNECT:
                     break;
             }
@@ -85,7 +81,7 @@ namespace MqttFx.Channels
             switch (message.ConnectReturnCode)
             {
                 case ConnectReturnCode.ConnectionAccepted:
-                    connectPromise.TrySetResult(new MqttConnectResult(ConnectReturnCode.ConnectionAccepted));
+                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.ConnectionAccepted));
                     break;
 
                 case ConnectReturnCode.BadUsernameOrPassword:
@@ -93,7 +89,7 @@ namespace MqttFx.Channels
                 case ConnectReturnCode.RefusedNotAuthorized:
                 case ConnectReturnCode.BrokerUnavailable:
                 case ConnectReturnCode.UnacceptableProtocolVersion:
-                    connectPromise.TrySetResult(new MqttConnectResult(message.ConnectReturnCode));
+                    connectFuture.TrySetResult(new MqttConnectResult(message.ConnectReturnCode));
                     channel.CloseAsync();
                     break;
             }
@@ -104,9 +100,13 @@ namespace MqttFx.Channels
             switch (message.Qos)
             {
                 case MqttQos.AtMostOnce:
+                    InvokeHandlersForIncomingPublish(message);
                     break;
 
                 case MqttQos.AtLeastOnce:
+                    InvokeHandlersForIncomingPublish(message);
+                    if(message.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketId));
                     break;
 
                 case MqttQos.ExactlyOnce:
@@ -136,6 +136,35 @@ namespace MqttFx.Channels
 
         private void HandlePubcomp(Packet message)
         {
+        }
+
+        private void InvokeHandlersForIncomingPublish(PublishPacket message)
+        {
+            //bool handlerInvoked = false;
+            //for (MqttSubscription subscription : ImmutableSet.copyOf(this.client.getSubscriptions().values()))
+            //{
+            //    if (subscription.matches(message.variableHeader().topicName()))
+            //    {
+            //        if (subscription.isOnce() && subscription.isCalled())
+            //        {
+            //            continue;
+            //        }
+            //        message.payload().markReaderIndex();
+            //        subscription.setCalled(true);
+            //        subscription.getHandler().onMessage(message.variableHeader().topicName(), message.payload());
+            //        if (subscription.isOnce())
+            //        {
+            //            this.client.off(subscription.getTopic(), subscription.getHandler());
+            //        }
+            //        message.payload().resetReaderIndex();
+            //        handlerInvoked = true;
+            //    }
+            //}
+            //if (!handlerInvoked && client.getDefaultHandler() != null)
+            //{
+            //    client.getDefaultHandler().onMessage(message.variableHeader().topicName(), message.payload());
+            //}
+            //message.payload().release();
         }
     }
 }

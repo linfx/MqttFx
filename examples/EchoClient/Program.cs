@@ -1,5 +1,4 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
-using DotNetty.Common.Internal.Logging;
+﻿using DotNetty.Common.Internal.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
 using MqttFx;
@@ -35,21 +34,22 @@ namespace EchoClient
             if (result.Succeeded)
             {
                 //var top = "$SYS/brokers/+/clients/#";
+                var topic = "testtopic/abc";
                 //Console.WriteLine("Subscribe:" + top);
 
-                //var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
+                //var rcs = (await client.SubscribeAsync(topic, MqttQos.AtMostOnce)).ReturnCodes;
 
                 //foreach (var rc in rcs)
                 //{
                 //    Console.WriteLine(rc);
                 //}
 
-                for (int i = 1; i <= 1; i++)
-                {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.AtLeastOnce);
-                    await Task.Delay(1000);
-                    //Console.ReadKey();
-                }
+                //for (int i = 1; i <= 1; i++)
+                //{
+                //    await client.PublishAsync("testtopic/1", Encoding.UTF8.GetBytes($"Hello World!: {i}"));
+                //    await Task.Delay(1000);
+                //    //Console.ReadKey();
+                //}
             }
             Console.ReadKey();
         }

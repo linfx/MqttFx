@@ -48,23 +48,24 @@ namespace MqttFx
 
             try
             {
-                var connectPromise = new TaskCompletionSource<MqttConnectResult>();
+                var connectFuture = new TaskCompletionSource<MqttConnectResult>();
                 var bootstrap = new Bootstrap();
                 bootstrap
                     .Group(eventLoop)
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)
                     .RemoteAddress(Config.Host, Config.Port)
-                    .Handler(new MqttChannelInitializer(this, connectPromise));
+                    .Handler(new MqttChannelInitializer(this, connectFuture));
 
-                var clientChannel = await bootstrap.ConnectAsync();
-                if (clientChannel.Open)
+                var future = await bootstrap.ConnectAsync();
+                if (future.Open)
                 {
                     _packetDispatcher.Reset();
                     _packetIdProvider.Reset();
-                    channel = clientChannel;
+                    channel = future;
                 }
-                return await connectPromise.Task;
+
+                return await connectFuture.Task;
             }
             catch (Exception ex)
             {
@@ -135,13 +136,25 @@ namespace MqttFx
         }
 
         /// <summary>
+        /// Subscribe on the given topic, with the given qos. When a message is received, MqttClient will invoke the <see cref="IMqttHandler"/> #OnMessage(string, byte[])} function of the given handler
+        /// </summary>
+        /// <param name="topic">The topic filter to subscribe to</param>
+        /// <param name="handler">The handler to invoke when we receive a message</param>
+        /// <param name="qos">The qos to request to the server</param>
+        /// <returns></returns>
+        public Task On(string topic, IMqttHandler handler, MqttQos qos = MqttQos.AtLeastOnce)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// 配置
         /// </summary>
         public MqttClientOptions Config { get; }
 
         #region ==================== PRIVATE API ====================
 
-        internal async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
+        private async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -189,6 +202,17 @@ namespace MqttFx
                 return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
+        }
+
+        private Task CreateSubscription(string topic, IMqttHandler handler, MqttQos qos)
+        {
+            var packet = new SubscribePacket
+            {
+                PacketId = _packetIdProvider.NewPacketId(),
+            };
+            packet.Add(topic, qos);
+
+            return SendAndReceiveAsync<SubAckPacket>(packet);
         }
 
         #endregion

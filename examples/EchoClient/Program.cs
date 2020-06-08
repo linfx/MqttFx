@@ -2,10 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
 using MqttFx;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EchoClient
@@ -68,28 +66,28 @@ namespace EchoClient
             //$SYS/brokers/+/clients/+/connected
             //$SYS/brokers/+/clients/+/disconnected
             //$SYS/brokers/+/clients/#
-            var message = e.Message;
-            var payload = Encoding.UTF8.GetString(message.Payload);
+            //var message = e.Message;
+            //var payload = Encoding.UTF8.GetString(message.Payload);
 
-            if (new Regex(@"\$SYS/brokers/.+?/connected").Match(message.Topic).Success)
-            {
-                //{ "clientid":"mqtt.fx","username":"mqtt.fx","ipaddress":"127.0.0.1","clean_sess":true,"protocol":4,"connack":0,"ts":1540949660}
+            //if (new Regex(@"\$SYS/brokers/.+?/connected").Match(message.Topic).Success)
+            //{
+            //    //{ "clientid":"mqtt.fx","username":"mqtt.fx","ipaddress":"127.0.0.1","clean_sess":true,"protocol":4,"connack":0,"ts":1540949660}
 
-                var obj = JObject.Parse(payload);
-                Console.WriteLine($"【Client Connected】 client_id:{obj.Value<string>("clientid")}, ipaddress:{obj.Value<string>("ipaddress")}");
+            //    var obj = JObject.Parse(payload);
+            //    Console.WriteLine($"【Client Connected】 client_id:{obj.Value<string>("clientid")}, ipaddress:{obj.Value<string>("ipaddress")}");
 
-            }
-            else if (new Regex(@"\$SYS/brokers/.+?/disconnected").Match(message.Topic).Success)
-            {
-                //{"clientid":"mqtt.fx","username":"mqtt.fx","reason":"normal","ts":1540949658}
+            //}
+            //else if (new Regex(@"\$SYS/brokers/.+?/disconnected").Match(message.Topic).Success)
+            //{
+            //    //{"clientid":"mqtt.fx","username":"mqtt.fx","reason":"normal","ts":1540949658}
 
-                var obj = JObject.Parse(payload);
-                Console.WriteLine($"【Client Disconnected】 client_id:{obj.Value<string>("clientid")}");
-            }
-            else
-            {
-                Console.WriteLine(payload);
-            }
+            //    var obj = JObject.Parse(payload);
+            //    Console.WriteLine($"【Client Disconnected】 client_id:{obj.Value<string>("clientid")}");
+            //}
+            //else
+            //{
+            //    Console.WriteLine(payload);
+            //}
         }
     }
 }

@@ -19,7 +19,6 @@ namespace EchoClient
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
             {
-                //options.Host = "127.0.0.1";
                 options.Host = "broker.hivemq.com";
                 options.Port = 1883;
             });
@@ -44,12 +43,12 @@ namespace EchoClient
                 //    Console.WriteLine(rc);
                 //}
 
-                //for (int i = 1; i <= 1; i++)
-                //{
-                //    await client.PublishAsync("testtopic/1", Encoding.UTF8.GetBytes($"Hello World!: {i}"));
-                //    await Task.Delay(1000);
-                //    //Console.ReadKey();
-                //}
+                for (int i = 1; i <= 10; i++)
+                {
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
+                    await Task.Delay(1000);
+                    //Console.ReadKey();
+                }
             }
             Console.ReadKey();
         }

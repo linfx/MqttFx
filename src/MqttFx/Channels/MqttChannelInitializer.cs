@@ -22,7 +22,7 @@ namespace MqttFx.Channels
         {
             ch.Pipeline.AddLast(new LoggingHandler());
             ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(true, 256 * 1024));
-            ch.Pipeline.AddLast(new IdleStateHandler(3, 0, 0), new MqttPingHandler());
+            ch.Pipeline.AddLast(new IdleStateHandler(3, 3, 0), new MqttPingHandler());
             ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));
         }
     }

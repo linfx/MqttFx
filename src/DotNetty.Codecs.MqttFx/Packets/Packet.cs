@@ -8,8 +8,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public abstract class Packet
     {
-        #region FixedHeader
-
         /// <summary>
         /// 固定报头
         /// </summary>
@@ -39,8 +37,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 剩余长度
         /// </summary>
         public int RemaingLength => FixedHeader.RemaingLength;
-
-        #endregion
 
         /// <summary>
         /// 消息基类
@@ -86,7 +82,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
             try
             {
                 EncodePacketId(buf);
-
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteTo(buffer);
                 buffer.WriteBytes(buf);

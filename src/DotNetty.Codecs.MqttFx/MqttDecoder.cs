@@ -16,6 +16,11 @@ namespace DotNetty.Codecs.MqttFx
 
         public enum ParseState { Ready, Failed }
 
+        /// <summary>
+        /// 解码器
+        /// </summary>
+        /// <param name="isServer"></param>
+        /// <param name="maxMessageSize"></param>
         public MqttDecoder(bool isServer, int maxMessageSize)
             : base(ParseState.Ready)
         {
@@ -136,19 +141,5 @@ namespace DotNetty.Codecs.MqttFx
             value = result;
             return true;
         }
-
-        //static int DecodeRemainingLength(IByteBuffer buffer)
-        //{
-        //    byte encodedByte;
-        //    var multiplier = 1;
-        //    var remainingLength = 0;
-        //    do
-        //    {
-        //        encodedByte = buffer.ReadByte();
-        //        remainingLength += (encodedByte & 0x7f) * multiplier;
-        //        multiplier *= 0x80;
-        //    } while ((encodedByte & 0x80) != 0);
-        //    return remainingLength;
-        //}
     }
 }

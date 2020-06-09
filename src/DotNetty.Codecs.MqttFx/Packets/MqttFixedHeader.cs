@@ -1,5 +1,4 @@
 ﻿using DotNetty.Buffers;
-using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -47,30 +46,35 @@ namespace DotNetty.Codecs.MqttFx.Packets
             RemaingLength = remainingLength;
         }
 
-        public void WriteTo(IByteBuffer buffer)
+        /// <summary>
+        /// 写入固定报头数据
+        /// </summary>
+        /// <param name="buf"></param>
+        public void WriteTo(IByteBuffer buf)
         {
-            var flags = (byte)PacketType << 4;
+            buf.WriteByte(GetFixedHeaderByte());
+            WriteVariableLength(buf, RemaingLength);
+        }
+
+        private int GetFixedHeaderByte()
+        {
+            int flags = (byte)PacketType << 4;
             flags |= Dup.ToByte() << 3;
             flags |= (byte)Qos << 1;
             flags |= Retain.ToByte();
-
-            buffer.WriteByte((byte)flags);
-            buffer.WriteBytes(EncodeLength(RemaingLength));
+            return flags;
         }
 
-        static byte[] EncodeLength(int length)
+        private static void WriteVariableLength(IByteBuffer buf, int num)
         {
-            var result = new List<byte>();
             do
             {
-                var digit = (byte)(length % 0x80);
-                length /= 0x80;
-                if (length > 0)
+                var digit = (byte)(num % 0x80);
+                num /= 0x80;
+                if (num > 0)
                     digit |= 0x80;
-                result.Add(digit);
-            } while (length > 0);
-
-            return result.ToArray();
+                buf.WriteByte(digit);
+            } while (num > 0);
         }
     }
 }

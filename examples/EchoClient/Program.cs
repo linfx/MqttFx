@@ -17,7 +17,7 @@ namespace EchoClient
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
             {
-                options.Host = "broker.hivemq.com";
+                options.Host = "broker.emqx.io";
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();

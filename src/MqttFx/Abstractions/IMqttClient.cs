@@ -18,7 +18,7 @@ namespace MqttFx
         /// 连接
         /// </summary>
         /// <returns></returns>
-        Task<MqttConnectResult> ConnectAsync();
+        ValueTask<MqttConnectResult> ConnectAsync();
 
         /// <summary>
         /// 发布消息

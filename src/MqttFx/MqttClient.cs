@@ -41,7 +41,7 @@ namespace MqttFx
         /// 连接
         /// </summary>
         /// <returns></returns>
-        public async Task<MqttConnectResult> ConnectAsync()
+        public async ValueTask<MqttConnectResult> ConnectAsync()
         {
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();

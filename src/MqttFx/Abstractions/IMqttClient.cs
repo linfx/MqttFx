@@ -18,7 +18,7 @@ namespace MqttFx
         /// 连接
         /// </summary>
         /// <returns></returns>
-        ValueTask<MqttConnectResult> ConnectAsync();
+        ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 发布消息

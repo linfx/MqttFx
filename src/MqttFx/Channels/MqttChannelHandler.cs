@@ -51,7 +51,7 @@ namespace MqttFx.Channels
                     HandleSubAck((SubAckPacket)msg);
                     break;
                 case PacketType.PUBLISH:
-                    HandlePublish(ctx.Channel, (PublishPacket)msg);
+                    ProcessPublish(ctx.Channel, (PublishPacket)msg);
                     break;
                 case PacketType.PUBACK:
                     HandlePuback((PubAckPacket)msg);
@@ -95,7 +95,7 @@ namespace MqttFx.Channels
             }
         }
 
-        private void HandlePublish(IChannel channel, PublishPacket message)
+        private void ProcessPublish(IChannel channel, PublishPacket message)
         {
             switch (message.Qos)
             {

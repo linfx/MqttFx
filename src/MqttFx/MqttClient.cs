@@ -25,7 +25,6 @@ namespace MqttFx
         private IEventLoopGroup eventLoop;
         private volatile IChannel channel;
 
-        public Action<ConnectReturnCode> OnConnected;
         public Action OnDisconnected;
         public Action<Message> OnMessageReceived;
 
@@ -41,31 +40,29 @@ namespace MqttFx
         /// 连接
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<MqttConnectResult> ConnectAsync()
+        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
         {
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
 
             try
             {
-                var connectFuture = new TaskCompletionSource<MqttConnectResult>();
+                var tcsConnect = new TaskCompletionSource<MqttConnectResult>();
                 var bootstrap = new Bootstrap();
                 bootstrap
                     .Group(eventLoop)
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)
                     .RemoteAddress(Config.Host, Config.Port)
-                    .Handler(new MqttChannelInitializer(this, connectFuture));
+                    .Handler(new MqttChannelInitializer(this, tcsConnect));
 
-                var future = await bootstrap.ConnectAsync();
-                if (future.Open)
+                channel = await bootstrap.ConnectAsync();
+                if (channel.Open)
                 {
                     _packetDispatcher.Reset();
                     _packetIdProvider.Reset();
-                    channel = future;
                 }
-
-                return await connectFuture.Task;
+                return await tcsConnect.Task;
             }
             catch (Exception ex)
             {

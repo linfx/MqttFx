@@ -32,21 +32,19 @@ namespace EchoClient
             {
                 //var top = "$SYS/brokers/+/clients/#";
                 var topic = "testtopic/abc";
-                //Console.WriteLine("Subscribe:" + top);
-
-                //var rcs = (await client.SubscribeAsync(topic, MqttQos.AtMostOnce)).ReturnCodes;
+                await client.SubscribeAsync(topic);
 
                 //foreach (var rc in rcs)
                 //{
                 //    Console.WriteLine(rc);
                 //}
 
-                for (int i = 1; i <= 10; i++)
-                {
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
-                    await Task.Delay(1000);
-                    //Console.ReadKey();
-                }
+                //for (int i = 1; i <= 10; i++)
+                //{
+                //    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
+                //    await Task.Delay(1000);
+                //    //Console.ReadKey();
+                //}
             }
             Console.ReadKey();
         }

@@ -47,24 +47,33 @@ namespace DotNetty.Codecs.MqttFx.Packets
         }
 
         /// <summary>
-        /// 写入固定报头数据
+        /// 写入固定报头
         /// </summary>
         /// <param name="buf"></param>
-        public void WriteTo(IByteBuffer buf)
+        public void WriteFixedHeader(IByteBuffer buf)
         {
-            buf.WriteByte(GetFixedHeaderByte());
+            WriteFixedHeaderByte(buf);
             WriteVariableLength(buf, RemaingLength);
         }
 
-        private int GetFixedHeaderByte()
+        /// <summary>
+        /// 写入固定报头首字节
+        /// </summary>
+        /// <returns></returns>
+        private void WriteFixedHeaderByte(IByteBuffer buf)
         {
-            int flags = (byte)PacketType << 4;
-            flags |= Dup.ToByte() << 3;
-            flags |= (byte)Qos << 1;
-            flags |= Retain.ToByte();
-            return flags;
+            var ret = (byte)PacketType << 4;
+            ret |= Dup.ToByte() << 3;
+            ret |= (byte)Qos << 1;
+            ret |= Retain.ToByte();
+            buf.WriteByte(ret);
         }
 
+        /// <summary>
+        /// 写入剩余长度
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="num"></param>
         private static void WriteVariableLength(IByteBuffer buf, int num)
         {
             do

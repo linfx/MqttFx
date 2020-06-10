@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
 using System;
 using System.Text;
@@ -43,10 +44,10 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                for (int i = 1; i <= 5; i++)
+                for (int i = 1; i <= 1; i++)
                 {
                     var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"a"), MqttQos.AtMostOnce);
                     await Task.Delay(100);
                 }
             }

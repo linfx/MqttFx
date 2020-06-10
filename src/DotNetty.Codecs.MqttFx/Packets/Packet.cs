@@ -81,7 +81,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                EncodePacketId(buf);
+                WritePacketId(buf);
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteFixedHeader(buffer);
                 buffer.WriteBytes(buf);
@@ -100,17 +100,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Decode(IByteBuffer buffer)
         {
             int remainingLength = RemaingLength;
-            DecodePacketId(buffer, ref remainingLength);
+            ReadPacketId(buffer, ref remainingLength);
             FixedHeader.RemaingLength = remainingLength;
         }
 
-        protected void EncodePacketId(IByteBuffer buffer)
+        protected void WritePacketId(IByteBuffer buffer)
         {
             if (Qos > MqttQos.AtMostOnce)
                 buffer.WriteUnsignedShort(PacketId);
         }
 
-        protected void DecodePacketId(IByteBuffer buffer, ref int remainingLength)
+        protected void ReadPacketId(IByteBuffer buffer, ref int remainingLength)
         {
             if (Qos > MqttQos.AtMostOnce)
             {
@@ -131,19 +131,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// QOS Level 0 - Message is not guaranteed delivery. No retries are made to ensure delivery is successful.
         /// </summary>
         AtMostOnce = 0x00,
-
         /// <summary>
         /// QOS Level 1 - Message is guaranteed delivery. It will be delivered at least one time, but may be delivered
         /// more than once if network errors occur.
         /// </summary>
         AtLeastOnce = 0x01,
-
         /// <summary>
         /// QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
         /// it is successfully sent..
         /// </summary>
         ExactlyOnce = 0x02,
-
         /// <summary>
         /// Failure
         /// </summary>

@@ -12,7 +12,9 @@ namespace MqttFx
         /// <summary>
         /// 配置
         /// </summary>
-        MqttClientOptions Config { get; }
+        MqttClientOptions Options { get; }
+
+        IMessageReceivedHandler MessageReceivedHandler { get; set; }
 
         /// <summary>
         /// 连接
@@ -49,5 +51,6 @@ namespace MqttFx
         //event EventHandler<MqttClientConnectedEventArgs> Connected;
         //event EventHandler<MqttClientDisconnectedEventArgs> Disconnected;
         //event EventHandler<MqttMessageReceivedEventArgs> MessageReceived;
+        Task On(string topic, IMessageReceivedHandler handler, MqttQos qos = MqttQos.AtLeastOnce);
     }
 }

@@ -9,20 +9,20 @@ namespace SimpleClient
     {
         static async Task Main(string[] args)
         {
-            var host = HostingHostBuilderExtensions.ConfigureLogging(new HostBuilder()
-, logging =>
-                 {
-                     logging.AddConsole();
-                     Microsoft.Extensions.Logging.LoggingBuilderExtensions.SetMinimumLevel(logging, (LogLevel)LogLevel.Debug);
-                 })
-                .ConfigureServices((System.Action<IServiceCollection>)(services =>
+            var host = HostingHostBuilderExtensions.ConfigureLogging(new HostBuilder(), logging =>
+            {
+                logging.AddConsole();
+                //Microsoft.Extensions.Logging.LoggingBuilderExtensions.SetMinimumLevel(logging, (LogLevel)LogLevel.Debug);
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddMqttFx(options =>
                 {
-                    MqttFxServiceCollectionExtensions.AddMqttClient(services, (System.Action<MqttFx.MqttClientOptions>)(options =>
-                     {
-                         options.Host = "127.0.0.1";
-                     }));
-                    services.AddHostedService<Services>();
-                }));
+                    options.Host = "broker.emqx.io";
+                    options.Port = 1883;
+                });
+                services.AddHostedService<Services>();
+            });
             await host.RunConsoleAsync();
         }
     }

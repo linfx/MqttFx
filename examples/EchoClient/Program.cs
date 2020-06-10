@@ -1,6 +1,4 @@
-﻿using DotNetty.Common.Internal.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Console;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
 using System;
 using System.Text;
@@ -12,7 +10,9 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
-            InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleLoggerOptions
+            //{
+            //}));
 
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
@@ -21,17 +21,24 @@ namespace EchoClient
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
-
             var client = container.GetService<IMqttClient>();
-            //client.Connected += Client_Connected;
-            //client.Disconnected += Client_Disconnected;
-            //client.MessageReceived += Client_MessageReceived;
+
+
+            client.UseMessageReceivedHandler(message =>
+            {
+                Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
+                Console.WriteLine($"+ Topic = {message.Topic}");
+                Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(message.Payload)}");
+                Console.WriteLine($"+ QoS = {message.Qos}");
+                Console.WriteLine($"+ Retain = {message.Retain}");
+                Console.WriteLine();
+            });
 
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
                 //var top = "$SYS/brokers/+/clients/#";
-                var topic = "testtopic/abc";
+                var topic = "testtopic/abcd";
                 await client.SubscribeAsync(topic);
 
                 //foreach (var rc in rcs)
@@ -39,24 +46,13 @@ namespace EchoClient
                 //    Console.WriteLine(rc);
                 //}
 
-                //for (int i = 1; i <= 10; i++)
-                //{
-                //    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
-                //    await Task.Delay(1000);
-                //    //Console.ReadKey();
-                //}
+                for (int i = 1; i <= 10; i++)
+                {
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
+                    await Task.Delay(1000);
+                }
             }
             Console.ReadKey();
-        }
-
-        private static void Client_Connected(object sender, MqttClientConnectedEventArgs e)
-        {
-            Console.WriteLine("Connected Ssuccessful!");
-        }
-
-        private static void Client_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
-        {
-            Console.WriteLine("Disconnected");
         }
 
         private static void Client_MessageReceived(object sender, MqttMessageReceivedEventArgs e)

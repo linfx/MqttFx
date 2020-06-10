@@ -19,23 +19,23 @@ namespace MqttFx.Channels
         {
             var packet = new ConnectPacket
             {
-                ClientId = client.Config.ClientId,
-                CleanSession = client.Config.CleanSession,
-                KeepAlive = client.Config.KeepAlive,
+                ClientId = client.Options.ClientId,
+                CleanSession = client.Options.CleanSession,
+                KeepAlive = client.Options.KeepAlive,
             };
-            if (client.Config.Credentials != null)
+            if (client.Options.Credentials != null)
             {
                 packet.UsernameFlag = true;
-                packet.UserName = client.Config.Credentials.Username;
-                packet.Password = client.Config.Credentials.Username;
+                packet.UserName = client.Options.Credentials.Username;
+                packet.Password = client.Options.Credentials.Username;
             }
-            if (client.Config.WillMessage != null)
+            if (client.Options.WillMessage != null)
             {
                 packet.WillFlag = true;
-                packet.WillQos = client.Config.WillMessage.Qos;
-                packet.WillRetain = client.Config.WillMessage.Retain;
-                packet.WillTopic = client.Config.WillMessage.Topic;
-                packet.WillMessage = client.Config.WillMessage.Payload;
+                packet.WillQos = client.Options.WillMessage.Qos;
+                packet.WillRetain = client.Options.WillMessage.Retain;
+                packet.WillTopic = client.Options.WillMessage.Topic;
+                packet.WillMessage = client.Options.WillMessage.Payload;
             }
             context.WriteAndFlushAsync(packet);
         }
@@ -51,7 +51,7 @@ namespace MqttFx.Channels
                     HandleSubAck((SubAckPacket)msg);
                     break;
                 case PacketType.PUBLISH:
-                    ProcessPublish(ctx.Channel, (PublishPacket)msg);
+                    HandlePublish(ctx.Channel, (PublishPacket)msg);
                     break;
                 case PacketType.PUBACK:
                     HandlePuback((PubAckPacket)msg);
@@ -95,7 +95,7 @@ namespace MqttFx.Channels
             }
         }
 
-        private void ProcessPublish(IChannel channel, PublishPacket message)
+        private void HandlePublish(IChannel channel, PublishPacket message)
         {
             switch (message.Qos)
             {
@@ -140,31 +140,11 @@ namespace MqttFx.Channels
 
         private void InvokeHandlersForIncomingPublish(PublishPacket message)
         {
-            //bool handlerInvoked = false;
-            //for (MqttSubscription subscription : ImmutableSet.copyOf(this.client.getSubscriptions().values()))
-            //{
-            //    if (subscription.matches(message.variableHeader().topicName()))
-            //    {
-            //        if (subscription.isOnce() && subscription.isCalled())
-            //        {
-            //            continue;
-            //        }
-            //        message.payload().markReaderIndex();
-            //        subscription.setCalled(true);
-            //        subscription.getHandler().onMessage(message.variableHeader().topicName(), message.payload());
-            //        if (subscription.isOnce())
-            //        {
-            //            this.client.off(subscription.getTopic(), subscription.getHandler());
-            //        }
-            //        message.payload().resetReaderIndex();
-            //        handlerInvoked = true;
-            //    }
-            //}
-            //if (!handlerInvoked && client.getDefaultHandler() != null)
-            //{
-            //    client.getDefaultHandler().onMessage(message.variableHeader().topicName(), message.payload());
-            //}
-            //message.payload().release();
+            var handler = client.MessageReceivedHandler;
+            if(handler != null)
+            {
+                handler.OnMesage(message.ToMessage());
+            }
         }
     }
 }

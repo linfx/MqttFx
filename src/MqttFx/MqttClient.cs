@@ -28,11 +28,13 @@ namespace MqttFx
         public Action OnDisconnected;
         public Action<Message> OnMessageReceived;
 
+        public IMessageReceivedHandler MessageReceivedHandler { get; set; }
+
         public MqttClient(
             ILogger<MqttClient> logger,
             IOptions<MqttClientOptions> options)
         {
-            Config = options.Value;
+            Options = options.Value;
             _logger = logger ?? NullLogger<MqttClient>.Instance;
         }
 
@@ -53,7 +55,7 @@ namespace MqttFx
                     .Group(eventLoop)
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)
-                    .RemoteAddress(Config.Host, Config.Port)
+                    .RemoteAddress(Options.Host, Options.Port)
                     .Handler(new MqttChannelInitializer(this, tcsConnect));
 
                 channel = await bootstrap.ConnectAsync();
@@ -97,7 +99,7 @@ namespace MqttFx
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="cancellationToken"></param>
-        public Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
+        public async Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
         {
             var packet = new SubscribePacket
             {
@@ -105,7 +107,10 @@ namespace MqttFx
             };
             packet.Add(topic, qos);
 
-            return SendAndReceiveAsync<SubAckPacket>(packet, cancellationToken);
+            //return SendAndReceiveAsync<SubAckPacket>(packet, cancellationToken);
+            await SendAndFlushPacketAsync(packet);
+
+            return null;
         }
 
         ///// <summary>
@@ -133,21 +138,21 @@ namespace MqttFx
         }
 
         /// <summary>
-        /// Subscribe on the given topic, with the given qos. When a message is received, MqttClient will invoke the <see cref="IMqttHandler"/> #OnMessage(string, byte[])} function of the given handler
+        /// Subscribe on the given topic, with the given qos. When a message is received, MqttClient will invoke the <see cref="IMessageReceivedHandler"/> #OnMessage(string, byte[])} function of the given handler
         /// </summary>
         /// <param name="topic">The topic filter to subscribe to</param>
         /// <param name="handler">The handler to invoke when we receive a message</param>
         /// <param name="qos">The qos to request to the server</param>
         /// <returns></returns>
-        public Task On(string topic, IMqttHandler handler, MqttQos qos = MqttQos.AtLeastOnce)
+        public Task On(string topic, IMessageReceivedHandler handler, MqttQos qos = MqttQos.AtLeastOnce)
         {
-            throw new NotImplementedException();
+            return CreateSubscription(topic, handler, qos);
         }
 
         /// <summary>
         /// 配置
         /// </summary>
-        public MqttClientOptions Config { get; }
+        public MqttClientOptions Options { get; }
 
         #region ==================== PRIVATE API ====================
 
@@ -163,7 +168,7 @@ namespace MqttFx
 
             await channel.WriteAndFlushAsync(packet);
 
-            using var timeoutCts = new CancellationTokenSource(Config.Timeout);
+            using var timeoutCts = new CancellationTokenSource(Options.Timeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
             linkedCts.Token.Register(() =>
@@ -201,7 +206,7 @@ namespace MqttFx
             return Task.CompletedTask;
         }
 
-        private Task CreateSubscription(string topic, IMqttHandler handler, MqttQos qos)
+        private Task CreateSubscription(string topic, IMessageReceivedHandler handler, MqttQos qos)
         {
             var packet = new SubscribePacket
             {

@@ -1,20 +1,17 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MqttFx;
-using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SimpleClient
 {
-    class Services : IHostedService
+    public class Services : IHostedService
     {
         private readonly ILogger<Services> _logger;
-        private readonly MqttClient _client;
+        private readonly IMqttClient _client;
 
-        public Services(ILogger<Services> logger, MqttClient client)
+        public Services(ILogger<Services> logger, IMqttClient client)
         {
             _logger = logger;
             _client = client;
@@ -22,6 +19,8 @@ namespace SimpleClient
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            await _client.ConnectAsync();
+
             //if (await _client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             //{
             //    //var top = "/World";

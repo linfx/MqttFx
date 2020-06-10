@@ -19,23 +19,26 @@ namespace MqttFx
     public class MqttClient : IMqttClient
     {
         private readonly ILogger _logger;
-        private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
-        private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
-
         private IEventLoopGroup eventLoop;
         private volatile IChannel channel;
 
-        public Action OnDisconnected;
-        public Action<Message> OnMessageReceived;
+        private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
+        private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
+
+        public bool IsConnected { get; private set; }
+
+        public MqttClientOptions Options { get; }
+
+        public IMqttClientConnectedHandler ConnectedHandler { get; set; }
 
         public IMessageReceivedHandler MessageReceivedHandler { get; set; }
 
-        public MqttClient(
-            ILogger<MqttClient> logger,
-            IOptions<MqttClientOptions> options)
+        public IMqttClientDisconnectedHandler DisconnectedHandler { get; set; }
+
+        public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {
-            Options = options.Value;
             _logger = logger ?? NullLogger<MqttClient>.Instance;
+            Options = options.Value;
         }
 
         /// <summary>
@@ -49,22 +52,24 @@ namespace MqttFx
 
             try
             {
-                var tcsConnect = new TaskCompletionSource<MqttConnectResult>();
+                var connectFuture = new TaskCompletionSource<MqttConnectResult>();
                 var bootstrap = new Bootstrap();
                 bootstrap
                     .Group(eventLoop)
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)
                     .RemoteAddress(Options.Host, Options.Port)
-                    .Handler(new MqttChannelInitializer(this, tcsConnect));
+                    .Handler(new MqttChannelInitializer(this, connectFuture));
 
                 channel = await bootstrap.ConnectAsync();
+
                 if (channel.Open)
                 {
                     _packetDispatcher.Reset();
                     _packetIdProvider.Reset();
+                    IsConnected = true;
                 }
-                return await tcsConnect.Task;
+                return await connectFuture.Task;
             }
             catch (Exception ex)
             {
@@ -80,7 +85,7 @@ namespace MqttFx
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="retain"></param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce, bool retain = false)
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce, bool retain = false, CancellationToken cancellationToken = default)
         {
             var packet = new PublishPacket(qos, false, retain)
             {
@@ -99,31 +104,26 @@ namespace MqttFx
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="cancellationToken"></param>
-        public async Task<SubAckPacket> SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
+        public async Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
         {
             var packet = new SubscribePacket
             {
                 PacketId = _packetIdProvider.NewPacketId(),
             };
             packet.Add(topic, qos);
-
-            //return SendAndReceiveAsync<SubAckPacket>(packet, cancellationToken);
             await SendAndFlushPacketAsync(packet);
-
-            return null;
         }
 
-        ///// <summary>
-        ///// 取消订阅
-        ///// </summary>
-        ///// <param name="topics">主题</param>
-        //public Task<UnsubscribeAckMessage> UnsubscribeAsync(params string[] topics)
-        //{
-        //    var packet = new UnsubscribePacket();
-        //    packet.AddRange(topics);
-
-        //    return SendAndReceiveAsync<UnsubscribeAckMessage>(packet, _cancellationTokenSource.Token);
-        //}
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <param name="topics">主题</param>
+        public Task UnsubscribeAsync(params string[] topics)
+        {
+            var packet = new UnsubscribePacket();
+            packet.AddRange(topics);
+            return SendAndFlushPacketAsync(packet);
+        }
 
         /// <summary>
         /// 断开连接
@@ -134,27 +134,7 @@ namespace MqttFx
             if (channel != null)
                 await channel.CloseAsync();
             await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
-            OnDisconnected?.Invoke();
         }
-
-        /// <summary>
-        /// Subscribe on the given topic, with the given qos. When a message is received, MqttClient will invoke the <see cref="IMessageReceivedHandler"/> #OnMessage(string, byte[])} function of the given handler
-        /// </summary>
-        /// <param name="topic">The topic filter to subscribe to</param>
-        /// <param name="handler">The handler to invoke when we receive a message</param>
-        /// <param name="qos">The qos to request to the server</param>
-        /// <returns></returns>
-        public Task On(string topic, IMessageReceivedHandler handler, MqttQos qos = MqttQos.AtLeastOnce)
-        {
-            return CreateSubscription(topic, handler, qos);
-        }
-
-        /// <summary>
-        /// 配置
-        /// </summary>
-        public MqttClientOptions Options { get; }
-
-        #region ==================== PRIVATE API ====================
 
         private async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
         {
@@ -205,18 +185,5 @@ namespace MqttFx
 
             return Task.CompletedTask;
         }
-
-        private Task CreateSubscription(string topic, IMessageReceivedHandler handler, MqttQos qos)
-        {
-            var packet = new SubscribePacket
-            {
-                PacketId = _packetIdProvider.NewPacketId(),
-            };
-            packet.Add(topic, qos);
-
-            return SendAndReceiveAsync<SubAckPacket>(packet);
-        }
-
-        #endregion
     }
 }

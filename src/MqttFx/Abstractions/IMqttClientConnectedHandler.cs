@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MqttFx.Abstractions
+﻿namespace MqttFx
 {
-    interface IMqttClientConnectedHandler
+    public interface IMqttClientConnectedHandler
     {
+        void OnConnected();
     }
 }

@@ -10,10 +10,7 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
-            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleLoggerOptions
-            //{
-            //}));
-
+            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleLoggerOptions {}));
             var services = new ServiceCollection();
             services.AddMqttFx(options =>
             {
@@ -23,6 +20,15 @@ namespace EchoClient
             var container = services.BuildServiceProvider();
             var client = container.GetService<IMqttClient>();
 
+            client.UseConnectedHandler(async () =>
+            {
+                Console.WriteLine("### CONNECTED WITH SERVER ###");
+
+                var topic = "testtopic/abcd";
+                await client.SubscribeAsync(topic);
+
+                Console.WriteLine("### SUBSCRIBED ###");
+            });
 
             client.UseMessageReceivedHandler(message =>
             {
@@ -37,19 +43,11 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                //var top = "$SYS/brokers/+/clients/#";
-                var topic = "testtopic/abcd";
-                await client.SubscribeAsync(topic);
-
-                //foreach (var rc in rcs)
-                //{
-                //    Console.WriteLine(rc);
-                //}
-
-                for (int i = 1; i <= 10; i++)
+                for (int i = 1; i <= 5; i++)
                 {
+                    var topic = "testtopic/abcd";
                     await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"Hello World!: {i}"));
-                    await Task.Delay(1000);
+                    await Task.Delay(100);
                 }
             }
             Console.ReadKey();

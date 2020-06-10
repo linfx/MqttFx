@@ -82,6 +82,9 @@ namespace MqttFx.Channels
             {
                 case ConnectReturnCode.ConnectionAccepted:
                     connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.ConnectionAccepted));
+
+                    if(client.ConnectedHandler != null)
+                        client.ConnectedHandler.OnConnected();
                     break;
 
                 case ConnectReturnCode.BadUsernameOrPassword:

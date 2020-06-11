@@ -8,13 +8,9 @@
     <RepositoryUrl>https://github.com/linfx/MqttFx</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>mqtt</PackageTags>
-    <Copyright>(c) LinFx 2019</Copyright>
+    <Copyright>(c) LinFx 2020</Copyright>
     <Version>0.6.1</Version>
     <Description>General purpose codecs for DotNetty、MqttFx</Description>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using DotNetty.Buffers;
 using DotNetty.Codecs.MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
@@ -10,11 +11,11 @@ namespace MqttFx.Test
 {
     public class MqttCodecTests
     {
-        static readonly IByteBufferAllocator Allocator = new UnpooledByteBufferAllocator();
+        private static readonly IByteBufferAllocator Allocator = new UnpooledByteBufferAllocator();
 
-        readonly MqttDecoder serverDecoder;
-        readonly MqttDecoder clientDecoder;
-        readonly Mock<IChannelHandlerContext> contextMock;
+        private readonly MqttDecoder serverDecoder;
+        private readonly MqttDecoder clientDecoder;
+        private readonly Mock<IChannelHandlerContext> contextMock;
 
         public MqttCodecTests()
         {
@@ -23,6 +24,60 @@ namespace MqttFx.Test
             contextMock = new Mock<IChannelHandlerContext>(MockBehavior.Strict);
             contextMock.Setup(x => x.Removed).Returns(false);
             contextMock.Setup(x => x.Allocator).Returns(UnpooledByteBufferAllocator.Default);
+        }
+
+        [Theory]
+        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.ExactlyOnce, true)]
+        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AtLeastOnce, false)]
+        [InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
+        [InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
+        public void TestConnectMessage(string clientId, bool cleanSession, ushort keepAlive, string userName, string password, string willTopicName, byte[] willMessage, MqttQos? willQos, bool willRetain)
+        {
+            var packet = new ConnectPacket
+            {
+                ClientId = clientId,
+                CleanSession = cleanSession,
+                KeepAlive = keepAlive
+            };
+            if (userName != null)
+            {
+                packet.UserName = userName;
+                if (password != null)
+                {
+                    packet.Password = password;
+                }
+            }
+            if (willTopicName != null)
+            {
+                packet.WillTopic = willTopicName;
+                packet.WillMessage = willMessage;
+                packet.WillQos = willQos ?? MqttQos.AtMostOnce;
+                packet.WillRetain = willRetain;
+            }
+
+            ConnectPacket recoded = RecodePacket(packet, true, true);
+
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnectPacket>()), Times.Once);
+            Assert.Equal(packet.ClientId, recoded.ClientId);
+            Assert.Equal(packet.CleanSession, recoded.CleanSession);
+            Assert.Equal(packet.KeepAlive, recoded.KeepAlive);
+            Assert.Equal(packet.UsernameFlag, recoded.UsernameFlag);
+            if (packet.UsernameFlag)
+            {
+                Assert.Equal(packet.UserName, recoded.UserName);
+            }
+            Assert.Equal(packet.PasswordFlag, recoded.PasswordFlag);
+            if (packet.PasswordFlag)
+            {
+                Assert.Equal(packet.Password, recoded.Password);
+            }
+            if (packet.WillFlag)
+            {
+                Assert.Equal(packet.WillTopic, recoded.WillTopic);
+                //Assert.True(ByteBufferUtil.Equals(Unpooled.WrappedBuffer(willMessage), recoded.WillMessage));
+                Assert.Equal(packet.Qos, recoded.Qos);
+                Assert.Equal(packet.WillRetain, recoded.WillRetain);
+            }
         }
 
         [Theory]
@@ -48,19 +103,22 @@ namespace MqttFx.Test
             Assert.Equal(packet.ConnectReturnCode, recoded.ConnectReturnCode);
         }
 
-        //[Theory]
-        //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
-        //[InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
-        //public void TestSubscribeMessage(int packetId, string[] topicFilters, MqttQos[] requestedQosValues)
-        //{
-        //    var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscriptionRequest(topic, qos)).ToArray());
+        [Theory]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
+        public void TestSubscribeMessage(int packetId, string[] topicFilters, MqttQos[] requestedQosValues)
+        {
+            //var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscriptionRequest(topic, qos)).ToArray());
 
-        //    SubscribePacket recoded = RecodePacket(packet, true, true);
+            var packet = new SubscribePacket();
+            //packet.Add(topicFilters.Zip(requestedQosValues, (topic, qos) => new ))
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-        //    Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscriptionRequest>.Default);
-        //    Assert.Equal(packet.PacketId, recoded.PacketId);
-        //}
+            SubscribePacket recoded = RecodePacket(packet, true, true);
+
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
+            //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscriptionRequest>.Default);
+            //Assert.Equal(packet.PacketId, recoded.PacketId);
+        }
 
         [Theory]
         [InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]
@@ -98,7 +156,6 @@ namespace MqttFx.Test
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
-
         [Theory]
         [InlineData(MqttQos.AtMostOnce, false, false, 1, "a", null)]
         [InlineData(MqttQos.ExactlyOnce, true, false, ushort.MaxValue, "/", new byte[0])]
@@ -124,12 +181,26 @@ namespace MqttFx.Test
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            //Assert.True(ByteBufferUtil.Equals(payload == null ? Unpooled.Empty : Unpooled.WrappedBuffer(payload), recoded.Payload));
+            Assert.Equal(payload, recoded.Payload);
+        }
+
+        [Fact]
+        public void TestEmptyPacketMessages()
+        {
+            TestEmptyPacketMessage(PingReqPacket.Instance, true);
+            TestEmptyPacketMessage(PingRespPacket.Instance, false);
+            TestEmptyPacketMessage(DisconnectPacket.Instance, true);
+        }
+
+        private void TestEmptyPacketMessage<T>(T packet, bool useServer) where T : Packet
+        {
+            T recoded = RecodePacket(packet, useServer, true);
+
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<T>()), Times.Once);
         }
 
 
-        T RecodePacket<T>(T packet, bool useServer, bool explodeForDecode)
-            where T : Packet
+        private T RecodePacket<T>(T packet, bool useServer, bool explodeForDecode) where T : Packet
         {
             var output = new List<object>();
             MqttEncoder.DoEncode(Allocator, packet, output);

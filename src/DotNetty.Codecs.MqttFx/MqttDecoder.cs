@@ -59,7 +59,7 @@ namespace DotNetty.Codecs.MqttFx
             }
         }
 
-        bool TryDecodePacket(IChannelHandlerContext context, IByteBuffer buffer, out Packet packet)
+        private bool TryDecodePacket(IChannelHandlerContext context, IByteBuffer buffer, out Packet packet)
         {
             if (!buffer.IsReadable(2))
             {
@@ -83,7 +83,7 @@ namespace DotNetty.Codecs.MqttFx
             return true;
         }
 
-        Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
+        private Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
         {
             var fixedHeader = new MqttFixedHeader(packetSignature, remainingLength);
             Packet packet = fixedHeader.PacketType switch
@@ -110,7 +110,7 @@ namespace DotNetty.Codecs.MqttFx
             return packet;
         }
 
-        bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
+        private bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
         {
             int readable = buffer.ReadableBytes;
             int result = 0;

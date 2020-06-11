@@ -15,6 +15,17 @@ namespace MqttFx
             return client;
         }
 
+        public static IMqttClient UseDisconnectedHandler(this IMqttClient client, Action handler)
+        {
+            return client.UseDisconnectedHandler(new MqttClientDisconnectedHandler(handler));
+        }
+
+        public static IMqttClient UseDisconnectedHandler(this IMqttClient client, IMqttClientDisconnectedHandler handler)
+        {
+            client.DisconnectedHandler = handler;
+            return client;
+        }
+
         public static IMqttClient UseMessageReceivedHandler(this IMqttClient client, Action<Message> handler)
         {
             return client.UseApplicationMessageReceivedHandler(new MessageReceivedHandler(handler));

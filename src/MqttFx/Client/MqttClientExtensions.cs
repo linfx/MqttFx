@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MqttFx.Client.Abstractions;
+using MqttFx.Client.Handlers;
+using System;
 
-namespace MqttFx
+namespace MqttFx.Client
 {
     public static class MqttClientExtensions
     {

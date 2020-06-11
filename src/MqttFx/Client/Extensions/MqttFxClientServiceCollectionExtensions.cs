@@ -1,11 +1,13 @@
-﻿using System;
-using MqttFx;
+﻿using MqttFx;
+using MqttFx.Client;
+using MqttFx.Client.Abstractions;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class MqttFxServiceCollectionExtensions
+    public static class MqttFxClientServiceCollectionExtensions
     {
-        public static IServiceCollection AddMqttFx(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
+        public static IServiceCollection AddMqttFxClient(this IServiceCollection services, Action<MqttClientOptions> optionsAction)
         {
             if (optionsAction == null)
                 throw new ArgumentNullException(nameof(optionsAction));

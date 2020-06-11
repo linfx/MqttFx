@@ -1,6 +1,7 @@
-﻿using System;
+﻿using MqttFx.Client.Abstractions;
+using System;
 
-namespace MqttFx
+namespace MqttFx.Client.Handlers
 {
     public class MessageReceivedHandler : IMessageReceivedHandler
     {

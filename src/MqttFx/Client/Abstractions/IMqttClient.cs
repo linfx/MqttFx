@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MqttFx
+namespace MqttFx.Client.Abstractions
 {
     /// <summary>
     /// Mqtt客户端

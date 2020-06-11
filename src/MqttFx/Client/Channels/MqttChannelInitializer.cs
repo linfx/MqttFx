@@ -3,6 +3,7 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using MqttFx.Client.Abstractions;
 using System.Threading.Tasks;
 
 namespace MqttFx.Channels

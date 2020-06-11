@@ -1,4 +1,4 @@
-﻿namespace MqttFx
+﻿namespace MqttFx.Client.Abstractions
 {
     public interface IMessageReceivedHandler
     {

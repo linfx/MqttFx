@@ -6,12 +6,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using MqttFx.Channels;
+using MqttFx.Client.Abstractions;
 using MqttFx.Utils;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MqttFx
+namespace MqttFx.Client
 {
     /// <summary>
     /// Mqtt客户端
@@ -133,6 +134,7 @@ namespace MqttFx
         {
             if (channel != null)
                 await channel.CloseAsync();
+
             await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 

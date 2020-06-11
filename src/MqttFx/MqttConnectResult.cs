@@ -5,9 +5,7 @@ namespace MqttFx
 {
     public class MqttConnectResult
     {
-        public MqttConnectResult()
-        {
-        }
+        public MqttConnectResult() { }
 
         public MqttConnectResult(ConnectReturnCode connectReturn)
         {

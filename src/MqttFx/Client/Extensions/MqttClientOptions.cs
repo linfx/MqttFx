@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MqttFx.Client;
+using System;
 
 namespace MqttFx
 {

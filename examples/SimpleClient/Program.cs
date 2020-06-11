@@ -16,7 +16,7 @@ namespace SimpleClient
             })
             .ConfigureServices(services =>
             {
-                services.AddMqttFx(options =>
+                services.AddMqttFxClient(options =>
                 {
                     options.Host = "broker.emqx.io";
                     options.Port = 1883;

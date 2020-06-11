@@ -18,8 +18,6 @@
   <ItemGroup>
     <PackageReference Include="DotNetty.Codecs.Mqtt" Version="0.6.0" />
     <PackageReference Include="DotNetty.Handlers" Version="0.6.0" />
-    <PackageReference Include="DotNetty.Transport" Version="0.6.0" />
-    <PackageReference Include="DotNetty.Transport.Libuv" Version="0.6.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.5" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.5" />
   </ItemGroup>

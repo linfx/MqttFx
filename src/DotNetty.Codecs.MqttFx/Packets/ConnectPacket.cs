@@ -1,6 +1,7 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
 using System;
+using System.Net.Security;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -92,7 +93,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 buf.WriteString(ProtocolName);        //byte 1 - 8
                 buf.WriteByte(ProtocolLevel);         //byte 9
 
-                // connect flags;                      //byte 10
+                // connect flags                      //byte 10
                 var flags = UsernameFlag.ToByte() << 7;
                 flags |= PasswordFlag.ToByte() << 6;
                 flags |= WillRetain.ToByte() << 5;
@@ -124,6 +125,36 @@ namespace DotNetty.Codecs.MqttFx.Packets
             finally
             {
                 buf?.SafeRelease();
+            }
+        }
+
+        public override void Decode(IByteBuffer buffer)
+        {
+            int remainingLength = RemaingLength;
+
+            // variable header
+            ProtocolName = buffer.ReadString(ref remainingLength);
+            ProtocolLevel = buffer.ReadByte();
+
+            // connect flags                      //byte 10
+            int connectFlags = buffer.ReadByte();
+            CleanSession = (connectFlags & 0x02) == 0x02;
+            WillFlag = (connectFlags & 0x04) == 0x04;
+            if(WillFlag)
+            {
+                WillRetain = (connectFlags & 0x20) == 0x20;
+                Qos = (MqttQos)((connectFlags & 0x18) >> 3);
+                WillTopic = string.Empty;
+            }
+
+            // keep alive
+
+            // payload
+            ClientId = buffer.ReadString(ref remainingLength);
+            if(WillFlag)
+            {
+                WillTopic = buffer.ReadString(ref remainingLength);
+                //WillMessage = buffer.ReadBytes
             }
         }
     }

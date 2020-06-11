@@ -26,7 +26,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 服务质量等级
         /// </summary>
-        public MqttQos Qos => FixedHeader.Qos;
+        public MqttQos Qos
+        {
+            get { return FixedHeader.Qos; }
+            set { FixedHeader.Qos = value; }
+        }
 
         /// <summary>
         /// 保留标志

@@ -21,7 +21,6 @@ namespace MqttFx
         private readonly ILogger _logger;
         private IEventLoopGroup eventLoop;
         private volatile IChannel channel;
-
         private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
         private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
 
@@ -50,19 +49,18 @@ namespace MqttFx
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
 
+            var connectFuture = new TaskCompletionSource<MqttConnectResult>();
+            var bootstrap = new Bootstrap();
+            bootstrap
+                .Group(eventLoop)
+                .Channel<TcpSocketChannel>()
+                .Option(ChannelOption.TcpNodelay, true)
+                .RemoteAddress(Options.Host, Options.Port)
+                .Handler(new MqttChannelInitializer(this, connectFuture));
+
             try
             {
-                var connectFuture = new TaskCompletionSource<MqttConnectResult>();
-                var bootstrap = new Bootstrap();
-                bootstrap
-                    .Group(eventLoop)
-                    .Channel<TcpSocketChannel>()
-                    .Option(ChannelOption.TcpNodelay, true)
-                    .RemoteAddress(Options.Host, Options.Port)
-                    .Handler(new MqttChannelInitializer(this, connectFuture));
-
                 channel = await bootstrap.ConnectAsync();
-
                 if (channel.Open)
                 {
                     _packetDispatcher.Reset();
@@ -95,7 +93,7 @@ namespace MqttFx
             if (qos > MqttQos.AtMostOnce)
                 packet.PacketId = _packetIdProvider.NewPacketId();
 
-            return SendAndFlushPacketAsync(packet);
+            return SendPacketAsync(packet);
         }
 
         /// <summary>
@@ -104,14 +102,15 @@ namespace MqttFx
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="cancellationToken"></param>
-        public async Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
+        public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken = default)
         {
             var packet = new SubscribePacket
             {
                 PacketId = _packetIdProvider.NewPacketId(),
             };
             packet.Add(topic, qos);
-            await SendAndFlushPacketAsync(packet);
+
+            return SendPacketAsync(packet);
         }
 
         /// <summary>
@@ -122,7 +121,8 @@ namespace MqttFx
         {
             var packet = new UnsubscribePacket();
             packet.AddRange(topics);
-            return SendAndFlushPacketAsync(packet);
+
+            return SendPacketAsync(packet);
         }
 
         /// <summary>
@@ -136,6 +136,29 @@ namespace MqttFx
             await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 
+        /// <summary>
+        /// 发送包
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <returns></returns>
+        private Task SendPacketAsync(Packet packet)
+        {
+            if (channel == null)
+                return Task.CompletedTask;
+
+            if (channel.Active)
+                return channel.WriteAndFlushAsync(packet);
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 发送包
+        /// </summary>
+        /// <typeparam name="TPacket"></typeparam>
+        /// <param name="packet"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         private async Task<TPacket> SendAndReceiveAsync<TPacket>(Packet packet, CancellationToken cancellationToken = default) where TPacket : Packet
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -173,17 +196,6 @@ namespace MqttFx
                 else
                     throw;
             }
-        }
-
-        private Task SendAndFlushPacketAsync(Packet packet)
-        {
-            if (channel == null)
-                return Task.CompletedTask;
-
-            if (channel.Active)
-                return channel.WriteAndFlushAsync(packet);
-
-            return Task.CompletedTask;
         }
     }
 }

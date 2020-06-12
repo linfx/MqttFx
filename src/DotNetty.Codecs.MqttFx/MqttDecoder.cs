@@ -47,8 +47,6 @@ namespace DotNetty.Codecs.MqttFx
                         // read out data until connection is closed
                         input.SkipBytes(input.ReadableBytes);
                         return;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
             }
             catch (DecoderException)
@@ -67,25 +65,17 @@ namespace DotNetty.Codecs.MqttFx
                 return false;
             }
 
-            byte signature = buffer.ReadByte();
+            packet = DecodePacketInternal(buffer);
 
-            if (!TryDecodeRemainingLength(buffer, out int remainingLength) || !buffer.IsReadable(remainingLength))
-            {
-                packet = null;
-                return false;
-            }
-
-            packet = DecodePacketInternal(buffer, signature, ref remainingLength);
-
-            if (remainingLength > 0)
-                throw new DecoderException($"Declared remaining length is bigger than packet data size by {remainingLength}.");
+            if (packet.RemaingLength > 0)
+                throw new DecoderException($"Declared remaining length is bigger than packet data size by {packet.RemaingLength}.");
 
             return true;
         }
 
-        private Packet DecodePacketInternal(IByteBuffer buffer, byte packetSignature, ref int remainingLength)
+        private Packet DecodePacketInternal(IByteBuffer buffer)
         {
-            var fixedHeader = new MqttFixedHeader(packetSignature, remainingLength);
+            var fixedHeader = new MqttFixedHeader(buffer);
             Packet packet = fixedHeader.PacketType switch
             {
                 PacketType.CONNECT => new ConnectPacket(),
@@ -106,40 +96,7 @@ namespace DotNetty.Codecs.MqttFx
             };
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
-            remainingLength = packet.RemaingLength;
             return packet;
-        }
-
-        private bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
-        {
-            int readable = buffer.ReadableBytes;
-            int result = 0;
-            int multiplier = 1;
-            byte digit;
-            int read = 0;
-            do
-            {
-                if (readable < read + 1)
-                {
-                    value = default;
-                    return false;
-                }
-                digit = buffer.ReadByte();
-                result += (digit & 0x7f) * multiplier;
-                multiplier <<= 7;
-                read++;
-            }
-            while ((digit & 0x80) != 0 && read < 4);
-
-            if (read == 4 && (digit & 0x80) != 0)
-                throw new DecoderException("Remaining length exceeds 4 bytes in length");
-
-            int completeMessageSize = result + 1 + read;
-            if (completeMessageSize > _maxMessageSize)
-                throw new DecoderException("Message is too big: " + completeMessageSize);
-
-            value = result;
-            return true;
         }
     }
 }

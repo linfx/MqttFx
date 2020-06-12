@@ -32,18 +32,35 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public int RemaingLength { internal get; set; }
 
+        public MqttFixedHeader() { }
+
         public MqttFixedHeader(PacketType packetType)
         {
             PacketType = packetType;
         }
 
-        public MqttFixedHeader(byte signature, int remainingLength)
+        public MqttFixedHeader(IByteBuffer buf)
         {
+            var signature = buf.ReadByte();
             PacketType = (PacketType)((signature & 0xf0) >> 4);
             Dup = ((signature & 0x08) >> 3) > 0;
             Qos = (MqttQos)((signature & 0x06) >> 1);
             Retain = (signature & 0x01) > 0;
-            RemaingLength = remainingLength;
+
+            int multiplier = 1;
+            short digit;
+            int loops = 0;
+            do
+            {
+                digit = buf.ReadByte();
+                RemaingLength += (digit & 127) * multiplier;
+                multiplier *= 128;
+                loops++;
+            } while ((digit & 128) != 0 && loops < 4);
+
+            // MQTT protocol limits Remaining Length to 4 bytes
+            if (loops == 4 && (digit & 128) != 0)
+                throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
         }
 
         /// <summary>

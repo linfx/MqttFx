@@ -1,7 +1,6 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
 using System;
-using System.Net.Security;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -11,9 +10,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class ConnectPacket : Packet
     {
         public ConnectPacket()
-            : base(PacketType.CONNECT)
-        {
-        }
+            : base(PacketType.CONNECT) { }
 
         #region Variable header
 
@@ -140,7 +137,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             int connectFlags = buffer.ReadByte();
             CleanSession = (connectFlags & 0x02) == 0x02;
             WillFlag = (connectFlags & 0x04) == 0x04;
-            if(WillFlag)
+            if (WillFlag)
             {
                 WillRetain = (connectFlags & 0x20) == 0x20;
                 Qos = (MqttQos)((connectFlags & 0x18) >> 3);
@@ -151,7 +148,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
             // payload
             ClientId = buffer.ReadString(ref remainingLength);
-            if(WillFlag)
+            if (WillFlag)
             {
                 WillTopic = buffer.ReadString(ref remainingLength);
                 //WillMessage = buffer.ReadBytes
@@ -165,9 +162,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class ConnAckPacket : Packet
     {
         public ConnAckPacket()
-            : base(PacketType.CONNACK)
-        {
-        }
+            : base(PacketType.CONNACK) { }
 
         /// <summary>
         /// 当前会话
@@ -203,11 +198,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer)
         {
-            int remainingLength = RemaingLength;
-            int ackData = buffer.ReadUnsignedShort(ref remainingLength);
-            SessionPresent = ((ackData >> 8) & 0x1) != 0;
-            ConnectReturnCode = (ConnectReturnCode)(ackData & 0xFF);
-            FixedHeader.RemaingLength = remainingLength;
+            SessionPresent = (buffer.ReadByte() & 0x01) == 0x01;
+            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
+            FixedHeader.RemaingLength -= 2;
         }
     }
 

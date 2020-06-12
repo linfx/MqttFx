@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using DotNetty.Codecs.MqttFx;
 using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using Moq;
+using System.Collections.Generic;
 using Xunit;
 
 namespace MqttFx.Test

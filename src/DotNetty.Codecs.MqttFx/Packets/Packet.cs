@@ -40,7 +40,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 剩余长度
         /// </summary>
-        public int RemaingLength => FixedHeader.RemaingLength;
+        public int RemaingLength
+        {
+            get { return FixedHeader.RemaingLength; }
+            set { FixedHeader.RemaingLength = value; }
+        }
 
         /// <summary>
         /// 消息基类

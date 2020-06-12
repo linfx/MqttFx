@@ -176,31 +176,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Encode(IByteBuffer buffer)
         {
-            var buf = Unpooled.Buffer();
-            try
-            {
-                if (SessionPresent)
-                    buf.WriteByte(1);  // 7 reserved 0-bits and SP = 1
-                else
-                    buf.WriteByte(0);  // 7 reserved 0-bits and SP = 0
-
-                buf.WriteByte((byte)ConnectReturnCode);
-
-                FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
-                buffer.WriteBytes(buf);
-            }
-            finally
-            {
-                buf?.SafeRelease();
-            }
+            FixedHeader.RemaingLength = 2;
+            FixedHeader.WriteFixedHeader(buffer);
+            buffer.WriteByte(SessionPresent ? 0x01 : 0x00);
+            buffer.WriteByte((byte)ConnectReturnCode);
         }
 
         public override void Decode(IByteBuffer buffer)
         {
+            FixedHeader.RemaingLength -= 2;
             SessionPresent = (buffer.ReadByte() & 0x01) == 0x01;
             ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
-            FixedHeader.RemaingLength -= 2;
         }
     }
 

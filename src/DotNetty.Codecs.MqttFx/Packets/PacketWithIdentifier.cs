@@ -3,20 +3,21 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 连接报文回执
+    /// 报文抽象类(含报文标识符)
     /// </summary>
-    public sealed class ConnAckPacket : Packet
+    public abstract class PacketWithIdentifier : Packet
     {
         /// <summary>
         /// 可变报头
         /// </summary>
-        public ConnAckVariableHeader VariableHeader;
+        public PacketIdentifierVariableHeader VariableHeader;
 
         /// <summary>
-        /// 连接报文回执
+        /// 报文抽象类(含报文标识符)
         /// </summary>
-        public ConnAckPacket()
-            : base(PacketType.CONNACK) { }
+        /// <param name="packetType">报文类型</param>
+        public PacketWithIdentifier(PacketType packetType)
+            : base(packetType) { }
 
         /// <summary>
         /// 编码
@@ -24,8 +25,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
-            FixedHeader.Encode(buffer, 2);
-            VariableHeader.Encode(buffer);
+            FixedHeader.Encode(buffer);
+            VariableHeader.Encode(buffer, FixedHeader);
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
-            VariableHeader.Decode(buffer);
+            VariableHeader.Decode(buffer, FixedHeader);
         }
     }
 }

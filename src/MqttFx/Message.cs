@@ -34,10 +34,10 @@ namespace MqttFx
         {
             return new Message
             {
+                Qos = packet.FixedHeader.Qos,
+                Retain = packet.FixedHeader.Retain,
                 Topic = packet.VariableHeader.TopicName,
                 Payload = packet.Payload,
-                Qos = packet.Qos,
-                Retain = packet.Retain
             };
         }
     }

@@ -41,7 +41,7 @@ namespace MqttFx.Channels
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, Packet msg)
         {
-            switch (msg.PacketType)
+            switch (msg.FixedHeader.PacketType)
             {
                 case PacketType.CONNACK:
                     HandleConack(ctx.Channel, (ConnAckPacket)msg);
@@ -98,7 +98,7 @@ namespace MqttFx.Channels
 
         private void HandlePublish(IChannel channel, PublishPacket message)
         {
-            switch (message.Qos)
+            switch (message.FixedHeader.Qos)
             {
                 case MqttQos.AtMostOnce:
                     InvokeHandlersForIncomingPublish(message);

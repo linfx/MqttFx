@@ -25,7 +25,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public string Password { get; set; }
 
-        public void Encode(ConnectVariableHeader variableHeader, IByteBuffer buffer)
+        public void Encode(IByteBuffer buffer, ConnectVariableHeader variableHeader)
         {
             buffer.WriteString(ClientId);
             if (variableHeader.WillFlag)

@@ -36,6 +36,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
             FixedHeader.Retain = retain;
         }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
@@ -43,7 +47,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 VariableHeader.Encode(buf, FixedHeader);
                 buf.WriteBytes(Payload, 0, Payload.Length);
-                FixedHeader.Encode(buffer, buf.WriterIndex);
+                FixedHeader.Encode(buffer, buf.ReadableBytes);
                 buffer.WriteBytes(buf);
             }
             finally
@@ -52,6 +56,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
             VariableHeader.Decode(buffer, FixedHeader);

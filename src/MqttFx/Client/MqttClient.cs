@@ -105,10 +105,7 @@ namespace MqttFx.Client
         /// <param name="cancellationToken"></param>
         public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken = default)
         {
-            var packet = new SubscribePacket
-            {
-                PacketId = _packetIdProvider.NewPacketId(),
-            };
+            var packet = new SubscribePacket();
             packet.Add(topic, qos);
 
             return SendPacketAsync(packet);
@@ -166,8 +163,8 @@ namespace MqttFx.Client
             cancellationToken.ThrowIfCancellationRequested();
 
             ushort identifier = 0;
-            if (packet is PacketWithId packetWithId)
-                identifier = packetWithId.PacketId;
+            //if (packet is PacketWithIdentifier packetWithId)
+            //    identifier = packetWithId.PacketId;
 
             var awaiter = _packetDispatcher.AddPacketAwaiter<TPacket>(identifier);
 

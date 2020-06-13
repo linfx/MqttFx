@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 取消订阅
     /// </summary>
-    public sealed class UnsubscribePacket : PacketWithId
+    public sealed class UnsubscribePacket : PacketWithIdentifier
     {
         private readonly List<string> _topics = new List<string>();
 
@@ -25,7 +25,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteShort(PacketId);
+                buf.WriteShort(VariableHeader.PacketIdentifier);
 
                 foreach (var item in _topics)
                 {
@@ -46,7 +46,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 取消订阅回执
     /// </summary>
-    public sealed class UnsubAckPacket : PacketWithId
+    public sealed class UnsubAckPacket : PacketWithIdentifier
     {
         public UnsubAckPacket()
             : base(PacketType.UNSUBACK)

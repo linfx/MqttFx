@@ -7,9 +7,7 @@
     {
         public static readonly DisconnectPacket Instance = new DisconnectPacket();
 
-        public DisconnectPacket() 
-            : base(PacketType.DISCONNECT)
-        {
-        }
+        public DisconnectPacket()
+            : base(PacketType.DISCONNECT) { }
     }
 }

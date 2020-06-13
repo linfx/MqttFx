@@ -4,12 +4,12 @@
     /// QoS2消息回执
     /// QoS 2 publish received, part 1
     /// </summary>
-    public sealed class PubRecPacket : PacketWithId
+    public sealed class PubRecPacket : PacketWithIdentifier
     {
         public PubRecPacket(ushort packetId = default)
             : base(PacketType.PUBREC)
         {
-            PacketId = packetId;
+            VariableHeader.PacketIdentifier = packetId;
         }
     }
 }

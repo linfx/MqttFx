@@ -4,7 +4,7 @@ using DotNetty.Common.Utilities;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 发起连接
+    /// 连接报文
     /// </summary>
     public sealed class ConnectPacket : Packet
     {
@@ -14,10 +14,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public ConnectVariableHeader VariableHeader;
 
         /// <summary>
-        /// 载荷
+        /// 有效载荷
         /// </summary>
         public ConnectPlayload Payload;
 
+        /// <summary>
+        /// 连接报文
+        /// </summary>
         public ConnectPacket()
             : base(PacketType.CONNECT)
         {
@@ -25,13 +28,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
             VariableHeader.ProtocolLevel = 0x04;
         }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
                 VariableHeader.Encode(buf);
-                Payload.Encode(VariableHeader, buf);
+                Payload.Encode(buf, VariableHeader);
                 FixedHeader.Encode(buffer, buf.WriterIndex);
                 buffer.WriteBytes(buf);
             }
@@ -41,9 +48,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
-            int remainingLength = RemaingLength;
+            int remainingLength = FixedHeader.RemaingLength;
 
             // variable header
             VariableHeader.ProtocolName = buffer.ReadString(ref remainingLength);
@@ -56,7 +67,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             if (VariableHeader.WillFlag)
             {
                 VariableHeader.WillRetain = (connectFlags & 0x20) == 0x20;
-                Qos = (MqttQos)((connectFlags & 0x18) >> 3);
+                FixedHeader.Qos = (MqttQos)((connectFlags & 0x18) >> 3);
                 Payload.WillTopic = string.Empty;
             }
 

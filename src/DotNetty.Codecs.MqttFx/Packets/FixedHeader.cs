@@ -11,85 +11,89 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 报文类型
         /// </summary>
         public PacketType PacketType { get; set; }
-
         /// <summary>
         /// 重发标志
+        /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
+        /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
         /// </summary>
         public bool Dup { get; set; }
-
         /// <summary>
         /// 服务质量等级
         /// </summary>
         public MqttQos Qos { get; set; }
-
         /// <summary>
         /// 保留标志
         /// </summary>
         public bool Retain { get; set; }
-
         /// <summary>
         /// 剩余长度
+        /// 表示当前报文剩余部分的字节数，包括可变报头和负载的数据。
+        /// 剩余长度不包括用于编码剩余长度字段本身的字节数。
         /// </summary>
         public int RemaingLength { internal get; set; }
-
-        public FixedHeader(byte signature, int remainingLength)
-        {
-            PacketType = (PacketType)((signature & 0xf0) >> 4);
-            Dup = ((signature & 0x08) >> 3) > 0;
-            Qos = (MqttQos)((signature & 0x06) >> 1);
-            Retain = (signature & 0x01) > 0;
-            RemaingLength = remainingLength;
-        }
-
-        /// <summary>
-        /// 写入固定报头
-        /// </summary>
-        /// <param name="buffer"></param>
-        public void Encode(IByteBuffer buffer)
-        {
-            WriteFixedHeaderByte(buffer);
-            WriteVariableLength(buffer, RemaingLength);
-        }
 
         /// <summary>
         /// 写入固定报头
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="remaingLength">剩余长度</param>
-        public void Encode(IByteBuffer buffer, int remaingLength)
+        public void Encode(IByteBuffer buffer, int remaingLength = default)
         {
-            RemaingLength = remaingLength;
-            Encode(buffer);
-        }
+            if(remaingLength != default)
+                RemaingLength = remaingLength;
 
-        /// <summary>
-        /// 写入固定报头首字节
-        /// </summary>
-        /// <returns></returns>
-        private void WriteFixedHeaderByte(IByteBuffer buf)
-        {
+            /*
+             * MQTT控制报文的类型
+             * 标志 Flags
+            */
             var ret = (byte)PacketType << 4;
             ret |= Dup.ToByte() << 3;
             ret |= (byte)Qos << 1;
             ret |= Retain.ToByte();
-            buf.WriteByte(ret);
-        }
+            buffer.WriteByte(ret);
 
-        /// <summary>
-        /// 写入剩余长度
-        /// </summary>
-        /// <param name="buf"></param>
-        /// <param name="num"></param>
-        private static void WriteVariableLength(IByteBuffer buf, int num)
-        {
+            /*
+             * 剩余长度 Remaining Length
+             * 剩余长度字段使用一个变长度编码方案，对小于128的值它使用单字节编码。
+             * 更大的值按下面的方式处理。低7位有效位用于编码数据，最高有效位用于指示是否有更多的字节。
+             * 因此每个字节可以编码128个数值和一个延续位（continuation bit）。
+             * 剩余长度字段最大4个字节。
+            */
             do
             {
-                var digit = (byte)(num % 0x80);
-                num /= 0x80;
-                if (num > 0)
+                var digit = (byte)(remaingLength % 0x80);
+                remaingLength /= 0x80;
+                if (remaingLength > 0)
                     digit |= 0x80;
-                buf.WriteByte(digit);
-            } while (num > 0);
+                buffer.WriteByte(digit);
+            } while (remaingLength > 0);
+        }
+
+        public void Decode(IByteBuffer buffer)
+        {
+            // MQTT控制报文的类型 & 标志 Flags
+            int ret = buffer.ReadByte();
+            //PacketType = (PacketType)((ret & 0xf0) >> 4);
+            PacketType = (PacketType)(ret >> 4);
+            Dup = (ret & 0x08) == 0x08;
+            Qos = (MqttQos)((ret & 0x06) >> 1);
+            Retain = (ret & 0x01) > 0;
+
+            // 剩余长度 Remaining Length
+            int multiplier = 1;
+            short digit;
+            int loops = 0;
+            do
+            {
+                digit = buffer.ReadByte();
+                RemaingLength += (digit & 127) * multiplier;
+                multiplier *= 128;
+                loops++;
+            } while ((digit & 128) != 0 && loops < 4);
+
+            // MQTT protocol limits Remaining Length to 4 bytes
+            if (loops == 4 && (digit & 128) != 0)
+                throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
         }
     }
 }

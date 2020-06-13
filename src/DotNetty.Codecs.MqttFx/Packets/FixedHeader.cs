@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 固定报头
     /// </summary>
-    public class MqttFixedHeader
+    public struct FixedHeader
     {
         /// <summary>
         /// 报文类型
@@ -32,12 +32,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public int RemaingLength { internal get; set; }
 
-        public MqttFixedHeader(PacketType packetType)
-        {
-            PacketType = packetType;
-        }
-
-        public MqttFixedHeader(byte signature, int remainingLength)
+        public FixedHeader(byte signature, int remainingLength)
         {
             PacketType = (PacketType)((signature & 0xf0) >> 4);
             Dup = ((signature & 0x08) >> 3) > 0;

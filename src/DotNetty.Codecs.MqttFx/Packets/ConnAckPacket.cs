@@ -12,26 +12,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
             : base(PacketType.CONNACK) { }
 
         /// <summary>
-        /// 当前会话
+        /// 可变报头
         /// </summary>
-        public bool SessionPresent { get; set; }
-
-        /// <summary>
-        /// 连接返回码
-        /// </summary>
-        public ConnectReturnCode ConnectReturnCode { get; set; }
+        public ConnAckVariableHeader VariableHeader;
 
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                if (SessionPresent)
-                    buf.WriteByte(1);  // 7 reserved 0-bits and SP = 1
-                else
-                    buf.WriteByte(0);  // 7 reserved 0-bits and SP = 0
-
-                buf.WriteByte((byte)ConnectReturnCode);
+                buf.WriteByte(VariableHeader.SessionPresent ? 0x01 : 0x00);
+                buf.WriteByte((byte)VariableHeader.ConnectReturnCode);
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
                 FixedHeader.WriteFixedHeader(buffer);
@@ -47,8 +38,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             int remainingLength = RemaingLength;
             int ackData = buffer.ReadUnsignedShort(ref remainingLength);
-            SessionPresent = ((ackData >> 8) & 0x1) != 0;
-            ConnectReturnCode = (ConnectReturnCode)(ackData & 0xFF);
+            VariableHeader.SessionPresent = ((ackData >> 8) & 0x1) != 0;
+            VariableHeader.ConnectReturnCode = (ConnectReturnCode)(ackData & 0xFF);
             FixedHeader.RemaingLength = remainingLength;
         }
     }

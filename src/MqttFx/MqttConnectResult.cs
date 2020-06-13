@@ -16,14 +16,14 @@ namespace MqttFx
         {
             get
             {
-                if (ConnectReturn == ConnectReturnCode.ConnectionAccepted)
+                if (ConnectReturn == ConnectReturnCode.CONNECTION_ACCEPTED)
                     return true;
 
                 return false;
             }
         }
 
-        public ConnectReturnCode ConnectReturn { get; set; } = ConnectReturnCode.BrokerUnavailable;
+        public ConnectReturnCode ConnectReturn { get; set; } = ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE;
 
         public IChannel Channel { get; set; }
     }

@@ -18,25 +18,23 @@ namespace MqttFx.Channels
 
         public override void ChannelActive(IChannelHandlerContext context)
         {
-            var packet = new ConnectPacket
-            {
-                ClientId = client.Options.ClientId,
-                CleanSession = client.Options.CleanSession,
-                KeepAlive = client.Options.KeepAlive,
-            };
+            var packet = new ConnectPacket();
+            packet.Payload.ClientId = client.Options.ClientId;
+            packet.VariableHeader.CleanSession = client.Options.CleanSession;
+            packet.VariableHeader.KeepAlive = client.Options.KeepAlive;
             if (client.Options.Credentials != null)
             {
-                packet.UsernameFlag = true;
-                packet.UserName = client.Options.Credentials.Username;
-                packet.Password = client.Options.Credentials.Username;
+                packet.VariableHeader.UsernameFlag = true;
+                packet.Payload.UserName = client.Options.Credentials.Username;
+                packet.Payload.Password = client.Options.Credentials.Username;
             }
             if (client.Options.WillMessage != null)
             {
-                packet.WillFlag = true;
-                packet.WillQos = client.Options.WillMessage.Qos;
-                packet.WillRetain = client.Options.WillMessage.Retain;
-                packet.WillTopic = client.Options.WillMessage.Topic;
-                packet.WillMessage = client.Options.WillMessage.Payload;
+                packet.VariableHeader.WillFlag = true;
+                packet.VariableHeader.WillQos = client.Options.WillMessage.Qos;
+                packet.VariableHeader.WillRetain = client.Options.WillMessage.Retain;
+                packet.Payload.WillTopic = client.Options.WillMessage.Topic;
+                packet.Payload.WillMessage = client.Options.WillMessage.Payload;
             }
             context.WriteAndFlushAsync(packet);
         }
@@ -79,21 +77,21 @@ namespace MqttFx.Channels
 
         private void HandleConack(IChannel channel, ConnAckPacket message)
         {
-            switch (message.ConnectReturnCode)
+            switch (message.VariableHeader.ConnectReturnCode)
             {
-                case ConnectReturnCode.ConnectionAccepted:
-                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.ConnectionAccepted));
+                case ConnectReturnCode.CONNECTION_ACCEPTED:
+                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
 
                     if(client.ConnectedHandler != null)
                         client.ConnectedHandler.OnConnected();
                     break;
 
-                case ConnectReturnCode.BadUsernameOrPassword:
-                case ConnectReturnCode.IdentifierRejected:
+                case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
+                case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
                 case ConnectReturnCode.RefusedNotAuthorized:
-                case ConnectReturnCode.BrokerUnavailable:
-                case ConnectReturnCode.UnacceptableProtocolVersion:
-                    connectFuture.TrySetResult(new MqttConnectResult(message.ConnectReturnCode));
+                case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
+                case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
+                    connectFuture.TrySetResult(new MqttConnectResult(message.VariableHeader.ConnectReturnCode));
                     channel.CloseAsync();
                     break;
             }

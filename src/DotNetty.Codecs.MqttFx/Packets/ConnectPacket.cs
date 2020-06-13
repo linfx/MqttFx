@@ -1,7 +1,5 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
-using System;
-using System.Net.Security;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -11,78 +9,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class ConnectPacket : Packet
     {
         public ConnectPacket()
-            : base(PacketType.CONNECT)
-        {
-        }
-
-        #region Variable header
+            : base(PacketType.CONNECT) { }
 
         /// <summary>
-        /// 协议名
+        /// 可变报头
         /// </summary>
-        public string ProtocolName { get; set; } = "MQTT";
-        /// <summary>
-        /// 协议级别
-        /// </summary>
-        public byte ProtocolLevel { get; set; } = 0x04;
-        /// <summary>
-        /// 保持连接 
-        /// </summary>
-        public ushort KeepAlive { get; set; }
-
-        #region Connect Flags
-        /// <summary>
-        /// 用户名标志
-        /// </summary>
-        public bool UsernameFlag { get; set; }
-        /// <summary>
-        /// 密码标志
-        /// </summary>
-        public bool PasswordFlag { get; set; }
-        /// <summary>
-        /// 遗嘱保留
-        /// </summary>
-        public bool WillRetain { get; set; }
-        /// <summary>
-        /// 遗嘱QoS
-        /// </summary>
-        public MqttQos WillQos { get; set; }
-        /// <summary>
-        /// 遗嘱标志
-        /// </summary>
-        public bool WillFlag { get; set; }
-        /// <summary>
-        /// 清理会话
-        /// </summary>
-        public bool CleanSession { get; set; }
-        #endregion
-
-        #endregion
-
-        #region Payload
+        public ConnectVariableHeader VariableHeader;
 
         /// <summary>
-        /// 客户端标识符 Client Identifier
+        /// 载荷
         /// </summary>
-        public string ClientId { get; set; }
-        /// <summary>
-        /// 遗嘱主题 Will Topic
-        /// </summary>
-        public string WillTopic { get; set; }
-        /// <summary>
-        /// 遗嘱消息 Will Message
-        /// </summary>
-        public byte[] WillMessage { get; set; }
-        /// <summary>
-        /// 用户名 User Name
-        /// </summary>
-        public string UserName { get; set; }
-        /// <summary>
-        /// 密码 Password
-        /// </summary>
-        public string Password { get; set; }
-
-        #endregion
+        public ConnectPlayload Payload;
 
         public override void Encode(IByteBuffer buffer)
         {
@@ -90,32 +27,32 @@ namespace DotNetty.Codecs.MqttFx.Packets
             try
             {
                 // variable header
-                buf.WriteString(ProtocolName);        //byte 1 - 8
-                buf.WriteByte(ProtocolLevel);         //byte 9
+                buf.WriteString(VariableHeader.ProtocolName);        //byte 1 - 8
+                buf.WriteByte(VariableHeader.ProtocolLevel);         //byte 9
 
                 // connect flags                      //byte 10
-                var flags = UsernameFlag.ToByte() << 7;
-                flags |= PasswordFlag.ToByte() << 6;
-                flags |= WillRetain.ToByte() << 5;
-                flags |= ((byte)WillQos) << 3;
-                flags |= WillFlag.ToByte() << 2;
-                flags |= CleanSession.ToByte() << 1;
+                var flags = VariableHeader.UsernameFlag.ToByte() << 7;
+                flags |= VariableHeader.PasswordFlag.ToByte() << 6;
+                flags |= VariableHeader.WillRetain.ToByte() << 5;
+                flags |= ((byte)VariableHeader.WillQos) << 3;
+                flags |= VariableHeader.WillFlag.ToByte() << 2;
+                flags |= VariableHeader.CleanSession.ToByte() << 1;
                 buf.WriteByte((byte)flags);
 
                 // keep alive
-                buf.WriteShort(KeepAlive);            //byte 11 - 12
+                buf.WriteShort(VariableHeader.KeepAlive);            //byte 11 - 12
 
                 // payload
-                buf.WriteString(ClientId);
-                if (WillFlag)
+                buf.WriteString(Payload.ClientId);
+                if (VariableHeader.WillFlag)
                 {
-                    buf.WriteString(WillTopic);
-                    buf.WriteBytes(WillMessage);
+                    buf.WriteString(Payload.WillTopic);
+                    buf.WriteBytes(Payload.WillMessage);
                 }
-                if (UsernameFlag && PasswordFlag)
+                if (VariableHeader.UsernameFlag && VariableHeader.PasswordFlag)
                 {
-                    buf.WriteString(UserName);
-                    buf.WriteString(Password);
+                    buf.WriteString(Payload.UserName);
+                    buf.WriteString(Payload.Password);
                 }
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
@@ -133,71 +70,29 @@ namespace DotNetty.Codecs.MqttFx.Packets
             int remainingLength = RemaingLength;
 
             // variable header
-            ProtocolName = buffer.ReadString(ref remainingLength);
-            ProtocolLevel = buffer.ReadByte();
+            VariableHeader.ProtocolName = buffer.ReadString(ref remainingLength);
+            VariableHeader.ProtocolLevel = buffer.ReadByte();
 
             // connect flags                      //byte 10
             int connectFlags = buffer.ReadByte();
-            CleanSession = (connectFlags & 0x02) == 0x02;
-            WillFlag = (connectFlags & 0x04) == 0x04;
-            if(WillFlag)
+            VariableHeader.CleanSession = (connectFlags & 0x02) == 0x02;
+            VariableHeader.WillFlag = (connectFlags & 0x04) == 0x04;
+            if (VariableHeader.WillFlag)
             {
-                WillRetain = (connectFlags & 0x20) == 0x20;
+                VariableHeader.WillRetain = (connectFlags & 0x20) == 0x20;
                 Qos = (MqttQos)((connectFlags & 0x18) >> 3);
-                WillTopic = string.Empty;
+                Payload.WillTopic = string.Empty;
             }
 
             // keep alive
 
             // payload
-            ClientId = buffer.ReadString(ref remainingLength);
-            if(WillFlag)
+            Payload.ClientId = buffer.ReadString(ref remainingLength);
+            if (VariableHeader.WillFlag)
             {
-                WillTopic = buffer.ReadString(ref remainingLength);
+                Payload.WillTopic = buffer.ReadString(ref remainingLength);
                 //WillMessage = buffer.ReadBytes
             }
         }
-    }
-
-    /// <summary>
-    /// 连接返回码
-    /// </summary>
-    [Flags]
-    public enum ConnectReturnCode : byte
-    {
-        /// <summary>
-        /// 连接已接受
-        /// </summary>
-        ConnectionAccepted = 0x00,
-
-        /// <summary>
-        /// 连接已拒绝，不支持的协议版本
-        /// </summary>
-        UnacceptableProtocolVersion = 0x01,
-
-        /// <summary>
-        /// 接已拒绝，不合格的客户端标识符
-        /// </summary>
-        IdentifierRejected = 0x02,
-
-        /// <summary>
-        /// 连接已拒绝，服务端不可用
-        /// </summary>
-        BrokerUnavailable = 0x03,
-
-        /// <summary>
-        /// 连接已拒绝，无效的用户名或密码
-        /// </summary>
-        BadUsernameOrPassword = 0x04,
-
-        /// <summary>
-        /// 连接已拒绝，未授权
-        /// </summary>
-        NotAuthorized = 0x05,
-
-        /// <summary>
-        /// RefusedNotAuthorized
-        /// </summary>
-        RefusedNotAuthorized = 0x6
     }
 }

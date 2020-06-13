@@ -81,26 +81,23 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(false, ConnectReturnCode.ConnectionAccepted)]
-        [InlineData(true, ConnectReturnCode.ConnectionAccepted)]
-        [InlineData(false, ConnectReturnCode.UnacceptableProtocolVersion)]
-        [InlineData(false, ConnectReturnCode.IdentifierRejected)]
-        [InlineData(false, ConnectReturnCode.BrokerUnavailable)]
-        [InlineData(false, ConnectReturnCode.BadUsernameOrPassword)]
-        [InlineData(false, ConnectReturnCode.RefusedNotAuthorized)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_ACCEPTED)]
+        [InlineData(true, ConnectReturnCode.CONNECTION_ACCEPTED)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD)]
         public void TestConnAckMessage(bool sessionPresent, ConnectReturnCode returnCode)
         {
-            var packet = new ConnAckPacket
-            {
-                SessionPresent = sessionPresent,
-                ConnectReturnCode = returnCode
-            };
+            var packet = new ConnAckPacket();
+            packet.VariableHeader.SessionPresent = sessionPresent;
+            packet.VariableHeader.ConnectReturnCode = returnCode;
 
             var recoded = RecodePacket(packet, false, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnAckPacket>()), Times.Once);
-            Assert.Equal(packet.SessionPresent, recoded.SessionPresent);
-            Assert.Equal(packet.ConnectReturnCode, recoded.ConnectReturnCode);
+            Assert.Equal(packet.VariableHeader.SessionPresent, recoded.VariableHeader.SessionPresent);
+            Assert.Equal(packet.VariableHeader.ConnectReturnCode, recoded.VariableHeader.ConnectReturnCode);
         }
 
         [Theory]

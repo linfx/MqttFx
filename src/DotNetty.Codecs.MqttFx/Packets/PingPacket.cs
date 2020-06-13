@@ -7,10 +7,7 @@
     {
         public static readonly PingReqPacket Instance = new PingReqPacket();
 
-        public PingReqPacket() 
-            : base(PacketType.PINGREQ)
-        {
-        }
+        public PingReqPacket() : base(PacketType.PINGREQ) { }
     }
 
     /// <summary>
@@ -20,9 +17,6 @@
     {
         public static readonly PingRespPacket Instance = new PingRespPacket();
 
-        public PingRespPacket() 
-            : base(PacketType.PINGRESP)
-        {
-        }
+        public PingRespPacket() : base(PacketType.PINGRESP) { }
     }
 }

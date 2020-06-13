@@ -1,4 +1,6 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿using DotNetty.Buffers;
+
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     public struct ConnectPlayload
     {
@@ -22,5 +24,24 @@
         /// 密码 Password
         /// </summary>
         public string Password { get; set; }
+
+        public void Encode(ConnectVariableHeader variableHeader, IByteBuffer buffer)
+        {
+            buffer.WriteString(ClientId);
+            if (variableHeader.WillFlag)
+            {
+                buffer.WriteString(WillTopic);
+                buffer.WriteBytes(WillMessage);
+            }
+            if (variableHeader.UsernameFlag && variableHeader.PasswordFlag)
+            {
+                buffer.WriteString(UserName);
+                buffer.WriteString(Password);
+            }
+        }
+
+        public void Decode(IByteBuffer buffer)
+        {
+        }
     }
 }

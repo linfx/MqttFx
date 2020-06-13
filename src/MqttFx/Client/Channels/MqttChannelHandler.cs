@@ -88,7 +88,6 @@ namespace MqttFx.Channels
 
                 case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
                 case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
-                case ConnectReturnCode.RefusedNotAuthorized:
                 case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
                 case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
                     connectFuture.TrySetResult(new MqttConnectResult(message.VariableHeader.ConnectReturnCode));

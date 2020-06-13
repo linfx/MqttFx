@@ -44,11 +44,22 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 写入固定报头
         /// </summary>
-        /// <param name="buf"></param>
-        public void WriteFixedHeader(IByteBuffer buf)
+        /// <param name="buffer"></param>
+        public void Encode(IByteBuffer buffer)
         {
-            WriteFixedHeaderByte(buf);
-            WriteVariableLength(buf, RemaingLength);
+            WriteFixedHeaderByte(buffer);
+            WriteVariableLength(buffer, RemaingLength);
+        }
+
+        /// <summary>
+        /// 写入固定报头
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="remaingLength">剩余长度</param>
+        public void Encode(IByteBuffer buffer, int remaingLength)
+        {
+            RemaingLength = remaingLength;
+            Encode(buffer);
         }
 
         /// <summary>

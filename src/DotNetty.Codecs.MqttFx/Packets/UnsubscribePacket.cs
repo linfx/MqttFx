@@ -33,7 +33,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 }
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                FixedHeader.Encode(buffer);
                 buffer.WriteBytes(buf);
             }
             finally

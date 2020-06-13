@@ -90,7 +90,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 WritePacketId(buf);
                 FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                FixedHeader.Encode(buffer);
                 buffer.WriteBytes(buf);
                 buf = null;
             }

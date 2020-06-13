@@ -1,4 +1,6 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿using DotNetty.Buffers;
+
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     public struct ConnectVariableHeader
     {
@@ -38,5 +40,23 @@
         /// 清理会话
         /// </summary>
         public bool CleanSession { get; set; }
+
+        public void Encode(IByteBuffer buffer)
+        {
+            buffer.WriteString(ProtocolName);         // byte 1 - 8
+            buffer.WriteByte(ProtocolLevel);          // byte 9
+
+            // connect flags                          // byte 10
+            var flags = UsernameFlag.ToByte() << 7;
+            flags |= PasswordFlag.ToByte() << 6;
+            flags |= WillRetain.ToByte() << 5;
+            flags |= ((byte)WillQos) << 3;
+            flags |= WillFlag.ToByte() << 2;
+            flags |= CleanSession.ToByte() << 1;
+            buffer.WriteByte((byte)flags);
+
+            // keep alive
+            buffer.WriteShort(KeepAlive);            // byte 11 - 12
+        }
     }
 }

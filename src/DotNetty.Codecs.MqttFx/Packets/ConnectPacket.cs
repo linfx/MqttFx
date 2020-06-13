@@ -8,9 +8,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public sealed class ConnectPacket : Packet
     {
-        public ConnectPacket()
-            : base(PacketType.CONNECT) { }
-
         /// <summary>
         /// 可变报头
         /// </summary>
@@ -21,42 +18,21 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public ConnectPlayload Payload;
 
+        public ConnectPacket()
+            : base(PacketType.CONNECT)
+        {
+            VariableHeader.ProtocolName = "MQTT";
+            VariableHeader.ProtocolLevel = 0x04;
+        }
+
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                // variable header
-                buf.WriteString(VariableHeader.ProtocolName);        //byte 1 - 8
-                buf.WriteByte(VariableHeader.ProtocolLevel);         //byte 9
-
-                // connect flags                      //byte 10
-                var flags = VariableHeader.UsernameFlag.ToByte() << 7;
-                flags |= VariableHeader.PasswordFlag.ToByte() << 6;
-                flags |= VariableHeader.WillRetain.ToByte() << 5;
-                flags |= ((byte)VariableHeader.WillQos) << 3;
-                flags |= VariableHeader.WillFlag.ToByte() << 2;
-                flags |= VariableHeader.CleanSession.ToByte() << 1;
-                buf.WriteByte((byte)flags);
-
-                // keep alive
-                buf.WriteShort(VariableHeader.KeepAlive);            //byte 11 - 12
-
-                // payload
-                buf.WriteString(Payload.ClientId);
-                if (VariableHeader.WillFlag)
-                {
-                    buf.WriteString(Payload.WillTopic);
-                    buf.WriteBytes(Payload.WillMessage);
-                }
-                if (VariableHeader.UsernameFlag && VariableHeader.PasswordFlag)
-                {
-                    buf.WriteString(Payload.UserName);
-                    buf.WriteString(Payload.Password);
-                }
-
-                FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                VariableHeader.Encode(buf);
+                Payload.Encode(VariableHeader, buf);
+                FixedHeader.Encode(buffer, buf.WriterIndex);
                 buffer.WriteBytes(buf);
             }
             finally

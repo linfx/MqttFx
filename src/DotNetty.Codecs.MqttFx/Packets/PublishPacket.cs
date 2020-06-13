@@ -8,6 +8,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
+        /// 可变报头
+        /// </summary>
+        public PublishVariableHeader VariableHeader;
+
+        /// <summary>
+        /// 有效载荷
+        /// </summary>
+        public byte[] Payload { get; set; }
+
+        /// <summary>
         /// 发布消息
         /// </summary>
         public PublishPacket()
@@ -26,16 +36,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
             FixedHeader.Retain = retain;
         }
 
-        /// <summary>
-        /// 可变报头
-        /// </summary>
-        public PublishVariableHeader VariableHeader;
-
-        /// <summary>
-        /// 有效载荷
-        /// </summary>
-        public byte[] Payload { get; set; }
-
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
@@ -46,7 +46,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 buf.WriteBytes(Payload, 0, Payload.Length);
 
                 FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                FixedHeader.Encode(buffer);
                 buffer.WriteBytes(buf);
             }
             finally

@@ -34,7 +34,7 @@ namespace MqttFx
         {
             return new Message
             {
-                Topic = packet.TopicName,
+                Topic = packet.VariableHeader.TopicName,
                 Payload = packet.Payload,
                 Qos = packet.Qos,
                 Retain = packet.Retain

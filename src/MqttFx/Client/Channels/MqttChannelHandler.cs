@@ -106,8 +106,8 @@ namespace MqttFx.Channels
 
                 case MqttQos.AtLeastOnce:
                     InvokeHandlersForIncomingPublish(message);
-                    if(message.PacketId > 0)
-                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketId));
+                    if(message.VariableHeader.PacketIdentifier > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(message.VariableHeader.PacketIdentifier));
                     break;
 
                 case MqttQos.ExactlyOnce:

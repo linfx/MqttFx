@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 发布消息
     /// </summary>
-    public sealed class PublishPacket : PacketWithId
+    public sealed class PublishPacket : Packet
     {
         /// <summary>
         /// 可变报头
@@ -41,12 +41,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteString(VariableHeader.TopicName);
-                WritePacketId(buf);
+                VariableHeader.Encode(buf, FixedHeader);
                 buf.WriteBytes(Payload, 0, Payload.Length);
-
-                FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.Encode(buffer);
+                FixedHeader.Encode(buffer, buf.WriterIndex);
                 buffer.WriteBytes(buf);
             }
             finally
@@ -57,21 +54,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer)
         {
-            int remainingLength = RemaingLength;
-
-            // variable header
-            VariableHeader.TopicName = buffer.ReadString(ref remainingLength);
-            ReadPacketId(buffer, ref remainingLength);
-
-            // playload
-            if (remainingLength > 0)
+            VariableHeader.Decode(buffer, FixedHeader);
+            if (FixedHeader.RemaingLength > 0)
             {
-                Payload = new byte[remainingLength];
-                buffer.ReadBytes(Payload, 0, remainingLength);
-                remainingLength = 0;
+                Payload = new byte[FixedHeader.RemaingLength];
+                buffer.ReadBytes(Payload, 0, FixedHeader.RemaingLength);
+                FixedHeader.RemaingLength = 0;
             }
-
-            FixedHeader.RemaingLength = remainingLength;
         }
     }
 }

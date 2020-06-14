@@ -33,7 +33,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public int RemaingLength { internal get; set; }
 
         /// <summary>
-        /// 写入固定报头
+        /// 编码
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="remaingLength">剩余长度</param>
@@ -69,11 +69,14 @@ namespace DotNetty.Codecs.MqttFx.Packets
             } while (remaingLength > 0);
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public void Decode(IByteBuffer buffer)
         {
             // MQTT控制报文的类型 & 标志 Flags
             int ret = buffer.ReadByte();
-            //PacketType = (PacketType)((ret & 0xf0) >> 4);
             PacketType = (PacketType)(ret >> 4);
             Dup = (ret & 0x08) == 0x08;
             Qos = (MqttQos)((ret & 0x06) >> 1);

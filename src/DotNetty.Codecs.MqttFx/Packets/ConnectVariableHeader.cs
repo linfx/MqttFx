@@ -73,5 +73,28 @@ namespace DotNetty.Codecs.MqttFx.Packets
             // 保持连接 Keep Alive
             buffer.WriteShort(KeepAlive);            
         }
+
+        public void Decode(IByteBuffer buffer, FixedHeader fixedHeader)
+        {
+            int remainingLength = fixedHeader.RemaingLength;
+
+            // 协议名 Protocol Name
+            // 协议级别 Protocol Level
+            ProtocolName = buffer.ReadString(ref remainingLength);
+            ProtocolLevel = buffer.ReadByte();
+
+            // 连接标志 Connect Flags
+            int connectFlags = buffer.ReadByte();
+            CleanSession = (connectFlags & 0x02) == 0x02;
+            WillFlag = (connectFlags & 0x04) == 0x04;
+            if (WillFlag)
+            {
+                WillRetain = (connectFlags & 0x20) == 0x20;
+                WillQos = (MqttQos)((connectFlags & 0x18) >> 3);
+                //WillTopic = string.Empty;
+            }
+
+            // 保持连接 Keep Alive
+        }
     }
 }

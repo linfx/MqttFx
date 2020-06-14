@@ -25,6 +25,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public string Password { get; set; }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="variableHeader"></param>
         public void Encode(IByteBuffer buffer, ConnectVariableHeader variableHeader)
         {
             buffer.WriteString(ClientId);
@@ -40,8 +45,21 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
         }
 
-        public void Decode(IByteBuffer buffer)
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="fixedHeader"></param>
+        /// <param name="variableHeader"></param>
+        public void Decode(IByteBuffer buffer, FixedHeader fixedHeader, ConnectVariableHeader variableHeader)
         {
+            int remainingLength = fixedHeader.RemaingLength;
+            ClientId = buffer.ReadString(ref remainingLength);
+            if (variableHeader.WillFlag)
+            {
+                WillTopic = buffer.ReadString(ref remainingLength);
+                //WillMessage = buffer.ReadBytes(3);
+            }
         }
     }
 }

@@ -13,12 +13,20 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
         public void Encode(IByteBuffer buffer)
         {
             buffer.WriteByte(SessionPresent ? 0x01 : 0x00);
             buffer.WriteByte((byte)ConnectReturnCode);
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public void Decode(IByteBuffer buffer)
         {
             SessionPresent = (buffer.ReadByte() & 0x01) == 0x01;

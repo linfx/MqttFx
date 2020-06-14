@@ -39,7 +39,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 VariableHeader.Encode(buf);
                 Payload.Encode(buf, VariableHeader);
-                FixedHeader.Encode(buffer, buf.WriterIndex);
+                FixedHeader.Encode(buffer, buf.ReadableBytes);
                 buffer.WriteBytes(buf);
             }
             finally
@@ -54,32 +54,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
-            int remainingLength = FixedHeader.RemaingLength;
-
-            // variable header
-            VariableHeader.ProtocolName = buffer.ReadString(ref remainingLength);
-            VariableHeader.ProtocolLevel = buffer.ReadByte();
-
-            // connect flags                      //byte 10
-            int connectFlags = buffer.ReadByte();
-            VariableHeader.CleanSession = (connectFlags & 0x02) == 0x02;
-            VariableHeader.WillFlag = (connectFlags & 0x04) == 0x04;
-            if (VariableHeader.WillFlag)
-            {
-                VariableHeader.WillRetain = (connectFlags & 0x20) == 0x20;
-                FixedHeader.Qos = (MqttQos)((connectFlags & 0x18) >> 3);
-                Payload.WillTopic = string.Empty;
-            }
-
-            // keep alive
-
-            // payload
-            Payload.ClientId = buffer.ReadString(ref remainingLength);
-            if (VariableHeader.WillFlag)
-            {
-                Payload.WillTopic = buffer.ReadString(ref remainingLength);
-                //WillMessage = buffer.ReadBytes
-            }
+            VariableHeader.Decode(buffer, FixedHeader);
+            Payload.Decode(buffer, FixedHeader, VariableHeader);
         }
     }
 }

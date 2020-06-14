@@ -18,6 +18,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public ushort PacketIdentifier { get; set; }
 
+        /// <summary>
+        /// 编码
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="fixedHeader"></param>
         public void Encode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
             buffer.WriteString(TopicName);
@@ -25,6 +30,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 buffer.WriteUnsignedShort(PacketIdentifier);
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="fixedHeader"></param>
         public void Decode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
             int remainingLength = fixedHeader.RemaingLength;

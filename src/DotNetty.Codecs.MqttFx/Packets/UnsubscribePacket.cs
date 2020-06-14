@@ -10,10 +10,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
     {
         private readonly List<string> _topics = new List<string>();
 
-        public UnsubscribePacket() 
-            : base(PacketType.UNSUBSCRIBE)
-        {
-        }
+        public UnsubscribePacket()
+            : base(PacketType.UNSUBSCRIBE) { }
 
         public void AddRange(params string[] topics)
         {
@@ -40,17 +38,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 buf?.Release();
             }
-        }
-    }
-
-    /// <summary>
-    /// 取消订阅回执
-    /// </summary>
-    public sealed class UnsubAckPacket : PacketWithIdentifier
-    {
-        public UnsubAckPacket()
-            : base(PacketType.UNSUBACK)
-        {
         }
     }
 }

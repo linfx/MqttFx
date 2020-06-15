@@ -18,50 +18,94 @@ c# mqtt 3.1.1 client
     {
         static async Task Main(string[] args)
         {
-            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleLoggerOptions {}));
             var services = new ServiceCollection();
-            services.AddMqttFxClient(options =>
+            services.AddMqttClient(options =>
             {
-                options.Host = "broker.emqx.io";
-                options.Port = 1883;
+                options.Host = "118.126.96.166";
             });
             var container = services.BuildServiceProvider();
-            var client = container.GetService<IMqttClient>();
 
-            client.UseConnectedHandler(async () =>
+            var client = container.GetService<MqttClient>();
+            client.Connected += Client_Connected;
+            client.Disconnected += Client_Disconnected;
+            client.MessageReceived += Client_MessageReceived;
+            if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
             {
-                Console.WriteLine("### CONNECTED WITH SERVER ###");
+                var top = "$SYS/brokers/+/clients/#";
+                Console.WriteLine("Subscribe:" + top);
 
-                var topic = "testtopic/abcd";
-                await client.SubscribeAsync(topic);
+                var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
 
-                Console.WriteLine("### SUBSCRIBED ###");
-            });
-
-            client.UseMessageReceivedHandler(message =>
-            {
-                Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
-                Console.WriteLine($"+ Topic = {message.Topic}");
-                Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(message.Payload)}");
-                Console.WriteLine($"+ QoS = {message.Qos}");
-                Console.WriteLine($"+ Retain = {message.Retain}");
-                Console.WriteLine();
-            });
-
-            var result = await client.ConnectAsync();
-            if (result.Succeeded)
-            {
-                for (int i = 1; i <= 10; i++)
+                foreach (var rc in rcs)
                 {
-                    var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
-                    await Task.Delay(500);
+                    Console.WriteLine(rc);
+                }
+
+                for (int i = 1; i < int.MaxValue; i++)
+                {
+                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.AtLeastOnce);
+                    await Task.Delay(1000);
+                    //Console.ReadKey();
                 }
             }
             Console.ReadKey();
+        }
+
+        private static void Client_Connected(object sender, MqttClientConnectedEventArgs e)
+        {
+            Console.WriteLine("Connected Ssuccessful!");
+        }
+
+        private static void Client_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
+        {
+            Console.WriteLine("Disconnected");
+        }
+
+        private static void Client_MessageReceived(object sender, MqttMessageReceivedEventArgs e)
+        {
+            //$SYS/brokers/+/clients/+/connected
+            //$SYS/brokers/+/clients/+/disconnected
+            //$SYS/brokers/+/clients/#
+            var message = e.Message;
+            var payload = Encoding.UTF8.GetString(message.Payload);
+
+            if (new Regex(@"\$SYS/brokers/.+?/connected").Match(message.Topic).Success)
+            {
+                //{ "clientid":"mqtt.fx","username":"mqtt.fx","ipaddress":"127.0.0.1","clean_sess":true,"protocol":4,"connack":0,"ts":1540949660}
+
+                var obj = JObject.Parse(payload);
+                Console.WriteLine($"【Client Connected】 client_id:{obj.Value<string>("clientid")}, ipaddress:{obj.Value<string>("ipaddress")}");
+
+            }
+            else if (new Regex(@"\$SYS/brokers/.+?/disconnected").Match(message.Topic).Success)
+            {
+                //{"clientid":"mqtt.fx","username":"mqtt.fx","reason":"normal","ts":1540949658}
+
+                var obj = JObject.Parse(payload);
+                Console.WriteLine($"【Client Disconnected】 client_id:{obj.Value<string>("clientid")}");
+            }
+            else
+            {
+                Console.WriteLine(payload);
+            }
         }
     }
 
 ```
 
 
+## EMQ  百万级分布式开源物联网MQTT消息服务器
+http://www.emqtt.com/
+
+***************************
+
+## 概览
+#### MQTT是一个轻量的发布订阅模式消息传输协议，专门针对低带宽和不稳定网络环境的物联网应用设计
+```
+MQTT 官网:            http://mqtt.org
+MQTT V3.1.1协议规范:  http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
+MQTT 协议英文版:      http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
+MQTT 协议中文版:      https://mcxiaoke.gitbooks.io/mqtt-cn/content/
+MQTT 协议中文版:      https://legacy.gitbook.com/book/mcxiaoke/mqtt-cn
+
+```

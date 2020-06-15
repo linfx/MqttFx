@@ -5,12 +5,22 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 发布消息
     /// </summary>
-    public sealed class PublishPacket : PacketWithId
+    public sealed class PublishPacket : Packet
     {
+        /// <summary>
+        /// 可变报头
+        /// </summary>
+        public PublishVariableHeader VariableHeader;
+
+        /// <summary>
+        /// 有效载荷
+        /// </summary>
+        public byte[] Payload { get; set; }
+
         /// <summary>
         /// 发布消息
         /// </summary>
-        public PublishPacket() 
+        public PublishPacket()
             : base(PacketType.PUBLISH) { }
 
         /// <summary>
@@ -19,8 +29,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="qos">服务质量等级</param>
         /// <param name="dup">重发标志</param>
         /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos, bool dup = false, bool retain = false) 
-            : this()
+        public PublishPacket(MqttQos qos, bool dup = false, bool retain = false) : this()
         {
             FixedHeader.Qos = qos;
             FixedHeader.Dup = dup;
@@ -28,26 +37,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         }
 
         /// <summary>
-        /// 主题
+        /// 编码
         /// </summary>
-        public string TopicName { get; set; }
-
-        /// <summary>
-        /// 有效载荷
-        /// </summary>
-        public byte[] Payload { get; set; }
-
+        /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteString(TopicName);
-                WritePacketId(buf);
+                VariableHeader.Encode(buf, FixedHeader);
                 buf.WriteBytes(Payload, 0, Payload.Length);
-
-                FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                FixedHeader.Encode(buffer, buf.ReadableBytes);
                 buffer.WriteBytes(buf);
             }
             finally
@@ -56,75 +56,19 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
         }
 
+        /// <summary>
+        /// 解码
+        /// </summary>
+        /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer)
         {
-            int remainingLength = RemaingLength;
-
-            // variable header
-            TopicName = buffer.ReadString(ref remainingLength);
-            ReadPacketId(buffer, ref remainingLength);
-
-            // playload
-            if (remainingLength > 0)
+            VariableHeader.Decode(buffer, FixedHeader);
+            if (FixedHeader.RemaingLength > 0)
             {
-                Payload = new byte[remainingLength];
-                buffer.ReadBytes(Payload, 0, remainingLength);
-                remainingLength = 0;
+                Payload = new byte[FixedHeader.RemaingLength];
+                buffer.ReadBytes(Payload, 0, FixedHeader.RemaingLength);
+                FixedHeader.RemaingLength = 0;
             }
-
-            FixedHeader.RemaingLength = remainingLength;
-        }
-    }
-
-    /// <summary>
-    /// 发布回执
-    /// QoS level = 1
-    /// </summary>
-    public sealed class PubAckPacket : PacketWithId
-    {
-        public PubAckPacket(ushort packetId = default)
-            : base(PacketType.PUBACK)
-        {
-            PacketId = packetId;
-        }
-    }
-
-    /// <summary>
-    /// QoS2消息回执
-    /// QoS 2 publish received, part 1
-    /// </summary>
-    public sealed class PubRecPacket : PacketWithId
-    {
-        public PubRecPacket(ushort packetId = default)
-            : base(PacketType.PUBREC)
-        {
-            PacketId = packetId;
-        }
-    }
-
-    /// <summary>
-    /// QoS2消息释放
-    /// QoS 2 publish received, part 2
-    /// </summary>
-    public sealed class PubRelPacket : PacketWithId
-    {
-        public PubRelPacket(ushort packetId = default)
-            : base(PacketType.PUBREL)
-        {
-            PacketId = packetId;
-        }
-    }
-
-    /// <summary>
-    /// QoS2消息完成
-    /// QoS 2 publish received, part 3
-    /// </summary>
-    public sealed class PubCompPacket : PacketWithId
-    {
-        public PubCompPacket(ushort packetId = default)
-            : base(PacketType.PUBCOMP)
-        {
-            PacketId = packetId;
         }
     }
 }

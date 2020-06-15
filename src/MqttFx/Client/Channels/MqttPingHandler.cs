@@ -14,7 +14,7 @@ namespace MqttFx.Channels
         {
             if (msg is Packet message)
             {
-                switch (message.PacketType)
+                switch (message.FixedHeader.PacketType)
                 {
                     case PacketType.PINGREQ:
                         HandlePingReq(ctx.Channel);

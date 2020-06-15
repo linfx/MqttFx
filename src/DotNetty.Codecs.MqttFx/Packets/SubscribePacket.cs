@@ -4,18 +4,19 @@ using System.Collections.Generic;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 订阅主题
+    /// 订阅报文
     /// </summary>
-    public sealed class SubscribePacket : PacketWithId
+    public sealed class SubscribePacket : PacketWithIdentifier
     {
         /// <summary>
-        /// 主题列表
+        /// 有效载荷
         /// </summary>
-        private readonly List<SubscriptionRequest> _subscribeTopics = new List<SubscriptionRequest>();
+        public SubscribePayload Payload;
 
         public SubscribePacket()
-            : base(PacketType.SUBSCRIBE)
+            : base(PacketType.SUBSCRIBE) 
         {
+            Payload.SubscribeTopics = new List<SubscriptionRequest>();
         }
 
         /// <summary>
@@ -25,12 +26,12 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="qos">服务质量等级</param>
         public void Add(string topic, MqttQos qos)
         {
-            _subscribeTopics.Add(new SubscriptionRequest(topic, qos));
+            Payload.SubscribeTopics.Add(new SubscriptionRequest(topic, qos));
         }
 
-        public void Add(params SubscriptionRequest[] request)
+        public void AddRange(params SubscriptionRequest[] request)
         {
-            _subscribeTopics.AddRange(request);
+            Payload.SubscribeTopics.AddRange(request);
         }
 
         public override void Encode(IByteBuffer buffer)
@@ -38,16 +39,18 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteUnsignedShort(PacketId);
+                buf.WriteUnsignedShort(VariableHeader.PacketIdentifier);
 
-                foreach (var item in _subscribeTopics)
+                foreach (var item in Payload.SubscribeTopics)
                 {
                     buf.WriteString(item.Topic);
                     buf.WriteByte((byte)item.Qos);
                 }
 
+                VariableHeader.Encode(buf, FixedHeader);
+
                 FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.WriteFixedHeader(buffer);
+                FixedHeader.Encode(buffer);
                 buffer.WriteBytes(buf);
             }
             finally
@@ -55,51 +58,5 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 buf?.Release();
             }
         }
-    }
-
-    /// <summary>
-    /// 订阅回执
-    /// </summary>
-    public class SubAckPacket : PacketWithId
-    {
-        public SubAckPacket()
-            : base(PacketType.SUBACK)
-        {
-        }
-
-        /// <summary>
-        /// 返回代码
-        /// </summary>
-        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
-
-        public override void Decode(IByteBuffer buffer)
-        {
-            base.Decode(buffer);
-
-            var returnCodes = new MqttQos[RemaingLength];
-            for (int i = 0; i < RemaingLength; i++)
-            {
-                var returnCode = (MqttQos)buffer.ReadByte();
-                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
-                {
-                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-                }
-                returnCodes[i] = returnCode;
-            }
-            ReturnCodes = returnCodes;
-            FixedHeader.RemaingLength = 0;
-        }
-    }
-
-    public class SubscriptionRequest
-    {
-        public SubscriptionRequest(string topic, MqttQos qos)
-        {
-            Topic = topic;
-            Qos = qos;
-        }
-
-        public string Topic { get; set; }
-        public MqttQos Qos { get; set; }
     }
 }

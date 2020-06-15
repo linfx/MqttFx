@@ -47,6 +47,8 @@ namespace DotNetty.Codecs.MqttFx
                         // read out data until connection is closed
                         input.SkipBytes(input.ReadableBytes);
                         return;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             catch (DecoderException)
@@ -65,18 +67,9 @@ namespace DotNetty.Codecs.MqttFx
                 return false;
             }
 
-            packet = DecodePacketInternal(buffer);
-
-            if (packet.RemaingLength > 0)
-                throw new DecoderException($"Declared remaining length is bigger than packet data size by {packet.RemaingLength}.");
-
-            return true;
-        }
-
-        private Packet DecodePacketInternal(IByteBuffer buffer)
-        {
-            var fixedHeader = new MqttFixedHeader(buffer);
-            Packet packet = fixedHeader.PacketType switch
+            var fixedHeader = new FixedHeader();
+            fixedHeader.Decode(buffer);
+            packet = fixedHeader.PacketType switch
             {
                 PacketType.CONNECT => new ConnectPacket(),
                 PacketType.CONNACK => new ConnAckPacket(),
@@ -96,7 +89,8 @@ namespace DotNetty.Codecs.MqttFx
             };
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
-            return packet;
+
+            return true;
         }
     }
 }

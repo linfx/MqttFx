@@ -23,10 +23,8 @@ namespace MqttFx.Utils
             if (packet == null) throw new ArgumentNullException(nameof(packet));
 
             ushort identifier = 0;
-            if (packet is PacketWithId packetWithId)
-            {
-                identifier = packetWithId.PacketId;
-            }
+            //if (packet is PacketWithIdentifier packetWithId)
+            //    identifier = packetWithId.PacketId;
 
             var type = packet.GetType();
             var key = new Tuple<ushort, Type>(identifier, type);

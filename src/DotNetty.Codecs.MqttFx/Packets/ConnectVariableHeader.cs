@@ -43,6 +43,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public bool WillFlag { get; set; }
         /// <summary>
         /// 清理会话
+        /// 设置为 0，服务端必须基于当前会话（使用客户端标识符识别）的状态恢复与客户端的通信。
+        /// 设置为 1，客户端和服务端必须丢弃之前的任何会话并开始一个新的会话。会话仅持续和网络连接同样长的时间。与这个会话关联的状态数据不能被任何之后的会话重用 [MQTT-3.1.2-6]。
         /// </summary>
         public bool CleanSession { get; set; }
 

@@ -44,13 +44,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
             /*
              * MQTT控制报文的类型
-             * 标志 Flags
+             * 标志位 Header Flags
             */
-            var ret = (byte)PacketType << 4;
-            ret |= Dup.ToByte() << 3;
-            ret |= (byte)Qos << 1;
-            ret |= Retain.ToByte();
-            buffer.WriteByte(ret);
+            var headerFlags = (byte)PacketType << 4;
+            headerFlags |= Dup.ToByte() << 3;
+            headerFlags |= (byte)Qos << 1;
+            headerFlags |= Retain.ToByte();
+            buffer.WriteByte(headerFlags);
 
             /*
              * 剩余长度 Remaining Length
@@ -76,11 +76,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public void Decode(IByteBuffer buffer)
         {
             // MQTT控制报文的类型 & 标志 Flags
-            int ret = buffer.ReadByte();
-            PacketType = (PacketType)(ret >> 4);
-            Dup = (ret & 0x08) == 0x08;
-            Qos = (MqttQos)((ret & 0x06) >> 1);
-            Retain = (ret & 0x01) > 0;
+            int headerFlags = buffer.ReadByte();
+            PacketType = (PacketType)(headerFlags >> 4);
+            Dup = (headerFlags & 0x08) == 0x08;
+            Qos = (MqttQos)((headerFlags & 0x06) >> 1);
+            Retain = (headerFlags & 0x01) > 0;
 
             // 剩余长度 Remaining Length
             int multiplier = 1;

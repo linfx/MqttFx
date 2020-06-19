@@ -1,5 +1,8 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Common.Internal.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 using MqttFx.Client;
 using MqttFx.Client.Abstractions;
 using System;
@@ -12,7 +15,7 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
-            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleLoggerOptions {}));
+            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider());
             var services = new ServiceCollection();
             services.AddMqttFxClient(options =>
             {

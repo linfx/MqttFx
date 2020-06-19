@@ -19,7 +19,8 @@ namespace EchoClient
             var services = new ServiceCollection();
             services.AddMqttFxClient(options =>
             {
-                options.Host = "broker.emqx.io";
+                //options.Host = "broker.emqx.io";
+                options.Host = "127.0.0.1";
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();

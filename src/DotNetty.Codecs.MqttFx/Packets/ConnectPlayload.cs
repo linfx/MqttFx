@@ -38,9 +38,12 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 buffer.WriteString(WillTopic);
                 buffer.WriteBytes(WillMessage);
             }
-            if (variableHeader.UsernameFlag && variableHeader.PasswordFlag)
+            if (variableHeader.UsernameFlag)
             {
                 buffer.WriteString(UserName);
+            }
+            if (variableHeader.PasswordFlag)
+            {
                 buffer.WriteString(Password);
             }
         }

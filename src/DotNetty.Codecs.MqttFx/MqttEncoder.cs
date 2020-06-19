@@ -17,7 +17,7 @@ namespace DotNetty.Codecs.MqttFx
 
         public static void DoEncode(IByteBufferAllocator bufferAllocator, Packet packet, List<object> output)
         {
-            var buffer = bufferAllocator.Buffer();
+            IByteBuffer buffer = bufferAllocator.Buffer();
             try
             {
                 packet.Encode(buffer);

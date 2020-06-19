@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using Microsoft.Extensions.DependencyInjection;
 using MqttFx.Client;
 using MqttFx.Client.Abstractions;
 using System;
@@ -20,6 +21,7 @@ namespace EchoClient
             });
             var container = services.BuildServiceProvider();
             var client = container.GetService<IMqttClient>();
+
 
             client.UseConnectedHandler(async () =>
             {
@@ -44,12 +46,12 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                //for (int i = 1; i <= 10; i++)
-                //{
-                //    var topic = "testtopic/abcd";
-                //    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
-                //    await Task.Delay(500);
-                //}
+                for (int i = 1; i <= 10; i++)
+                {
+                    await Task.Delay(500);
+                    var topic = "testtopic/abcd";
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"));
+                }
             }
             Console.ReadKey();
         }

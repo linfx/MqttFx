@@ -16,8 +16,8 @@ namespace MqttFx
         {
             get
             {
-                //if (ConnectReturn == ConnectReturnCode.CONNECTION_ACCEPTED)
-                //    return true;
+                if (ConnectReturn == ConnectReturnCode.CONNECTION_ACCEPTED)
+                    return true;
 
                 return false;
             }

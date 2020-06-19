@@ -4,6 +4,7 @@ using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace MqttFx.Test
@@ -100,22 +101,21 @@ namespace MqttFx.Test
             Assert.Equal(packet.VariableHeader.ConnectReturnCode, recoded.VariableHeader.ConnectReturnCode);
         }
 
-        //[Theory]
-        //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
-        //[InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
-        //public void TestSubscribeMessage(int packetId, string[] topicFilters, MqttQos[] requestedQosValues)
-        //{
-        //    //var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscriptionRequest(topic, qos)).ToArray());
+        [Theory]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
+        public void TestSubscribeMessage(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
+        {
+            var packet = new SubscribePacket();
+            packet.VariableHeader.PacketIdentifier = packetId;
+            packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscribeRequest(topic, qos)).ToArray());
 
-        //    var packet = new SubscribePacket();
-        //    //packet.Add(topicFilters.Zip(requestedQosValues, (topic, qos) => new ))
+            SubscribePacket recoded = RecodePacket(packet, true, true);
 
-        //    SubscribePacket recoded = RecodePacket(packet, true, true);
-
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-        //    //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscriptionRequest>.Default);
-        //    //Assert.Equal(packet.PacketId, recoded.PacketId);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
+            //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscribeRequest>.Default);
+            //Assert.Equal(packet.PacketId, recoded.PacketId);
+        }
 
         //[Theory]
         //[InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]

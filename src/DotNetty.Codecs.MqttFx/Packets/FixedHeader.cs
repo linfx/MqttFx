@@ -98,5 +98,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
             if (loops == 4 && (digit & 128) != 0)
                 throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
         }
+
+        public void Decode(int headerFlags)
+        {
+            PacketType = (PacketType)(headerFlags >> 4);
+            Dup = (headerFlags & 0x08) == 0x08;
+            Qos = (MqttQos)((headerFlags & 0x06) >> 1);
+            Retain = (headerFlags & 0x01) > 0;
+        }
     }
 }

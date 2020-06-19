@@ -1,8 +1,4 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
-using DotNetty.Common.Internal.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MqttFx.Client;
 using MqttFx.Client.Abstractions;
 using System;
@@ -19,8 +15,7 @@ namespace EchoClient
             var services = new ServiceCollection();
             services.AddMqttFxClient(options =>
             {
-                //options.Host = "broker.emqx.io";
-                options.Host = "127.0.0.1";
+                options.Host = "broker.emqx.io";
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
@@ -49,12 +44,12 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                for (int i = 1; i <= 10; i++)
-                {
-                    var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
-                    await Task.Delay(500);
-                }
+                //for (int i = 1; i <= 10; i++)
+                //{
+                //    var topic = "testtopic/abcd";
+                //    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
+                //    await Task.Delay(500);
+                //}
             }
             Console.ReadKey();
         }

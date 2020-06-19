@@ -24,7 +24,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             for (int i = 0; i < FixedHeader.RemaingLength; i++)
             {
                 var returnCode = (MqttQos)buffer.ReadByte();
-                if (returnCode > MqttQos.ExactlyOnce && returnCode != MqttQos.Failure)
+                if (returnCode > MqttQos.ExactlyOnce)
                 {
                     throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
                 }

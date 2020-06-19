@@ -75,14 +75,19 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public void Decode(IByteBuffer buffer)
         {
-            // MQTT控制报文的类型 & 标志 Flags
+            /*
+             * MQTT控制报文的类型
+             * 标志位 Header Flags
+            */
             int headerFlags = buffer.ReadByte();
             PacketType = (PacketType)(headerFlags >> 4);
             Dup = (headerFlags & 0x08) == 0x08;
             Qos = (MqttQos)((headerFlags & 0x06) >> 1);
             Retain = (headerFlags & 0x01) > 0;
 
-            // 剩余长度 Remaining Length
+            /*
+             * 剩余长度 Remaining Length
+            */
             int multiplier = 1;
             short digit;
             int loops = 0;
@@ -97,14 +102,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
             // MQTT protocol limits Remaining Length to 4 bytes
             if (loops == 4 && (digit & 128) != 0)
                 throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
-        }
-
-        public void Decode(int headerFlags)
-        {
-            PacketType = (PacketType)(headerFlags >> 4);
-            Dup = (headerFlags & 0x08) == 0x08;
-            Qos = (MqttQos)((headerFlags & 0x06) >> 1);
-            Retain = (headerFlags & 0x01) > 0;
         }
     }
 }

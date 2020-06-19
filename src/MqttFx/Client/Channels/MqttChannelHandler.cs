@@ -82,7 +82,7 @@ namespace MqttFx.Channels
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
                     connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
 
-                    if(client.ConnectedHandler != null)
+                    if (client.ConnectedHandler != null)
                         client.ConnectedHandler.OnConnected();
                     break;
 
@@ -106,7 +106,7 @@ namespace MqttFx.Channels
 
                 case MqttQos.AtLeastOnce:
                     InvokeHandlersForIncomingPublish(message);
-                    if(message.VariableHeader.PacketIdentifier > 0)
+                    if (message.VariableHeader.PacketIdentifier > 0)
                         channel.WriteAndFlushAsync(new PubAckPacket(message.VariableHeader.PacketIdentifier));
                     break;
 

@@ -24,7 +24,7 @@ namespace MqttFx
         public ushort KeepAlive { get; set; } = 60;
 
         /// <summary>
-        /// 案例凭证
+        /// 凭证
         /// </summary>
         public MqttClientCredentials Credentials { get; set; }
 

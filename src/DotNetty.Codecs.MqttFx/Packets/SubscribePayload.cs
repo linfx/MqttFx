@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DotNetty.Buffers;
+using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -7,12 +8,21 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 主题列表
         /// </summary>
-        public List<SubscriptionRequest> SubscribeTopics;
+        public List<SubscribeRequest> SubscribeTopics;
+
+        public void Encode(IByteBuffer buffer)
+        {
+            foreach (var item in SubscribeTopics)
+            {
+                buffer.WriteString(item.Topic);
+                buffer.WriteByte((byte)item.Qos);
+            }
+        }
     }
 
-    public class SubscriptionRequest
+    public class SubscribeRequest
     {
-        public SubscriptionRequest(string topic, MqttQos qos)
+        public SubscribeRequest(string topic, MqttQos qos)
         {
             Topic = topic;
             Qos = qos;

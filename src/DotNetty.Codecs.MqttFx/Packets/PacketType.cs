@@ -11,58 +11,58 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 发起连接
         /// </summary>
-        CONNECT = 0x10,
+        CONNECT = 1,
         /// <summary>
         /// 连接回执
         /// </summary>
-        CONNACK = 0x20,
+        CONNACK = 2,
         /// <summary>
         /// 发布消息
         /// </summary>
-        PUBLISH = 0x30,
+        PUBLISH = 3,
         /// <summary>
         /// 发布回执
         /// </summary>
-        PUBACK = 0x40,
+        PUBACK = 4,
         /// <summary>
         /// QoS2消息回执
         /// </summary>
-        PUBREC = 0x50,
+        PUBREC = 5,
         /// <summary>
         /// QoS2消息释放
         /// </summary>
-        PUBREL = 0x60,
+        PUBREL = 6,
         /// <summary>
         /// QoS2消息完成
         /// </summary>
-        PUBCOMP = 0x70,
+        PUBCOMP = 7,
         /// <summary>
         /// 订阅主题
         /// </summary>
-        SUBSCRIBE = 0x80,
+        SUBSCRIBE = 8,
         /// <summary>
         /// 订阅回执
         /// </summary>
-        SUBACK = 0x90,
+        SUBACK = 9,
         /// <summary>
         /// 取消订阅
         /// </summary>
-        UNSUBSCRIBE = 0xa0,
+        UNSUBSCRIBE = 10,
         /// <summary>
         /// 取消订阅回执
         /// </summary>
-        UNSUBACK = 0xb0,
+        UNSUBACK = 11,
         /// <summary>
         /// PING请求
         /// </summary>
-        PINGREQ = 0xc0,
+        PINGREQ = 12,
         /// <summary>
         /// PING响应
         /// </summary>
-        PINGRESP = 0xd0,
+        PINGRESP = 13,
         /// <summary>
         /// 断开连接
         /// </summary>
-        DISCONNECT = 0xe0,
+        DISCONNECT = 14
     }
 }

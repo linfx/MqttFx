@@ -22,6 +22,7 @@ namespace DotNetty.Codecs.MqttFx
             {
                 packet.Encode(buffer);
                 output.Add(buffer);
+                buffer = null;
             }
             finally
             {

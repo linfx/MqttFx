@@ -16,7 +16,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public SubscribePacket()
             : base(PacketType.SUBSCRIBE) 
         {
-            Payload.SubscribeTopics = new List<SubscriptionRequest>();
+            FixedHeader.Qos = MqttQos.AtLeastOnce;
+            FixedHeader.Retain = false;
+            Payload.SubscribeTopics = new List<SubscribeRequest>();
         }
 
         /// <summary>
@@ -26,10 +28,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="qos">服务质量等级</param>
         public void Add(string topic, MqttQos qos)
         {
-            Payload.SubscribeTopics.Add(new SubscriptionRequest(topic, qos));
+            Payload.SubscribeTopics.Add(new SubscribeRequest(topic, qos));
         }
 
-        public void AddRange(params SubscriptionRequest[] request)
+        public void AddRange(params SubscribeRequest[] request)
         {
             Payload.SubscribeTopics.AddRange(request);
         }
@@ -39,18 +41,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteUnsignedShort(VariableHeader.PacketIdentifier);
-
-                foreach (var item in Payload.SubscribeTopics)
-                {
-                    buf.WriteString(item.Topic);
-                    buf.WriteByte((byte)item.Qos);
-                }
-
                 VariableHeader.Encode(buf, FixedHeader);
-
-                FixedHeader.RemaingLength = buf.ReadableBytes;
-                FixedHeader.Encode(buffer);
+                Payload.Encode(buf);
+                FixedHeader.Encode(buffer, buf.ReadableBytes);
                 buffer.WriteBytes(buf);
             }
             finally

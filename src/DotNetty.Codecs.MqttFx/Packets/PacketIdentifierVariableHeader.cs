@@ -11,13 +11,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public void Encode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
-            if (fixedHeader.Qos > MqttQos.AtLeastOnce)
+            if (fixedHeader.Qos > MqttQos.AtMostOnce)
                 buffer.WriteUnsignedShort(PacketIdentifier);
         }
 
         public void Decode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
-            if (fixedHeader.Qos > MqttQos.AtLeastOnce)
+            if (fixedHeader.Qos > MqttQos.AtMostOnce)
             {
                 int remainingLength = fixedHeader.RemaingLength;
                 PacketIdentifier = buffer.ReadUnsignedShort(ref remainingLength);

@@ -73,7 +73,7 @@ namespace MqttFx.Client
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                throw new MqttException("BrokerUnavailable");
+                throw new MqttException("BrokerUnavailable: " + ex.Message);
             }
         }
 
@@ -84,13 +84,11 @@ namespace MqttFx.Client
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="retain"></param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce, bool retain = false, CancellationToken cancellationToken = default)
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain = false, CancellationToken cancellationToken = default)
         {
-            var packet = new PublishPacket(qos, false, retain)
-            {
-                Payload = payload
-            };
+            var packet = new PublishPacket(qos, false, retain);
             packet.VariableHeader.TopicName = topic;
+            packet.Payload = payload;
             if (qos > MqttQos.AtMostOnce)
                 packet.VariableHeader.PacketIdentifier = _packetIdProvider.NewPacketId();
 
@@ -106,6 +104,7 @@ namespace MqttFx.Client
         public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken = default)
         {
             var packet = new SubscribePacket();
+            packet.VariableHeader.PacketIdentifier = _packetIdProvider.NewPacketId();
             packet.Add(topic, qos);
 
             return SendPacketAsync(packet);

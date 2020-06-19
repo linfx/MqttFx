@@ -24,6 +24,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// QOS Level 2 - Message will be delivered once, and only once. Message will be retried until
         /// it is successfully sent..
         /// </summary>
-        ExactlyOnce = 2,
+        ExactlyOnce = 2
     }
 }

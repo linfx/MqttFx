@@ -70,7 +70,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             connectFlags |= ((byte)WillQos) << 3;
             connectFlags |= WillFlag.ToByte() << 2;
             connectFlags |= CleanSession.ToByte() << 1;
-            buffer.WriteByte((byte)connectFlags);
+            buffer.WriteByte(connectFlags);
 
             // 保持连接 Keep Alive
             buffer.WriteShort(KeepAlive);            
@@ -97,6 +97,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
 
             // 保持连接 Keep Alive
+            KeepAlive = (ushort)buffer.ReadShort();
         }
     }
 }

@@ -19,7 +19,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Decode(IByteBuffer buffer)
         {
             base.Decode(buffer);
-
             var returnCodes = new MqttQos[FixedHeader.RemaingLength];
             for (int i = 0; i < FixedHeader.RemaingLength; i++)
             {
@@ -31,7 +30,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 returnCodes[i] = returnCode;
             }
             ReturnCodes = returnCodes;
-            FixedHeader.RemaingLength = 0;
         }
     }
 }

@@ -4,12 +4,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
 {
     public struct ConnAckVariableHeader
     {
+        /*
+         * 连接确认标志 Connect Acknowledge Flags
+         * 第1个字节是 连接确认标志，位7-1是保留位且必须设置为0。 第0 (SP)位 是当前会话（Session Present）标志。
+        */
         /// <summary>
-        /// 当前会话
+        /// 当前会话 Session Present
         /// </summary>
         public bool SessionPresent { get; set; }
         /// <summary>
-        /// 连接返回码
+        /// 连接返回码 Connect Return code
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
 

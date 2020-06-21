@@ -12,19 +12,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public PacketType PacketType { get; set; }
         /// <summary>
-        /// 重发标志
-        /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
-        /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
+        /// 每个MQTT控制报文类型特定的标志
         /// </summary>
-        public bool Dup { get; set; }
-        /// <summary>
-        /// 服务质量等级
-        /// </summary>
-        public MqttQos Qos { get; set; }
-        /// <summary>
-        /// 保留标志
-        /// </summary>
-        public bool Retain { get; set; }
+        internal int Flags { get; set; }
         /// <summary>
         /// 剩余长度
         /// 表示当前报文剩余部分的字节数，包括可变报头和负载的数据。
@@ -47,10 +37,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
              * 标志位 Header Flags
             */
             var headerFlags = (byte)PacketType << 4;
-            headerFlags |= Dup.ToByte() << 3;
-            headerFlags |= (byte)Qos << 1;
-            headerFlags |= Retain.ToByte();
-            buffer.WriteByte(headerFlags);
+            headerFlags |= Flags;
+            buffer.WriteByte(headerFlags); 
 
             /*
              * 剩余长度 Remaining Length
@@ -81,9 +69,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             */
             int headerFlags = buffer.ReadByte();
             PacketType = (PacketType)(headerFlags >> 4);
-            Dup = (headerFlags & 0x08) == 0x08;
-            Qos = (MqttQos)((headerFlags & 0x06) >> 1);
-            Retain = (headerFlags & 0x01) > 0;
+            Flags = headerFlags & 0x0f;
 
             /*
              * 剩余长度 Remaining Length

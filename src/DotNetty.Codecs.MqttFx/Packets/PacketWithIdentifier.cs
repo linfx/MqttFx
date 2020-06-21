@@ -25,7 +25,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public override void Encode(IByteBuffer buffer)
         {
-            FixedHeader.Encode(buffer);
+            FixedHeader.Encode(buffer, 2);
             VariableHeader.Encode(buffer, FixedHeader);
         }
 

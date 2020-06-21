@@ -21,7 +21,7 @@ namespace MqttFx.Channels
 
         protected override void InitChannel(ISocketChannel ch)
         {
-            //ch.Pipeline.AddLast(new LoggingHandler());
+            ch.Pipeline.AddLast(new LoggingHandler());
             ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
             //ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
             ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));

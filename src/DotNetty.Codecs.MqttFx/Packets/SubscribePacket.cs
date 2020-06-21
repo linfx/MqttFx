@@ -16,8 +16,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public SubscribePacket()
             : base(PacketType.SUBSCRIBE) 
         {
-            FixedHeader.Qos = MqttQos.AtLeastOnce;
-            FixedHeader.Retain = false;
+            FixedHeader.Flags = 0x02;
             Payload.SubscribeTopics = new List<SubscribeRequest>();
         }
 

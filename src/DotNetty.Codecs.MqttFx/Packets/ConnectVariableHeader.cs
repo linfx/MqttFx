@@ -91,10 +91,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
             WillFlag = (connectFlags & 0x04) == 0x04;
             if (WillFlag)
             {
-                WillRetain = (connectFlags & 0x20) == 0x20;
                 WillQos = (MqttQos)((connectFlags & 0x18) >> 3);
-                //WillTopic = string.Empty;
+                WillRetain = (connectFlags & 0x20) == 0x20;
             }
+            UsernameFlag = (connectFlags & 0x80) == 0x80;
+            PasswordFlag = (connectFlags & 0x40) == 0x40;
 
             // 保持连接 Keep Alive
             KeepAlive = (ushort)buffer.ReadShort();

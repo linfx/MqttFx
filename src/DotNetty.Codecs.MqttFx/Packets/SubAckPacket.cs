@@ -18,18 +18,18 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer)
         {
-            base.Decode(buffer);
-            var returnCodes = new MqttQos[FixedHeader.RemaingLength];
-            for (int i = 0; i < FixedHeader.RemaingLength; i++)
-            {
-                var returnCode = (MqttQos)buffer.ReadByte();
-                if (returnCode > MqttQos.ExactlyOnce)
-                {
-                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-                }
-                returnCodes[i] = returnCode;
-            }
-            ReturnCodes = returnCodes;
+            //base.Decode(buffer);
+            //var returnCodes = new MqttQos[FixedHeader.RemaingLength];
+            //for (int i = 0; i < FixedHeader.RemaingLength; i++)
+            //{
+            //    var returnCode = (MqttQos)buffer.ReadByte();
+            //    if (returnCode > MqttQos.ExactlyOnce)
+            //    {
+            //        throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
+            //    }
+            //    returnCodes[i] = returnCode;
+            //}
+            //ReturnCodes = returnCodes;
         }
     }
 }

@@ -86,11 +86,13 @@ namespace MqttFx.Client
         /// <param name="retain"></param>
         public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain = false, CancellationToken cancellationToken = default)
         {
-            var packet = new PublishPacket(qos, false, retain);
-            packet.VariableHeader.TopicName = topic;
-            packet.Payload = payload;
+            var packet = new PublishPacket(qos, false, retain)
+            {
+                TopicName = topic,
+                Payload = payload
+            };
             if (qos > MqttQos.AtMostOnce)
-                packet.VariableHeader.PacketIdentifier = _packetIdProvider.NewPacketId();
+                packet.PacketIdentifier = _packetIdProvider.NewPacketId();
 
             return SendPacketAsync(packet);
         }

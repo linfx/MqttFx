@@ -1,8 +1,7 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// QoS2消息回执
-    /// QoS 2 publish received, part 1
+    /// 发布收到（QoS 2，第一步）
     /// </summary>
     public sealed class PubRecPacket : PacketWithIdentifier
     {

@@ -44,27 +44,27 @@ namespace MqttFx.Channels
             switch (msg.FixedHeader.PacketType)
             {
                 case PacketType.CONNACK:
-                    HandleConack(ctx.Channel, (ConnAckPacket)msg);
-                    break;
-                case PacketType.SUBACK:
-                    HandleSubAck((SubAckPacket)msg);
+                    ProcessMessage(ctx.Channel, (ConnAckPacket)msg);
                     break;
                 case PacketType.PUBLISH:
-                    HandlePublish(ctx.Channel, (PublishPacket)msg);
+                    ProcessMessage(ctx.Channel, (PublishPacket)msg);
                     break;
                 case PacketType.PUBACK:
-                    HandlePuback((PubAckPacket)msg);
+                    ProcessMessage(msg as PubAckPacket);
                     break;
                 case PacketType.PUBREC:
-                    HandlePubrel(ctx.Channel, msg);
+                    ProcessMessage(ctx.Channel, msg as PubRecPacket);
                     break;
                 case PacketType.PUBREL:
-                    HandlePubrec(ctx.Channel, msg);
+                    ProcessMessage(ctx.Channel, msg as PubRelPacket);
                     break;
                 case PacketType.PUBCOMP:
-                    HandlePubcomp(msg);
+                    ProcessMessage(msg);
                     break;
                 case PacketType.SUBSCRIBE:
+                    break;
+                case PacketType.SUBACK:
+                    ProcessMessage((SubAckPacket)msg);
                     break;
                 case PacketType.UNSUBSCRIBE:
                     break;
@@ -75,7 +75,7 @@ namespace MqttFx.Channels
             }
         }
 
-        private void HandleConack(IChannel channel, ConnAckPacket message)
+        private void ProcessMessage(IChannel channel, ConnAckPacket message)
         {
             switch (message.VariableHeader.ConnectReturnCode)
             {
@@ -96,18 +96,18 @@ namespace MqttFx.Channels
             }
         }
 
-        private void HandlePublish(IChannel channel, PublishPacket message)
+        private void ProcessMessage(IChannel channel, PublishPacket message)
         {
-            switch (message.FixedHeader.Qos)
+            switch (message.Qos)
             {
                 case MqttQos.AtMostOnce:
-                    InvokeHandlersForIncomingPublish(message);
+                    InvokeProcessForIncomingPublish(message);
                     break;
 
                 case MqttQos.AtLeastOnce:
-                    InvokeHandlersForIncomingPublish(message);
-                    if (message.VariableHeader.PacketIdentifier > 0)
-                        channel.WriteAndFlushAsync(new PubAckPacket(message.VariableHeader.PacketIdentifier));
+                    InvokeProcessForIncomingPublish(message);
+                    if (message.PacketIdentifier > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketIdentifier));
                     break;
 
                 case MqttQos.ExactlyOnce:
@@ -115,31 +115,34 @@ namespace MqttFx.Channels
             }
         }
 
-        private void HandleSubAck(SubAckPacket message)
+        private void ProcessMessage(PubAckPacket message)
         {
         }
 
-        private void HandleUnsuback(UnsubAckPacket message)
+        private void ProcessMessage(IChannel channel, PubRecPacket message)
+        {
+            var packet = new PubRelPacket(message.VariableHeader.PacketIdentifier);
+            channel.WriteAndFlushAsync(packet);
+        }
+
+        private void ProcessMessage(IChannel channel, PubRelPacket message)
         {
         }
 
-        private void HandlePuback(PubAckPacket message)
+        private void ProcessMessage(SubAckPacket message)
         {
         }
 
-        private void HandlePubrec(IChannel channel, Packet message)
+        private void ProcessMessage(UnsubAckPacket message)
         {
         }
 
-        private void HandlePubrel(IChannel channel, Packet message)
+
+        private void ProcessMessage(Packet message)
         {
         }
 
-        private void HandlePubcomp(Packet message)
-        {
-        }
-
-        private void InvokeHandlersForIncomingPublish(PublishPacket message)
+        private void InvokeProcessForIncomingPublish(PublishPacket message)
         {
             var handler = client.MessageReceivedHandler;
             if(handler != null)

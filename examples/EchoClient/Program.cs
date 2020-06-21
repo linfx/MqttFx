@@ -46,12 +46,12 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                for (int i = 1; i <= 10; i++)
-                {
-                    await Task.Delay(500);
-                    var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"));
-                }
+                //for (int i = 1; i <= 1; i++)
+                //{
+                //    await Task.Delay(500);
+                //    var topic = "testtopic/abcd";
+                //    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.ExactlyOnce);
+                //}
             }
             Console.ReadKey();
         }

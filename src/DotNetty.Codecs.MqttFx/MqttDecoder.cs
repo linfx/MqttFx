@@ -68,31 +68,24 @@ namespace DotNetty.Codecs.MqttFx
 
             FixedHeader fixedHeader = default;
             fixedHeader.Decode(buffer);
-            try
+            packet = fixedHeader.PacketType switch
             {
-                packet = fixedHeader.PacketType switch
-                {
-                    PacketType.CONNECT => new ConnectPacket(),
-                    PacketType.CONNACK => new ConnAckPacket(),
-                    PacketType.DISCONNECT => new DisconnectPacket(),
-                    PacketType.PINGREQ => new PingReqPacket(),
-                    PacketType.PINGRESP => new PingRespPacket(),
-                    PacketType.PUBACK => new PubAckPacket(),
-                    PacketType.PUBCOMP => new PubCompPacket(),
-                    PacketType.PUBLISH => new PublishPacket(),
-                    PacketType.PUBREC => new PubRecPacket(),
-                    PacketType.PUBREL => new PubRelPacket(),
-                    PacketType.SUBSCRIBE => new SubscribePacket(),
-                    PacketType.SUBACK => new SubAckPacket(),
-                    PacketType.UNSUBSCRIBE => new UnsubscribePacket(),
-                    PacketType.UNSUBACK => new UnsubscribePacket(),
-                    _ => throw new DecoderException("Unsupported Message Type"),
-                };
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+                PacketType.CONNECT => new ConnectPacket(),
+                PacketType.CONNACK => new ConnAckPacket(),
+                PacketType.DISCONNECT => new DisconnectPacket(),
+                PacketType.PINGREQ => new PingReqPacket(),
+                PacketType.PINGRESP => new PingRespPacket(),
+                PacketType.PUBACK => new PubAckPacket(),
+                PacketType.PUBCOMP => new PubCompPacket(),
+                PacketType.PUBLISH => new PublishPacket(),
+                PacketType.PUBREC => new PubRecPacket(),
+                PacketType.PUBREL => new PubRelPacket(),
+                PacketType.SUBSCRIBE => new SubscribePacket(),
+                PacketType.SUBACK => new SubAckPacket(),
+                PacketType.UNSUBSCRIBE => new UnsubscribePacket(),
+                PacketType.UNSUBACK => new UnsubscribePacket(),
+                _ => throw new DecoderException("Unsupported Message Type"),
+            };
             packet.FixedHeader = fixedHeader;
             packet.Decode(buffer);
 

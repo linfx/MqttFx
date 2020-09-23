@@ -1,6 +1,6 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
-using MqttFx.Client.Abstractions;
+using MqttFx.Client;
 using System.Threading.Tasks;
 
 namespace MqttFx.Channels

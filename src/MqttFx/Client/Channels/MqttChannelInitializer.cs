@@ -3,7 +3,7 @@ using DotNetty.Handlers.Logging;
 using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using MqttFx.Client.Abstractions;
+using MqttFx.Client;
 using System.Threading.Tasks;
 
 namespace MqttFx.Channels
@@ -23,7 +23,7 @@ namespace MqttFx.Channels
         {
             ch.Pipeline.AddLast(new LoggingHandler());
             ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
-            //ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
+            ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
             ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));
         }
     }

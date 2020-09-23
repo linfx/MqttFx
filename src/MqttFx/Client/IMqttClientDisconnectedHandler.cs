@@ -1,4 +1,4 @@
-﻿namespace MqttFx.Client.Abstractions
+﻿namespace MqttFx.Client
 {
     public interface IMqttClientDisconnectedHandler
     {

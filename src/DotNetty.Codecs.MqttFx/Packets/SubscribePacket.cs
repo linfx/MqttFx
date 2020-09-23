@@ -25,15 +25,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
-        public void Add(string topic, MqttQos qos)
-        {
-            Payload.SubscribeTopics.Add(new SubscribeRequest(topic, qos));
-        }
+        public void Add(string topic, MqttQos qos) => Payload.SubscribeTopics.Add(new SubscribeRequest(topic, qos));
 
-        public void AddRange(params SubscribeRequest[] request)
-        {
-            Payload.SubscribeTopics.AddRange(request);
-        }
+        /// <summary>
+        /// 订阅主题
+        /// </summary>
+        /// <param name="request"></param>
+        public void AddRange(params SubscribeRequest[] request) => Payload.SubscribeTopics.AddRange(request);
 
         public override void Encode(IByteBuffer buffer)
         {

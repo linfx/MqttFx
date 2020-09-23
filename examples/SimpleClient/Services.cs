@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MqttFx.Client.Abstractions;
+using MqttFx.Client;
 using System.Threading;
 using System.Threading.Tasks;
 

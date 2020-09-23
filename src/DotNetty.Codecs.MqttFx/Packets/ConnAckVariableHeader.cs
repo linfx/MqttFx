@@ -12,6 +12,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 当前会话 Session Present
         /// </summary>
         public bool SessionPresent { get; set; }
+
         /// <summary>
         /// 连接返回码 Connect Return code
         /// </summary>

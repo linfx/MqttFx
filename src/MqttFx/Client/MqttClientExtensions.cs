@@ -1,5 +1,4 @@
-﻿using MqttFx.Client.Abstractions;
-using MqttFx.Client.Handlers;
+﻿using MqttFx.Client.Handlers;
 using System;
 
 namespace MqttFx.Client

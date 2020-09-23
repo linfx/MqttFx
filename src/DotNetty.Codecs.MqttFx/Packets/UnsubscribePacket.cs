@@ -10,13 +10,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
     {
         private readonly List<string> _topics = new List<string>();
 
-        public UnsubscribePacket()
-            : base(PacketType.UNSUBSCRIBE) { }
+        public UnsubscribePacket() : base(PacketType.UNSUBSCRIBE) { }
 
-        public void AddRange(params string[] topics)
-        {
-            _topics.AddRange(topics);
-        }
+        public void AddRange(params string[] topics) => _topics.AddRange(topics);
 
         public override void Encode(IByteBuffer buffer)
         {

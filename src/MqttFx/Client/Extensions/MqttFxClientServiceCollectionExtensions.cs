@@ -1,6 +1,5 @@
 ﻿using MqttFx;
 using MqttFx.Client;
-using MqttFx.Client.Abstractions;
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection

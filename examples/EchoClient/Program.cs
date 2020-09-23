@@ -1,7 +1,6 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using Microsoft.Extensions.DependencyInjection;
 using MqttFx.Client;
-using MqttFx.Client.Abstractions;
 using System;
 using System.Text;
 using System.Threading.Tasks;

@@ -7,16 +7,7 @@
     {
         public static readonly PingReqPacket Instance = new PingReqPacket();
 
-        public PingReqPacket() : base(PacketType.PINGREQ) { }
-    }
-
-    /// <summary>
-    /// PING响应
-    /// </summary>
-    public class PingRespPacket : Packet
-    {
-        public static readonly PingRespPacket Instance = new PingRespPacket();
-
-        public PingRespPacket() : base(PacketType.PINGRESP) { }
+        public PingReqPacket() 
+            : base(PacketType.PINGREQ) { }
     }
 }

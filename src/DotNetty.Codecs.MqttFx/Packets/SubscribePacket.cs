@@ -38,9 +38,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
+                // Variable header
                 VariableHeader.Encode(buf, FixedHeader);
+
+                // Payload
                 Payload.Encode(buf);
+
+                // Fixed header
                 FixedHeader.Encode(buffer, buf.ReadableBytes);
+
                 buffer.WriteBytes(buf);
             }
             finally

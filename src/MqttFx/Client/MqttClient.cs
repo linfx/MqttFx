@@ -82,7 +82,7 @@ namespace MqttFx.Client
         /// <param name="topic">主题</param>
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
-        /// <param name="retain"></param>
+        /// <param name="retain">保留消息</param>
         public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain, CancellationToken cancellationToken)
         {
             var packet = new PublishPacket(qos, false, retain)

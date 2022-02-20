@@ -2,6 +2,9 @@
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
+    /// <summary>
+    /// 可变报头(Variable header)
+    /// </summary>
     public class PacketIdentifierVariableHeader : VariableHeader
     {
         /// <summary>

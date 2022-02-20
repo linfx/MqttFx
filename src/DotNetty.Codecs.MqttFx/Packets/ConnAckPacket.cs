@@ -1,7 +1,7 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 连接报文回执
+    /// 连接报文回执(CONNACK – Acknowledge connection request)
     /// </summary>
     public sealed class ConnAckPacket : Packet
     {

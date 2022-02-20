@@ -1,7 +1,7 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 连接报文
+    /// 连接报文(CONNECT – Client requests a connection to a Server)
     /// </summary>
     public sealed class ConnectPacket : Packet
     {

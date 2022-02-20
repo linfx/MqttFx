@@ -1,5 +1,8 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
+    /// <summary>
+    /// Connect Flags
+    /// </summary>
     public struct ConnectFlags
     {
         /// <summary>

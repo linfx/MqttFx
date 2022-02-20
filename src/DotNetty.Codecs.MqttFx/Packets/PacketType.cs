@@ -3,7 +3,7 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 报文类型
+    /// 报文类型(MQTT Control Packet type)
     /// </summary>
     [Flags]
     public enum PacketType : byte

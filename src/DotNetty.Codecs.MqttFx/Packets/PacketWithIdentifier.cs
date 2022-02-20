@@ -27,8 +27,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="fixedHeader">固定报头(Fixed header)</param>
         /// <param name="variableHeader">可变报头(Variable header)</param>
-        public PacketWithIdentifier(FixedHeader fixedHeader, PacketIdentifierVariableHeader variableHeader)
-            : base(fixedHeader, variableHeader)
+        public PacketWithIdentifier(PacketIdentifierVariableHeader variableHeader)
+            : base(variableHeader)
         {
             VariableHeader = variableHeader;
         }

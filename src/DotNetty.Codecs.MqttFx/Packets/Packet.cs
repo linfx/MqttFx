@@ -40,22 +40,19 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        /// <param name="fixedHeader">固定报头(Fixed header)</param>
         /// <param name="variableHeader">可变报头(Variable header)</param>
-        protected Packet(FixedHeader fixedHeader, VariableHeader variableHeader) :
-            this(fixedHeader, variableHeader, null)
+        protected Packet(VariableHeader variableHeader) :
+            this(variableHeader, null)
         {
         }
 
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        /// <param name="fixedHeader">固定报头(Fixed header)</param>
         /// <param name="variableHeader">可变报头(Variable header)</param>
         /// <param name="payload">有效载荷(Payload)</param>
-        protected Packet(FixedHeader fixedHeader, VariableHeader variableHeader, Payload payload)
+        protected Packet(VariableHeader variableHeader, Payload payload)
         {
-            FixedHeader = fixedHeader;
             VariableHeader = variableHeader;
             Payload = payload;
         }

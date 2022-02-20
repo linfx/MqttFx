@@ -9,15 +9,14 @@
         /// 连接报文
         /// </summary>
         public ConnectPacket()
-            : base(PacketType.CONNECT)
+            : this(new ConnectVariableHeader(), new ConnectPlayload())
         {
-            VariableHeader = new ConnectVariableHeader();
-            Payload = new ConnectPlayload();
         }
 
-        public ConnectPacket(FixedHeader fixedHeader, ConnectVariableHeader variableHeader, ConnectPlayload payload)
-            : base(fixedHeader, variableHeader)
+        public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPlayload payload)
+            : base(variableHeader, payload)
         {
+            FixedHeader.PacketType = PacketType.CONNECT;
             VariableHeader = variableHeader;
             Payload = payload;
         }

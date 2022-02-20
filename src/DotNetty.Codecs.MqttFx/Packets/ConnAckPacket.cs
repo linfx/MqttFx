@@ -9,14 +9,15 @@
         /// 连接报文回执
         /// </summary>
         public ConnAckPacket()
-            : base(PacketType.CONNACK) 
+            : this(new ConnAckVariableHeader()) 
         {
-            VariableHeader = new ConnAckVariableHeader();
         }
 
-        public ConnAckPacket(FixedHeader fixedHeader, ConnAckVariableHeader variableHeader)
-            : base(fixedHeader, variableHeader)
+        public ConnAckPacket(ConnAckVariableHeader variableHeader)
+            : base(variableHeader)
         {
+            FixedHeader.PacketType = PacketType.CONNACK;
+            VariableHeader = variableHeader;
         }
     }
 }

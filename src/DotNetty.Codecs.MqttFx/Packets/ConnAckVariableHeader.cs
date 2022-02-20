@@ -2,7 +2,7 @@
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
-    public struct ConnAckVariableHeader
+    public class ConnAckVariableHeader : VariableHeader
     {
         /*
          * 连接确认标志 Connect Acknowledge Flags
@@ -22,7 +22,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 编码
         /// </summary>
         /// <param name="buffer"></param>
-        public void Encode(IByteBuffer buffer)
+        public override void Encode(IByteBuffer buffer)
         {
             buffer.WriteByte(SessionPresent ? 0x01 : 0x00);
             buffer.WriteByte((byte)ConnectReturnCode);
@@ -32,10 +32,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 解码
         /// </summary>
         /// <param name="buffer"></param>
-        public void Decode(IByteBuffer buffer)
+        public override void Decode(IByteBuffer buffer, ref int remainingLength)
         {
             SessionPresent = (buffer.ReadByte() & 0x01) == 0x01;
             ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
+            remainingLength -= 2;
         }
     }
 }

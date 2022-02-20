@@ -47,7 +47,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="qos">服务质量等级</param>
         /// <param name="dup">重发标志</param>
         /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos = MqttQos.AtMostOnce, bool dup = false, bool retain = false) : this()
+        public PublishPacket(MqttQos qos = MqttQos.AT_MOST_ONCE, bool dup = false, bool retain = false) : this()
         {
             Qos = qos;
             Dup = dup;
@@ -68,7 +68,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             try
             {
                 buf.WriteString(TopicName);
-                if (Qos > MqttQos.AtMostOnce)
+                if (Qos > MqttQos.AT_MOST_ONCE)
                     buf.WriteUnsignedShort(PacketIdentifier);
                 buf.WriteBytes(Payload, 0, Payload.Length);
 

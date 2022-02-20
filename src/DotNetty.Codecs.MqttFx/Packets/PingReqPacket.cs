@@ -1,7 +1,7 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// PING请求
+    /// PING请求(PING request)
     /// </summary>
     public sealed class PingReqPacket : Packet
     {

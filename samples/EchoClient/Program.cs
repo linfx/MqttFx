@@ -26,10 +26,10 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/abcd";
-                await client.SubscribeAsync(topic);
+                //var topic = "testtopic/abcd";
+                //await client.SubscribeAsync(topic);
 
-                Console.WriteLine("### SUBSCRIBED ###");
+                //Console.WriteLine("### SUBSCRIBED ###");
             });
 
             client.UseMessageReceivedHandler(message =>
@@ -49,7 +49,7 @@ namespace EchoClient
                 {
                     await Task.Delay(500);
                     var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
                 }
             }
             Console.ReadKey();

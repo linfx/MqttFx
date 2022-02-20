@@ -3,20 +3,22 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 固定报头
+    /// 固定报头(Fixed header)
     /// </summary>
     public struct FixedHeader
     {
         /// <summary>
-        /// 报文类型
+        /// 报文类型(MQTT Control Packet type)
         /// </summary>
         public PacketType PacketType { get; set; }
+
         /// <summary>
-        /// 每个MQTT控制报文类型特定的标志
+        /// 每个MQTT控制报文类型特定的标志(Flags)
         /// </summary>
         internal int Flags { get; set; }
+
         /// <summary>
-        /// 剩余长度
+        /// 剩余长度(Remaining Length)
         /// 表示当前报文剩余部分的字节数，包括可变报头和负载的数据。
         /// 剩余长度不包括用于编码剩余长度字段本身的字节数。
         /// </summary>

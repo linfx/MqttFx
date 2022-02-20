@@ -2,7 +2,7 @@
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
-    public struct PacketIdentifierVariableHeader
+    public class PacketIdentifierVariableHeader : VariableHeader
     {
         /// <summary>
         /// 报文标识符
@@ -14,9 +14,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
             buffer.WriteUnsignedShort(PacketIdentifier);
         }
 
-        public void Decode(IByteBuffer buffer, FixedHeader fixedHeader)
+        public override void Decode(IByteBuffer buffer, ref int remainingLength)
         {
-            int remainingLength = fixedHeader.RemaingLength;
             PacketIdentifier = buffer.ReadUnsignedShort(ref remainingLength);
             if (PacketIdentifier == 0)
                 throw new DecoderException("[MQTT-2.3.1-1]");

@@ -1,6 +1,4 @@
-﻿using DotNetty.Buffers;
-
-namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 连接报文回执
@@ -8,33 +6,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class ConnAckPacket : Packet
     {
         /// <summary>
-        /// 可变报头
-        /// </summary>
-        public ConnAckVariableHeader VariableHeader;
-
-        /// <summary>
         /// 连接报文回执
         /// </summary>
         public ConnAckPacket()
-            : base(PacketType.CONNACK) { }
-
-        /// <summary>
-        /// 编码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Encode(IByteBuffer buffer)
+            : base(PacketType.CONNACK) 
         {
-            FixedHeader.Encode(buffer, 2);
-            VariableHeader.Encode(buffer);
+            VariableHeader = new ConnAckVariableHeader();
         }
 
-        /// <summary>
-        /// 解码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Decode(IByteBuffer buffer)
+        public ConnAckPacket(FixedHeader fixedHeader, ConnAckVariableHeader variableHeader)
+            : base(fixedHeader, variableHeader)
         {
-            VariableHeader.Decode(buffer);
         }
     }
 }

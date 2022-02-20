@@ -17,7 +17,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="packetType">报文类型</param>
         public PacketWithIdentifier(PacketType packetType)
-            : base(packetType) { }
+            : base(packetType) 
+        { 
+        }
 
         /// <summary>
         /// 编码

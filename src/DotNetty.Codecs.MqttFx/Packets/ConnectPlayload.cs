@@ -2,26 +2,33 @@
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
-    public struct ConnectPlayload
+    /// <summary>
+    /// 有效载荷(Payload)
+    /// </summary>
+    public class ConnectPlayload : Payload
     {
         /// <summary>
-        /// 客户端标识符 Client Identifier
+        /// 客户端标识符(Client Identifier)
         /// </summary>
         public string ClientId { get; set; }
+
         /// <summary>
-        /// 遗嘱主题 Will Topic
+        /// 遗嘱主题(Will Topic)
         /// </summary>
         public string WillTopic { get; set; }
+
         /// <summary>
-        /// 遗嘱消息 Will Message
+        /// 遗嘱消息(Will Message)
         /// </summary>
         public byte[] WillMessage { get; set; }
+
         /// <summary>
-        /// 用户名 User Name
+        /// 用户名(User Name)
         /// </summary>
         public string UserName { get; set; }
+
         /// <summary>
-        /// 密码 Password
+        /// 密码(Password)
         /// </summary>
         public string Password { get; set; }
 
@@ -30,19 +37,21 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="variableHeader"></param>
-        public void Encode(IByteBuffer buffer, ConnectVariableHeader variableHeader)
+        public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
+            var connectVariableHeader = (ConnectVariableHeader)variableHeader;
+
             buffer.WriteString(ClientId);
-            if (variableHeader.WillFlag)
+            if (connectVariableHeader.ConnectFlags.WillFlag)
             {
                 buffer.WriteString(WillTopic);
                 buffer.WriteBytes(WillMessage);
             }
-            if (variableHeader.UsernameFlag)
+            if (connectVariableHeader.ConnectFlags.UsernameFlag)
             {
                 buffer.WriteString(UserName);
             }
-            if (variableHeader.PasswordFlag)
+            if (connectVariableHeader.ConnectFlags.PasswordFlag)
             {
                 buffer.WriteString(Password);
             }
@@ -54,15 +63,18 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         /// <param name="fixedHeader"></param>
         /// <param name="variableHeader"></param>
-        public void Decode(IByteBuffer buffer, FixedHeader fixedHeader, ConnectVariableHeader variableHeader)
+        public override void Decode(IByteBuffer buffer, FixedHeader fixedHeader, VariableHeader variableHeader)
         {
+            var connectVariableHeader = (ConnectVariableHeader)variableHeader;
+
             int remainingLength = fixedHeader.RemaingLength;
             ClientId = buffer.ReadString(ref remainingLength);
-            if (variableHeader.WillFlag)
+            if (connectVariableHeader.ConnectFlags.WillFlag)
             {
                 WillTopic = buffer.ReadString(ref remainingLength);
                 //WillMessage = buffer.ReadBytes(3);
             }
+            fixedHeader.RemaingLength = remainingLength;
         }
     }
 }

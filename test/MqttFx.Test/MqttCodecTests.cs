@@ -27,8 +27,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.ExactlyOnce, true)]
-        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AtLeastOnce, false)]
+        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.EXACTLY_ONCE, true)]
+        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AT_LEAST_ONCE, false)]
         [InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
         [InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
         public void ConnectMessageTest(string clientId, bool cleanSession, ushort keepAlive, string userName, string password, string willTopicName, byte[] willMessage, MqttQos? willQos, bool willRetain)
@@ -50,7 +50,7 @@ namespace MqttFx.Test
             if (willTopicName != null)
             {
                 packet.VariableHeader.WillFlag = true;
-                packet.VariableHeader.WillQos = willQos ?? MqttQos.AtMostOnce;
+                packet.VariableHeader.WillQos = willQos ?? MqttQos.AT_MOST_ONCE;
                 packet.VariableHeader.WillRetain = willRetain;
                 packet.Payload.WillTopic = willTopicName;
                 packet.Payload.WillMessage = willMessage;
@@ -102,8 +102,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
-        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
         public void TestSubscribeMessage(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
             var packet = new SubscribePacket();

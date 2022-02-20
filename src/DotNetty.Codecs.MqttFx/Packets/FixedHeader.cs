@@ -91,12 +91,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
             //if (loops == 4 && (digit & 128) != 0)
             //    throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
 
-            if (TryDecodeRemainingLength(buffer, out RemainingLength) || !buffer.IsReadable(RemainingLength))
-            {
-                return true;
-            }
+            if (!TryDecodeRemainingLength(buffer, out RemainingLength) || !buffer.IsReadable(RemainingLength))
+                return false;
 
-            return false;
+            return true;
         }
 
         bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)

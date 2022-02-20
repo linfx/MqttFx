@@ -28,9 +28,9 @@ namespace MqttFx.Test
 
         [Theory]
         [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.EXACTLY_ONCE, true)]
-        //[InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AT_LEAST_ONCE, false)]
-        //[InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
-        //[InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
+        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AT_LEAST_ONCE, false)]
+        [InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
+        [InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
         public void ConnectMessageTest(string clientId, bool cleanSession, ushort keepAlive, string userName, string password, string willTopicName, byte[] willMessage, MqttQos? willQos, bool willRetain)
         {
             var packet = new ConnectPacket();

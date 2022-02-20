@@ -73,6 +73,14 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 WillTopic = buffer.ReadString(ref remainingLength);
                 WillMessage = buffer.ReadLengthBytes(ref remainingLength);
             }
+            if (connectVariableHeader.ConnectFlags.UsernameFlag)
+            {
+                UserName = buffer.ReadString(ref remainingLength);
+            }
+            if (connectVariableHeader.ConnectFlags.PasswordFlag)
+            {
+                Password = buffer.ReadString(ref remainingLength);
+            }
         }
     }
 }

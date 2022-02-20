@@ -75,6 +75,9 @@ namespace DotNetty.Codecs.MqttFx
 
         public static byte[] ReadBytes(this IByteBuffer buffer, int length, ref int remainingLength)
         {
+           if(length == 0)
+                return new byte[0];
+
             DecreaseRemainingLength(ref remainingLength, 1);
             return buffer.ReadBytes(length).Array;
         }

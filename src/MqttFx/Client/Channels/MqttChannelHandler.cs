@@ -92,23 +92,25 @@ namespace MqttFx.Channels
 
         private void ProcessMessage(IChannel channel, ConnAckPacket message)
         {
-            //switch (message.VariableHeader.ConnectReturnCode)
-            //{
-            //    case ConnectReturnCode.CONNECTION_ACCEPTED:
-            //        connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
+            var variableHeader = (ConnAckVariableHeader)message.VariableHeader;
 
-            //        if (client.ConnectedHandler != null)
-            //            client.ConnectedHandler.OnConnected();
-            //        break;
+            switch (variableHeader.ConnectReturnCode)
+            {
+                case ConnectReturnCode.CONNECTION_ACCEPTED:
+                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
 
-            //    case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
-            //    case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
-            //    case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
-            //    case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
-            //        connectFuture.TrySetResult(new MqttConnectResult(message.VariableHeader.ConnectReturnCode));
-            //        channel.CloseAsync();
-            //        break;
-            //}
+                    if (client.ConnectedHandler != null)
+                        client.ConnectedHandler.OnConnected();
+                    break;
+
+                case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
+                case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
+                case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
+                case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
+                    connectFuture.TrySetResult(new MqttConnectResult(variableHeader.ConnectReturnCode));
+                    channel.CloseAsync();
+                    break;
+            }
         }
 
         private void ProcessMessage(IChannel channel, PublishPacket message)

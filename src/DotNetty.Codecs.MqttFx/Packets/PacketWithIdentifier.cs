@@ -3,22 +3,34 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 报文抽象类(含报文标识符)
+    /// 报文抽象类(含报文标识符)(MQTT Control Packet)
     /// </summary>
     public abstract class PacketWithIdentifier : Packet
     {
         /// <summary>
-        /// 可变报头
+        /// 可变报头(Variable header)
         /// </summary>
-        public PacketIdentifierVariableHeader VariableHeader;
+        public new PacketIdentifierVariableHeader VariableHeader;
 
         /// <summary>
-        /// 报文抽象类(含报文标识符)
+        /// 报文抽象类(含报文标识符)(MQTT Control Packet)
         /// </summary>
         /// <param name="packetType">报文类型</param>
         public PacketWithIdentifier(PacketType packetType)
             : base(packetType) 
-        { 
+        {
+           VariableHeader = new PacketIdentifierVariableHeader();
+        }
+
+        /// <summary>
+        /// 报文抽象类(MQTT Control Packet)
+        /// </summary>
+        /// <param name="fixedHeader">固定报头(Fixed header)</param>
+        /// <param name="variableHeader">可变报头(Variable header)</param>
+        public PacketWithIdentifier(FixedHeader fixedHeader, PacketIdentifierVariableHeader variableHeader)
+            : base(fixedHeader, variableHeader)
+        {
+            VariableHeader = variableHeader;
         }
 
         /// <summary>

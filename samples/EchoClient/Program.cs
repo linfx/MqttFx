@@ -51,6 +51,11 @@ namespace EchoClient
                     await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
                 }
             }
+            else
+            {
+                Console.WriteLine("Connect Fail!");
+            }
+
             Console.ReadKey();
         }
     }

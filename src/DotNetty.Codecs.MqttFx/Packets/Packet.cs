@@ -4,7 +4,7 @@ using DotNetty.Common.Utilities;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 报文抽象类
+    /// 报文抽象类(MQTT Control Packet)
     /// </summary>
     public abstract class Packet
     {
@@ -24,34 +24,35 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public Payload Payload;
 
         /// <summary>
-        /// 报文抽象类
+        /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        public Packet() { }
+        protected Packet() { }
 
         /// <summary>
-        /// 报文抽象类
+        /// 报文抽象类(MQTT Control Packet)
         /// </summary>
         /// <param name="packetType">报文类型</param>
-        public Packet(PacketType packetType)
+        protected Packet(PacketType packetType)
         {
             FixedHeader.PacketType = packetType;
         }
 
         /// <summary>
-        /// 报文抽象类
+        /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        /// <param name="fixedHeader"></param>
-        /// <param name="variableHeader"></param>
+        /// <param name="fixedHeader">固定报头(Fixed header)</param>
+        /// <param name="variableHeader">可变报头(Variable header)</param>
         protected Packet(FixedHeader fixedHeader, VariableHeader variableHeader) :
             this(fixedHeader, variableHeader, null)
         {
         }
 
         /// <summary>
-        /// 报文抽象类
+        /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        /// <param name="fixedHeader"></param>
-        /// <param name="variableHeader"></param>
+        /// <param name="fixedHeader">固定报头(Fixed header)</param>
+        /// <param name="variableHeader">可变报头(Variable header)</param>
+        /// <param name="payload">有效载荷(Payload)</param>
         protected Packet(FixedHeader fixedHeader, VariableHeader variableHeader, Payload payload)
         {
             FixedHeader = fixedHeader;

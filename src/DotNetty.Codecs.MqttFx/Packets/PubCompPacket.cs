@@ -7,6 +7,9 @@
     public sealed class PubCompPacket : PacketWithIdentifier
     {
         public PubCompPacket(ushort packetId = default)
-            : base(PacketType.PUBCOMP) => VariableHeader.PacketIdentifier = packetId;
+            : base(PacketType.PUBCOMP)
+        {
+            VariableHeader.PacketIdentifier = packetId;
+        }
     }
 }

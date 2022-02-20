@@ -53,6 +53,20 @@ namespace DotNetty.Codecs.MqttFx
             buffer.WriteBytes(stringBytes);
         }
 
+        public static void WriteLengthBytes(this IByteBuffer buffer, byte[] value)
+        {
+            //var buf = Unpooled.WrappedBuffer(value);
+            //buffer.WriteShort(buf.ReadableBytes);
+            //if(buf.IsReadable())
+            //{
+            //    buffer.WriteBytes(buf);
+            //}
+
+            buffer.WriteShort(value.Length);
+            if(value.Length > 0)
+                buffer.WriteBytes(value);
+        }
+
         public static byte ReadByte(this IByteBuffer buffer, ref int remainingLength)
         {
             DecreaseRemainingLength(ref remainingLength, 1);
@@ -62,8 +76,7 @@ namespace DotNetty.Codecs.MqttFx
         public static byte[] ReadBytes(this IByteBuffer buffer, int length, ref int remainingLength)
         {
             DecreaseRemainingLength(ref remainingLength, 1);
-            var buf = buffer.ReadBytes(length);
-            return null;
+            return buffer.ReadBytes(length).Array;
         }
 
         /// <summary>
@@ -154,6 +167,18 @@ namespace DotNetty.Codecs.MqttFx
             buffer.SetReaderIndex(buffer.ReaderIndex + size);
 
             return value;
+        }
+
+        /// <summary>
+        /// 读长度字节
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="remainingLength"></param>
+        /// <returns></returns>
+        public static byte[] ReadLengthBytes(this IByteBuffer buffer, ref int remainingLength)
+        {
+            int length = ReadUnsignedShort(buffer, ref remainingLength);
+            return buffer.ReadBytes(length, ref remainingLength);
         }
 
         /// <summary>

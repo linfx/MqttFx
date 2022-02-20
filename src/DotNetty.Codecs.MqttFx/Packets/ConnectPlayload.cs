@@ -45,7 +45,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             if (connectVariableHeader.ConnectFlags.WillFlag)
             {
                 buffer.WriteString(WillTopic);
-                buffer.WriteBytes(WillMessage);
+                buffer.WriteLengthBytes(WillMessage);
             }
             if (connectVariableHeader.ConnectFlags.UsernameFlag)
             {
@@ -71,8 +71,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             if (connectVariableHeader.ConnectFlags.WillFlag)
             {
                 WillTopic = buffer.ReadString(ref remainingLength);
-                int willMessageLength = buffer.ReadUnsignedShort(ref remainingLength);
-                WillMessage = buffer.ReadBytes(willMessageLength, ref remainingLength);
+                WillMessage = buffer.ReadLengthBytes(ref remainingLength);
             }
         }
     }

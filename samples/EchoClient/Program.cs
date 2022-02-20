@@ -11,7 +11,6 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
-            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider());
             var services = new ServiceCollection();
             services.AddMqttFxClient(options =>
             {
@@ -26,10 +25,10 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                //var topic = "testtopic/abcd";
-                //await client.SubscribeAsync(topic);
+                var topic = "testtopic/abcd";
+                await client.SubscribeAsync(topic);
 
-                //Console.WriteLine("### SUBSCRIBED ###");
+                Console.WriteLine("### SUBSCRIBED ###");
             });
 
             client.UseMessageReceivedHandler(message =>

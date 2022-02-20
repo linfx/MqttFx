@@ -22,17 +22,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 表示当前报文剩余部分的字节数，包括可变报头和负载的数据。
         /// 剩余长度不包括用于编码剩余长度字段本身的字节数。
         /// </summary>
-        public int RemaingLength { internal get; set; }
+        public int RemainingLength { internal get; set; }
 
         /// <summary>
         /// 编码
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="remaingLength">剩余长度</param>
-        public void Encode(IByteBuffer buffer, int remaingLength = default)
+        /// <param name="remainingLength">剩余长度</param>
+        public void Encode(IByteBuffer buffer, int remainingLength = default)
         {
-            if(remaingLength != default)
-                RemaingLength = remaingLength;
+            if(remainingLength != default)
+                RemainingLength = remainingLength;
 
             /*
              * MQTT控制报文的类型
@@ -51,19 +51,19 @@ namespace DotNetty.Codecs.MqttFx.Packets
             */
             do
             {
-                var digit = (byte)(remaingLength % 0x80);
-                remaingLength /= 0x80;
-                if (remaingLength > 0)
+                var digit = (byte)(remainingLength % 0x80);
+                remainingLength /= 0x80;
+                if (remainingLength > 0)
                     digit |= 0x80;
                 buffer.WriteByte(digit);
-            } while (remaingLength > 0);
+            } while (remainingLength > 0);
         }
 
         /// <summary>
         /// 解码
         /// </summary>
         /// <param name="buffer"></param>
-        public void Decode(IByteBuffer buffer)
+        public bool Decode(IByteBuffer buffer)
         {
             /*
              * MQTT控制报文的类型
@@ -76,20 +76,65 @@ namespace DotNetty.Codecs.MqttFx.Packets
             /*
              * 剩余长度 Remaining Length
             */
+            //int multiplier = 1;
+            //short digit;
+            //int loops = 0;
+            //do
+            //{
+            //    digit = buffer.ReadByte();
+            //    RemaingLength += (digit & 127) * multiplier;
+            //    multiplier *= 128;
+            //    loops++;
+            //} while ((digit & 128) != 0 && loops < 4);
+
+            //// MQTT protocol limits Remaining Length to 4 bytes
+            //if (loops == 4 && (digit & 128) != 0)
+            //    throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
+
+            if (TryDecodeRemainingLength(buffer, out int remainingLength) || !buffer.IsReadable(remainingLength))
+            {
+                RemainingLength = remainingLength;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool TryDecodeRemainingLength(IByteBuffer buffer, out int value)
+        {
+            int readable = buffer.ReadableBytes;
+
+            int result = 0;
             int multiplier = 1;
-            short digit;
-            int loops = 0;
+            byte digit;
+            int read = 0;
             do
             {
+                if (readable < read + 1)
+                {
+                    value = default(int);
+                    return false;
+                }
                 digit = buffer.ReadByte();
-                RemaingLength += (digit & 127) * multiplier;
-                multiplier *= 128;
-                loops++;
-            } while ((digit & 128) != 0 && loops < 4);
+                result += (digit & 0x7f) * multiplier;
+                multiplier <<= 7;
+                read++;
+            }
+            while ((digit & 0x80) != 0 && read < 4);
 
-            // MQTT protocol limits Remaining Length to 4 bytes
-            if (loops == 4 && (digit & 128) != 0)
-                throw new DecoderException("remaining length exceeds 4 digits (" + PacketType + ')');
+            if (read == 4 && (digit & 0x80) != 0)
+            {
+                throw new DecoderException("Remaining length exceeds 4 bytes in length");
+            }
+
+            int completeMessageSize = result + 1 + read;
+            //if (completeMessageSize > this.maxMessageSize)
+            //{
+            //    throw new DecoderException("Message is too big: " + completeMessageSize);
+            //}
+
+            value = result;
+            return true;
         }
     }
 }

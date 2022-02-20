@@ -68,7 +68,12 @@ namespace DotNetty.Codecs.MqttFx
             }
 
             FixedHeader fixedHeader = default;
-            fixedHeader.Decode(buffer);
+            if (!fixedHeader.Decode(buffer))
+            {
+                packet = null;
+                return false;
+            }
+
             packet = fixedHeader.PacketType switch
             {
                 PacketType.CONNECT => new ConnectPacket(),

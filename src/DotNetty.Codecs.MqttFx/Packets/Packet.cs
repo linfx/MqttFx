@@ -84,8 +84,12 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public virtual void Decode(IByteBuffer buffer)
         {
-            VariableHeader?.Decode(buffer, FixedHeader);
-            Payload?.Decode(buffer, FixedHeader, VariableHeader);
+            var remainingLength = FixedHeader.RemainingLength;
+
+            VariableHeader?.Decode(buffer, ref remainingLength);
+            Payload?.Decode(buffer, VariableHeader, ref remainingLength);
+
+            FixedHeader.RemainingLength = remainingLength;
         }
     }
 }

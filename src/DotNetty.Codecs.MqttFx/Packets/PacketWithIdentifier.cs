@@ -1,6 +1,4 @@
-﻿using DotNetty.Buffers;
-
-namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 报文抽象类(含报文标识符)(MQTT Control Packet)
@@ -17,9 +15,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="packetType">报文类型</param>
         public PacketWithIdentifier(PacketType packetType)
-            : base(packetType) 
+            : base(packetType)
         {
-           VariableHeader = new PacketIdentifierVariableHeader();
+            VariableHeader = new PacketIdentifierVariableHeader();
         }
 
         /// <summary>
@@ -33,23 +31,14 @@ namespace DotNetty.Codecs.MqttFx.Packets
             VariableHeader = variableHeader;
         }
 
-        /// <summary>
-        /// 编码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Encode(IByteBuffer buffer)
-        {
-            FixedHeader.Encode(buffer, 2);
-            VariableHeader.Encode(buffer, FixedHeader);
-        }
-
-        /// <summary>
-        /// 解码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Decode(IByteBuffer buffer)
-        {
-            VariableHeader.Decode(buffer, FixedHeader);
-        }
+        ///// <summary>
+        ///// 编码
+        ///// </summary>
+        ///// <param name="buffer"></param>
+        //public override void Encode(IByteBuffer buffer)
+        //{
+        //    FixedHeader.Encode(buffer, 2);
+        //    VariableHeader.Encode(buffer, FixedHeader);
+        //}
     }
 }

@@ -64,10 +64,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
             ProtocolName = buffer.ReadString(ref remainingLength);
 
             // 协议级别 Protocol Level
-            ProtocolLevel = buffer.ReadByte();
+            ProtocolLevel = buffer.ReadByte(ref remainingLength);
 
             // 连接标志 Connect Flags
-            int connectFlags = buffer.ReadByte();
+            int connectFlags = buffer.ReadByte(ref remainingLength);
             ConnectFlags.CleanSession = (connectFlags & 0x02) == 0x02;
             ConnectFlags.WillFlag = (connectFlags & 0x04) == 0x04;
             if (ConnectFlags.WillFlag)
@@ -79,7 +79,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             ConnectFlags.PasswordFlag = (connectFlags & 0x40) == 0x40;
 
             // 保持连接 Keep Alive
-            KeepAlive = (ushort)buffer.ReadShort();
+            KeepAlive = (ushort)buffer.ReadShort(ref remainingLength);
         }
     }
 }

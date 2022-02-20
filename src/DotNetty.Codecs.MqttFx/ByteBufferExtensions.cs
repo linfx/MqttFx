@@ -53,6 +53,19 @@ namespace DotNetty.Codecs.MqttFx
             buffer.WriteBytes(stringBytes);
         }
 
+        public static byte ReadByte(this IByteBuffer buffer, ref int remainingLength)
+        {
+            DecreaseRemainingLength(ref remainingLength, 1);
+            return buffer.ReadByte();
+        }
+
+        public static byte[] ReadBytes(this IByteBuffer buffer, int length, ref int remainingLength)
+        {
+            DecreaseRemainingLength(ref remainingLength, 1);
+            var buf = buffer.ReadBytes(length);
+            return null;
+        }
+
         /// <summary>
         /// 读取两字节
         /// </summary>
@@ -64,6 +77,12 @@ namespace DotNetty.Codecs.MqttFx
             high = (byte)stream.ReadByte();
             low = (byte)stream.ReadByte();
             return (short)((high << 8) + low);
+        }
+
+        public static short ReadShort(this IByteBuffer buffer, ref int remainingLength)
+        {
+            DecreaseRemainingLength(ref remainingLength, 2);
+            return buffer.ReadShort();
         }
 
         /// <summary>
@@ -121,13 +140,10 @@ namespace DotNetty.Codecs.MqttFx
             int size = ReadUnsignedShort(buffer, ref remainingLength);
 
             //if (size < minBytes)
-            //{
             //    throw new DecoderException($"String value is shorter than minimum allowed {minBytes}. Advertised length: {size}");
-            //}
+
             //if (size > maxBytes)
-            //{
             //    throw new DecoderException($"String value is longer than maximum allowed {maxBytes}. Advertised length: {size}");
-            //}
 
             if (size == 0)
                 return string.Empty;

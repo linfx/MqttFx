@@ -18,8 +18,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 解码
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="fixedHeader"></param>
         /// <param name="variableHeader"></param>
-        public virtual void Decode(IByteBuffer buffer, FixedHeader fixedHeader, VariableHeader variableHeader) { }
+        public virtual void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength) { }
     }
 }

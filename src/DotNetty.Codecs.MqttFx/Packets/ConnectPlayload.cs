@@ -63,18 +63,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         /// <param name="fixedHeader"></param>
         /// <param name="variableHeader"></param>
-        public override void Decode(IByteBuffer buffer, FixedHeader fixedHeader, VariableHeader variableHeader)
+        public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
             var connectVariableHeader = (ConnectVariableHeader)variableHeader;
 
-            int remainingLength = fixedHeader.RemaingLength;
             ClientId = buffer.ReadString(ref remainingLength);
             if (connectVariableHeader.ConnectFlags.WillFlag)
             {
                 WillTopic = buffer.ReadString(ref remainingLength);
-                //WillMessage = buffer.ReadBytes(3);
+                int willMessageLength = buffer.ReadUnsignedShort(ref remainingLength);
+                WillMessage = buffer.ReadBytes(willMessageLength, ref remainingLength);
             }
-            fixedHeader.RemaingLength = remainingLength;
         }
     }
 }

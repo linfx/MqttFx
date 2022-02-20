@@ -86,25 +86,27 @@ namespace MqttFx.Test
             //}
         }
 
-        //[Theory]
-        //[InlineData(false, ConnectReturnCode.CONNECTION_ACCEPTED)]
-        //[InlineData(true, ConnectReturnCode.CONNECTION_ACCEPTED)]
-        //[InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION)]
-        //[InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED)]
-        //[InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE)]
-        //[InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD)]
-        //public void ConnAckMessageTest(bool sessionPresent, ConnectReturnCode returnCode)
-        //{
-        //    var packet = new ConnAckPacket();
-        //    packet.VariableHeader.SessionPresent = sessionPresent;
-        //    packet.VariableHeader.ConnectReturnCode = returnCode;
+        [Theory]
+        [InlineData(false, ConnectReturnCode.CONNECTION_ACCEPTED)]
+        [InlineData(true, ConnectReturnCode.CONNECTION_ACCEPTED)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE)]
+        [InlineData(false, ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD)]
+        public void ConnAckMessageTest(bool sessionPresent, ConnectReturnCode returnCode)
+        {
+            var packet = new ConnAckPacket();
+            var packet_variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
+            packet_variableHeader.SessionPresent = sessionPresent;
+            packet_variableHeader.ConnectReturnCode = returnCode;
 
-        //    var recoded = RecodePacket(packet, false, false);
+            var recoded = RecodePacket(packet, false, false);
+            var recoded_variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnAckPacket>()), Times.Once);
-        //    Assert.Equal(packet.VariableHeader.SessionPresent, recoded.VariableHeader.SessionPresent);
-        //    Assert.Equal(packet.VariableHeader.ConnectReturnCode, recoded.VariableHeader.ConnectReturnCode);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnAckPacket>()), Times.Once);
+            Assert.Equal(packet_variableHeader.SessionPresent, recoded_variableHeader.SessionPresent);
+            Assert.Equal(packet_variableHeader.ConnectReturnCode, recoded_variableHeader.ConnectReturnCode);
+        }
 
         //[Theory]
         //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]

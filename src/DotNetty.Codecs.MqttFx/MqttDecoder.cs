@@ -44,6 +44,7 @@ namespace DotNetty.Codecs.MqttFx
                         Checkpoint();
                         break;
                     case ParseState.Failed:
+                        // read out data until connection is closed
                         input.SkipBytes(input.ReadableBytes);
                         return;
                     default:

@@ -161,9 +161,9 @@ namespace MqttFx.Test
         //}
 
         [Theory]
-        [InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]
+        //[InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]
         //[InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
-        //[InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
+        [InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
         //[InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
@@ -171,21 +171,24 @@ namespace MqttFx.Test
             {
                 TopicName = topicName
             };
+            var packet_payload = (PublishPayload)packet.Payload;
+
             if (qos > MqttQos.AT_MOST_ONCE)
             {
-                //packet.PacketId = packetId;
+                packet.PacketId = packetId;
             }
-            //packet.Payload = payload;
+            packet_payload.Payload = payload;
 
             var recoded = RecodePacket(packet, false, true);
+            var recoded_payload = (PublishPayload)recoded.Payload;
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
             Assert.Equal(packet.TopicName, recoded.TopicName);
             if (packet.Qos > MqttQos.AT_MOST_ONCE)
             {
-                //Assert.Equal(packet.PacketId, recoded.PacketId);
+                Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            //Assert.Equal(payload, recoded.Payload);
+            Assert.Equal(packet_payload.Payload, recoded_payload.Payload);
         }
 
         [Fact]

@@ -35,7 +35,7 @@
         }
 
         /// <summary>
-        /// 主题名(UTF-8编码的字符串)
+        /// 主题名(UTF-8编码的字符串)(Topic Name)
         /// </summary>
         public string TopicName
         {
@@ -44,13 +44,13 @@
         }
 
         /// <summary>
-        /// 报文标识符
+        /// 报文标识符(Packet Identifier)
         /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
         /// </summary>
-        public ushort PacketIdentifier
+        public ushort PacketId
         {
-            get { return ((PublishVariableHeader)VariableHeader).PacketIdentifier; }
-            set { ((PublishVariableHeader)VariableHeader).PacketIdentifier = value; }
+            get { return ((PublishVariableHeader)VariableHeader).PacketId; }
+            set { ((PublishVariableHeader)VariableHeader).PacketId = value; }
         }
 
         /// <summary>
@@ -77,13 +77,14 @@
         /// <param name="retain">保留标志</param>
         public PublishPacket(MqttQos qos = MqttQos.AT_MOST_ONCE, bool dup = false, bool retain = false) : this()
         {
-            Qos = qos;
-            Dup = dup;
-            Retain = retain;
+            // TODO: 不生效
+            //Qos = qos;
+            //Dup = dup;
+            //Retain = retain;
 
-            FixedHeader.Flags |= Dup.ToByte() << 3;
-            FixedHeader.Flags |= (byte)Qos << 1;
-            FixedHeader.Flags |= Retain.ToByte();
+            FixedHeader.Flags |= (byte)qos << 1;
+            FixedHeader.Flags |= dup.ToByte() << 3;
+            FixedHeader.Flags |= retain.ToByte();
         }
 
         ///// <summary>

@@ -8,15 +8,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public class PublishVariableHeader : VariableHeader
     {
         /// <summary>
-        /// 主题名(UTF-8编码的字符串)
+        /// 主题名(UTF-8编码的字符串)(Topic Name)
         /// </summary>
         public string TopicName { get; set; }
 
         /// <summary>
-        /// 报文标识符
+        /// 报文标识符(Packet Identifier)
         /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
         /// </summary>
-        public ushort PacketIdentifier { get; set; }
+        public ushort PacketId { get; set; }
 
         /// <summary>
         /// 编码
@@ -27,7 +27,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             buffer.WriteString(TopicName);
             if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
-                buffer.WriteUnsignedShort(PacketIdentifier);
+                buffer.WriteUnsignedShort(PacketId);
         }
 
         /// <summary>
@@ -40,8 +40,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
             TopicName = buffer.ReadString(ref fixedHeader.RemainingLength);
             if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
             {
-                PacketIdentifier = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
-                if (PacketIdentifier == 0)
+                PacketId = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
+                if (PacketId == 0)
                     throw new DecoderException("[MQTT-2.3.1-1]");
             }
         }

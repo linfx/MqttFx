@@ -17,6 +17,18 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
+            IByteBuffer payload;
+            if (remainingLength > 0)
+            {
+                payload = buffer.ReadSlice(remainingLength);
+                payload.Retain();
+                remainingLength = 0;
+            }
+            else
+            {
+                payload = Unpooled.Empty;
+            }
+            Payload = payload.Array;
         }
     }
 }

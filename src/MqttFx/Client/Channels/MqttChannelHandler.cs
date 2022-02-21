@@ -123,8 +123,8 @@ namespace MqttFx.Channels
 
                 case MqttQos.AT_LEAST_ONCE:
                     InvokeProcessForIncomingPublish(message);
-                    if (message.PacketIdentifier > 0)
-                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketIdentifier));
+                    if (message.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketId));
                     break;
 
                 case MqttQos.EXACTLY_ONCE:

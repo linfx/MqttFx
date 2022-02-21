@@ -91,7 +91,7 @@ namespace MqttFx.Client
                 //Payload = payload
             };
             if (qos > MqttQos.AT_MOST_ONCE)
-                packet.PacketIdentifier = _packetIdProvider.NewPacketId();
+                packet.PacketId = _packetIdProvider.NewPacketId();
 
             return SendPacketAsync(packet);
         }

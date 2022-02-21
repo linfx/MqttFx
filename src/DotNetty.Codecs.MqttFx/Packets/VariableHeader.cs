@@ -19,5 +19,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         /// <param name="remainingLength"></param>
         public virtual void Decode(IByteBuffer buffer, ref int remainingLength) { }
+
+        public virtual void Encode(IByteBuffer buffer, FixedHeader fixedHeader) { }
+
+        public virtual void Decode(IByteBuffer buffer, FixedHeader fixedHeader) { }
     }
 }

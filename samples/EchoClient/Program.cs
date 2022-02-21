@@ -25,8 +25,8 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/abcd";
-                await client.SubscribeAsync(topic);
+                //var topic = "testtopic/abcd";
+                //await client.SubscribeAsync(topic);
 
                 Console.WriteLine("### SUBSCRIBED ###");
             });
@@ -47,6 +47,7 @@ namespace EchoClient
                 for (int i = 1; i <= 1; i++)
                 {
                     await Task.Delay(500);
+                    Console.WriteLine("### Publish Message ###");
                     var topic = "testtopic/abcd";
                     await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
                 }

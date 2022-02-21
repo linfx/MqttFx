@@ -1,6 +1,4 @@
-﻿using DotNetty.Buffers;
-
-namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 发布消息
@@ -30,16 +28,22 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
         /// </summary>
         public ushort PacketIdentifier { get; set; }
-        /// <summary>
-        /// 有效载荷
-        /// </summary>
-        public byte[] Payload { get; set; }
 
         /// <summary>
         /// 发布消息
         /// </summary>
         public PublishPacket()
-            : base(PacketType.PUBLISH) { }
+            : this(new PublishVariableHeader(), new PublishPayload())
+        {
+        }
+
+        public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
+            : base(variableHeader, payload)
+        {
+            FixedHeader.PacketType = PacketType.PUBLISH;
+            VariableHeader = variableHeader;
+            Payload = payload;
+        }
 
         /// <summary>
         /// 发布消息
@@ -58,53 +62,53 @@ namespace DotNetty.Codecs.MqttFx.Packets
             FixedHeader.Flags |= Retain.ToByte();
         }
 
-        /// <summary>
-        /// 编码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Encode(IByteBuffer buffer)
-        {
-            var buf = Unpooled.Buffer();
-            try
-            {
-                buf.WriteString(TopicName);
-                if (Qos > MqttQos.AT_MOST_ONCE)
-                    buf.WriteUnsignedShort(PacketIdentifier);
-                buf.WriteBytes(Payload, 0, Payload.Length);
+        ///// <summary>
+        ///// 编码
+        ///// </summary>
+        ///// <param name="buffer"></param>
+        //public override void Encode(IByteBuffer buffer)
+        //{
+        //    var buf = Unpooled.Buffer();
+        //    try
+        //    {
+        //        buf.WriteString(TopicName);
+        //        if (Qos > MqttQos.AT_MOST_ONCE)
+        //            buf.WriteUnsignedShort(PacketIdentifier);
+        //        buf.WriteBytes(Payload, 0, Payload.Length);
 
-                FixedHeader.Encode(buffer, buf.ReadableBytes);
-                buffer.WriteBytes(buf);
-            }
-            finally
-            {
-                buf?.Release();
-            }
-        }
+        //        FixedHeader.Encode(buffer, buf.ReadableBytes);
+        //        buffer.WriteBytes(buf);
+        //    }
+        //    finally
+        //    {
+        //        buf?.Release();
+        //    }
+        //}
 
-        /// <summary>
-        /// 解码
-        /// </summary>
-        /// <param name="buffer"></param>
-        public override void Decode(IByteBuffer buffer)
-        {
-            Dup = (FixedHeader.Flags & 0x08) == 0x08;
-            Qos = (MqttQos)((FixedHeader.Flags & 0x06) >> 1);
-            Retain = (FixedHeader.Flags & 0x01) > 0;
+        ///// <summary>
+        ///// 解码
+        ///// </summary>
+        ///// <param name="buffer"></param>
+        //public override void Decode(IByteBuffer buffer)
+        //{
+        //    Dup = (FixedHeader.Flags & 0x08) == 0x08;
+        //    Qos = (MqttQos)((FixedHeader.Flags & 0x06) >> 1);
+        //    Retain = (FixedHeader.Flags & 0x01) > 0;
 
-            //int remainingLength = fixedHeader.RemaingLength;
-            //TopicName = buffer.ReadString(ref remainingLength);
-            //if (fixedHeader.Qos > MqttQos.AtLeastOnce)
-            //{
-            //    PacketIdentifier = buffer.ReadUnsignedShort(ref remainingLength);
-            //    if (PacketIdentifier == 0)
-            //        throw new DecoderException("[MQTT-2.3.1-1]");
-            //}
-            //if (FixedHeader.RemaingLength > 0)
-            //{
-            //    Payload = new byte[FixedHeader.RemaingLength];
-            //    buffer.ReadBytes(Payload, 0, FixedHeader.RemaingLength);
-            //    FixedHeader.RemaingLength = 0;
-            //}
-        }
+        //    //int remainingLength = fixedHeader.RemaingLength;
+        //    //TopicName = buffer.ReadString(ref remainingLength);
+        //    //if (fixedHeader.Qos > MqttQos.AtLeastOnce)
+        //    //{
+        //    //    PacketIdentifier = buffer.ReadUnsignedShort(ref remainingLength);
+        //    //    if (PacketIdentifier == 0)
+        //    //        throw new DecoderException("[MQTT-2.3.1-1]");
+        //    //}
+        //    //if (FixedHeader.RemaingLength > 0)
+        //    //{
+        //    //    Payload = new byte[FixedHeader.RemaingLength];
+        //    //    buffer.ReadBytes(Payload, 0, FixedHeader.RemaingLength);
+        //    //    FixedHeader.RemaingLength = 0;
+        //    //}
+        //}
     }
 }

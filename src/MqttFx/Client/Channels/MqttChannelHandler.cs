@@ -27,7 +27,7 @@ namespace MqttFx.Channels
         {
             var packet = new ConnectPacket();
             var variableHeader = (ConnectVariableHeader)packet.VariableHeader;
-            var payload = (ConnectPlayload)packet.Payload;
+            var payload = (ConnectPayload)packet.Payload;
 
             variableHeader.ConnectFlags.CleanSession = client.Options.CleanSession;
             variableHeader.KeepAlive = client.Options.KeepAlive;

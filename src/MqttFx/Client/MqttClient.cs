@@ -88,7 +88,7 @@ namespace MqttFx.Client
             var packet = new PublishPacket(qos, false, retain)
             {
                 TopicName = topic,
-                Payload = payload
+                //Payload = payload
             };
             if (qos > MqttQos.AT_MOST_ONCE)
                 packet.PacketIdentifier = _packetIdProvider.NewPacketId();

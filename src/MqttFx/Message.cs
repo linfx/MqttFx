@@ -37,7 +37,7 @@ namespace MqttFx
                 //Qos = packet.FixedHeader.Qos,
                 //Retain = packet.FixedHeader.Retain,
                 //Topic = packet.VariableHeader.TopicName,
-                Payload = packet.Payload,
+                //Payload = packet.Payload,
             };
         }
     }

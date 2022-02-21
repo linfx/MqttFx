@@ -66,7 +66,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                VariableHeader?.Encode(buf);
+                VariableHeader?.Encode(buf, FixedHeader);
                 Payload?.Encode(buf, VariableHeader);
                 FixedHeader.Encode(buffer, buf.ReadableBytes);
 
@@ -84,7 +84,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public virtual void Decode(IByteBuffer buffer)
         {
-            VariableHeader?.Decode(buffer, ref FixedHeader.RemainingLength);
+            VariableHeader?.Decode(buffer, ref FixedHeader);
             Payload?.Decode(buffer, VariableHeader, ref FixedHeader.RemainingLength);
         }
     }

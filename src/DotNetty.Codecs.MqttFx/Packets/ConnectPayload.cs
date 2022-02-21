@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 有效载荷(Payload)
     /// </summary>
-    public class ConnectPlayload : Payload
+    public class ConnectPayload : Payload
     {
         /// <summary>
         /// 客户端标识符(Client Identifier)

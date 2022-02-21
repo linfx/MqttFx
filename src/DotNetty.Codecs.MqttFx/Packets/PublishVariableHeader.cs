@@ -26,8 +26,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Encode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
             buffer.WriteString(TopicName);
-            //if (fixedHeader.Qos > MqttQos.AT_LEAST_ONCE)
-            //    buffer.WriteUnsignedShort(PacketIdentifier);
+            if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
+                buffer.WriteUnsignedShort(PacketIdentifier);
         }
 
         /// <summary>
@@ -35,15 +35,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="fixedHeader"></param>
-        public override void Decode(IByteBuffer buffer, FixedHeader fixedHeader)
+        public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
             TopicName = buffer.ReadString(ref fixedHeader.RemainingLength);
-            //if (fixedHeader.Qos > MqttQos.AT_LEAST_ONCE)
-            //{
-            //    PacketIdentifier = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
-            //    if (PacketIdentifier == 0)
-            //        throw new DecoderException("[MQTT-2.3.1-1]");
-            //}
+            if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
+            {
+                PacketIdentifier = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
+                if (PacketIdentifier == 0)
+                    throw new DecoderException("[MQTT-2.3.1-1]");
+            }
         }
     }
 }

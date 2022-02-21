@@ -35,7 +35,7 @@ namespace MqttFx.Test
         {
             var packet = new ConnectPacket();
             var packet_variableHeader = (ConnectVariableHeader)packet.VariableHeader;
-            var packet_payload = (ConnectPlayload)packet.Payload;
+            var packet_payload = (ConnectPayload)packet.Payload;
 
             packet_payload.ClientId = clientId;
             packet_variableHeader.ConnectFlags.CleanSession = cleanSession;
@@ -61,7 +61,7 @@ namespace MqttFx.Test
 
             var recoded = RecodePacket(packet, true, false);
             var recoded_variableHeader = (ConnectVariableHeader)recoded.VariableHeader;
-            var recoded_payload = (ConnectPlayload)recoded.Payload;
+            var recoded_payload = (ConnectPayload)recoded.Payload;
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnectPacket>()), Times.Once);
             Assert.Equal(packet_payload.ClientId, recoded_payload.ClientId);
@@ -160,33 +160,33 @@ namespace MqttFx.Test
         //    Assert.Equal(packet.PacketId, recoded.PacketId);
         //}
 
-        //[Theory]
-        //[InlineData(MqttQos.AtMostOnce, false, false, 1, "a", null)]
-        //[InlineData(MqttQos.ExactlyOnce, true, false, ushort.MaxValue, "/", new byte[0])]
-        //[InlineData(MqttQos.AtLeastOnce, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
-        //[InlineData(MqttQos.ExactlyOnce, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
-        //public void TestPublishMessage(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
-        //{
-        //    var packet = new PublishPacket(qos, dup, retain)
-        //    {
-        //        TopicName = topicName
-        //    };
-        //    if (qos > MqttQos.AtMostOnce)
-        //    {
-        //        packet.PacketId = packetId;
-        //    }
-        //    packet.Payload = payload;
+        [Theory]
+        [InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]
+        //[InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
+        //[InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
+        //[InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
+        public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
+        {
+            var packet = new PublishPacket(qos, dup, retain)
+            {
+                TopicName = topicName
+            };
+            if (qos > MqttQos.AT_MOST_ONCE)
+            {
+                //packet.PacketId = packetId;
+            }
+            //packet.Payload = payload;
 
-        //    PublishPacket recoded = RecodePacket(packet, false, true);
+            var recoded = RecodePacket(packet, false, true);
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
-        //    Assert.Equal(packet.TopicName, recoded.TopicName);
-        //    if (packet.Qos > MqttQos.AtMostOnce)
-        //    {
-        //        Assert.Equal(packet.PacketId, recoded.PacketId);
-        //    }
-        //    Assert.Equal(payload, recoded.Payload);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
+            Assert.Equal(packet.TopicName, recoded.TopicName);
+            if (packet.Qos > MqttQos.AT_MOST_ONCE)
+            {
+                //Assert.Equal(packet.PacketId, recoded.PacketId);
+            }
+            //Assert.Equal(payload, recoded.Payload);
+        }
 
         [Fact]
         public void EmptyPacketMessagesTest()

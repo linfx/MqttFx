@@ -9,11 +9,11 @@
         /// 连接报文
         /// </summary>
         public ConnectPacket()
-            : this(new ConnectVariableHeader(), new ConnectPlayload())
+            : this(new ConnectVariableHeader(), new ConnectPayload())
         {
         }
 
-        public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPlayload payload)
+        public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPayload payload)
             : base(variableHeader, payload)
         {
             FixedHeader.PacketType = PacketType.CONNECT;

@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 订阅回执
     /// </summary>
-    public class SubAckPacket : PacketWithIdentifier
+    public class SubAckPacket : PacketWithId
     {
         public SubAckPacket()
             : base(PacketType.SUBACK) { }

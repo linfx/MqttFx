@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 取消订阅
     /// </summary>
-    public sealed class UnsubscribePacket : PacketWithIdentifier
+    public sealed class UnsubscribePacket : PacketWithId
     {
         private readonly List<string> _topics = new List<string>();
 
@@ -24,7 +24,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             var buf = Unpooled.Buffer();
             try
             {
-                buf.WriteShort(VariableHeader.PacketIdentifier);
+                //buf.WriteShort(VariableHeader.PacketId);
 
                 foreach (var item in _topics)
                 {

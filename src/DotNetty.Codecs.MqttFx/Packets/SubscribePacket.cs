@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// <summary>
     /// 订阅报文
     /// </summary>
-    public sealed class SubscribePacket : PacketWithIdentifier
+    public sealed class SubscribePacket : PacketWithId
     {
         /// <summary>
         /// 有效载荷

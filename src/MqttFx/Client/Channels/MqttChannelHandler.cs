@@ -138,7 +138,7 @@ namespace MqttFx.Channels
 
         private void ProcessMessage(IChannel channel, PubRecPacket message)
         {
-            var packet = new PubRelPacket(message.VariableHeader.PacketIdentifier);
+            var packet = new PubRelPacket(message.VariableHeader.PacketId);
             channel.WriteAndFlushAsync(packet);
         }
 

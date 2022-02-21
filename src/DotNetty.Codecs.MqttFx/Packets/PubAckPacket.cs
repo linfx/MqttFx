@@ -4,12 +4,11 @@
     /// 发布回执
     /// QoS level = 1
     /// </summary>
-    public sealed class PubAckPacket : PacketWithIdentifier
+    public sealed class PubAckPacket : PacketWithId
     {
         public PubAckPacket(ushort packetId = default) 
-            : base(PacketType.PUBACK)
+            : base(PacketType.PUBACK, packetId)
         {
-            VariableHeader.PacketIdentifier = packetId;
         }
     }
 }

@@ -65,25 +65,25 @@ namespace MqttFx.Test
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<ConnectPacket>()), Times.Once);
             Assert.Equal(packet_payload.ClientId, recoded_payload.ClientId);
-            //Assert.Equal(packet.VariableHeader.CleanSession, recoded.VariableHeader.CleanSession);
-            //Assert.Equal(packet.VariableHeader.KeepAlive, recoded.VariableHeader.KeepAlive);
-            //Assert.Equal(packet.VariableHeader.UsernameFlag, recoded.VariableHeader.UsernameFlag);
-            //if (packet.VariableHeader.UsernameFlag)
-            //{
-            //    Assert.Equal(packet.Payload.UserName, recoded.Payload.UserName);
-            //}
-            //Assert.Equal(packet.VariableHeader.PasswordFlag, recoded.VariableHeader.PasswordFlag);
-            //if (packet.VariableHeader.PasswordFlag)
-            //{
-            //    Assert.Equal(packet.Payload.Password, recoded.Payload.Password);
-            //}
-            //if (packet.VariableHeader.WillFlag)
-            //{
-            //    Assert.Equal(packet.VariableHeader.WillQos, recoded.VariableHeader.WillQos);
-            //    Assert.Equal(packet.VariableHeader.WillRetain, recoded.VariableHeader.WillRetain);
-            //    Assert.Equal(packet.Payload.WillTopic, recoded.Payload.WillTopic);
-            //    //Assert.True(ByteBufferUtil.Equals(Unpooled.WrappedBuffer(willMessage), recoded.WillMessage));
-            //}
+            Assert.Equal(packet_variableHeader.KeepAlive, recoded_variableHeader.KeepAlive);
+            Assert.Equal(packet_variableHeader.ConnectFlags.CleanSession, recoded_variableHeader.ConnectFlags.CleanSession);
+            Assert.Equal(packet_variableHeader.ConnectFlags.UsernameFlag, recoded_variableHeader.ConnectFlags.UsernameFlag);
+            if (packet_variableHeader.ConnectFlags.UsernameFlag)
+            {
+                Assert.Equal(recoded_payload.UserName, recoded_payload.UserName);
+            }
+            Assert.Equal(packet_variableHeader.ConnectFlags.PasswordFlag, packet_variableHeader.ConnectFlags.PasswordFlag);
+            if (packet_variableHeader.ConnectFlags.PasswordFlag)
+            {
+                Assert.Equal(recoded_payload.Password, recoded_payload.Password);
+            }
+            if (packet_variableHeader.ConnectFlags.WillFlag)
+            {
+                Assert.Equal(packet_variableHeader.ConnectFlags.WillQos, recoded_variableHeader.ConnectFlags.WillQos);
+                Assert.Equal(packet_variableHeader.ConnectFlags.WillRetain, recoded_variableHeader.ConnectFlags.WillRetain);
+                Assert.Equal(recoded_payload.WillTopic, recoded_payload.WillTopic);
+                //Assert.True(ByteBufferUtil.Equals(Unpooled.WrappedBuffer(willMessage), recoded.WillMessage));
+            }
         }
 
         [Theory]

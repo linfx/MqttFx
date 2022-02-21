@@ -10,24 +10,48 @@
         /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
         /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
         /// </summary>
-        public bool Dup { get; private set; }
+        public bool Dup
+        {
+            get { return FixedHeader.GetDup(); }
+            private set { FixedHeader.SetDup(value); }
+        }
+
         /// <summary>
         /// 服务质量等级
         /// </summary>
-        public MqttQos Qos { get; private set; }
+        public MqttQos Qos
+        {
+            get { return FixedHeader.GetQos(); }
+            private set { FixedHeader.SetQos(value); }
+        }
+
         /// <summary>
         /// 保留标志
         /// </summary>
-        public bool Retain { get; private set; }
+        public bool Retain
+        {
+            get { return FixedHeader.GetRetain(); }
+            private set { FixedHeader.SetRetain(value); }
+        }
+
         /// <summary>
         /// 主题名(UTF-8编码的字符串)
         /// </summary>
-        public string TopicName { get; set; }
+        public string TopicName
+        {
+            get { return ((PublishVariableHeader)VariableHeader).TopicName; }
+            set { ((PublishVariableHeader)VariableHeader).TopicName = value; }
+        }
+
         /// <summary>
         /// 报文标识符
         /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
         /// </summary>
-        public ushort PacketIdentifier { get; set; }
+        public ushort PacketIdentifier
+        {
+            get { return ((PublishVariableHeader)VariableHeader).PacketIdentifier; }
+            set { ((PublishVariableHeader)VariableHeader).PacketIdentifier = value; }
+        }
 
         /// <summary>
         /// 发布消息

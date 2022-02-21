@@ -108,21 +108,21 @@ namespace MqttFx.Test
             Assert.Equal(packet_variableHeader.ConnectReturnCode, recoded_variableHeader.ConnectReturnCode);
         }
 
-        //[Theory]
-        //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
+        [Theory]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
         //[InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
-        //public void TestSubscribeMessage(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
-        //{
-        //    var packet = new SubscribePacket();
-        //    packet.VariableHeader.PacketIdentifier = packetId;
-        //    packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscribeRequest(topic, qos)).ToArray());
+        public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
+        {
+            var packet = new SubscribePacket();
+            ((PacketIdVariableHeader)packet.VariableHeader).PacketId = packetId;
+            packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscribeRequest(topic, qos)).ToArray());
 
-        //    SubscribePacket recoded = RecodePacket(packet, true, true);
+            var recoded = RecodePacket(packet, true, true);
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-        //    //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscribeRequest>.Default);
-        //    //Assert.Equal(packet.PacketId, recoded.PacketId);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
+            //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscribeRequest>.Default);
+            //Assert.Equal(packet.PacketId, recoded.PacketId);
+        }
 
         //[Theory]
         //[InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]

@@ -7,17 +7,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public class PacketIdVariableHeader : VariableHeader
     {
+        /// <summary>
+        /// 报文标识符(Packet Identifier)
+        /// </summary>
+        public ushort PacketId { get; set; }
+
         public PacketIdVariableHeader() { }
 
         public PacketIdVariableHeader(ushort packetId)
         {
             PacketId = packetId;
         }
-
-        /// <summary>
-        /// 报文标识符(Packet Identifier)
-        /// </summary>
-        public ushort PacketId { get; set; }
 
         /// <summary>
         /// 编码

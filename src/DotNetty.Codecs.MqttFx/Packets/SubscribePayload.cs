@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
-    public struct SubscribePayload
+    public class SubscribePayload : Payload
     {
         /// <summary>
         /// 主题列表
         /// </summary>
-        public List<SubscribeRequest> SubscribeTopics;
+        public List<SubscribeRequest> SubscribeTopics = new List<SubscribeRequest>();
 
         public void Encode(IByteBuffer buffer)
         {

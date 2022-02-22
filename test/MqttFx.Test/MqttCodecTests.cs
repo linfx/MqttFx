@@ -126,23 +126,23 @@ namespace MqttFx.Test
             //Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
-        //[Theory]
-        //[InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]
-        //[InlineData(ushort.MaxValue, new[] { MqttQos.AtLeastOnce })]
-        //public void TestSubAckMessage(ushort packetId, MqttQos[] qosValues)
-        //{
-        //    var packet = new SubAckPacket
-        //    {
-        //        PacketId = packetId,
-        //        ReturnCodes = qosValues,
-        //    };
+        [Theory]
+        //[InlineData(1, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.FAILURE })]
+        [InlineData(ushort.MaxValue, new[] { MqttQos.AT_LEAST_ONCE })]
+        public void SubAckMessageTest(ushort packetId, MqttQos[] qosValues)
+        {
+            var packet = new SubAckPacket
+            {
+                PacketId = packetId,
+                ReturnCodes = qosValues,
+            };
 
-        //    SubAckPacket recoded = RecodePacket(packet, false, true);
+            var recoded = RecodePacket(packet, false, true);
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubAckPacket>()), Times.Once);
-        //    Assert.Equal(packet.ReturnCodes, recoded.ReturnCodes);
-        //    Assert.Equal(packet.PacketId, recoded.PacketId);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubAckPacket>()), Times.Once);
+            Assert.Equal(packet.ReturnCodes, recoded.ReturnCodes);
+            Assert.Equal(packet.PacketId, recoded.PacketId);
+        }
 
         //[Theory]
         //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" })]

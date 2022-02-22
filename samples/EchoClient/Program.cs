@@ -25,8 +25,8 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                //var topic = "testtopic/abcd";
-                //await client.SubscribeAsync(topic);
+                var topic = "testtopic/abcd";
+                await client.SubscribeAsync(topic);
 
                 Console.WriteLine("### SUBSCRIBED ###");
             });

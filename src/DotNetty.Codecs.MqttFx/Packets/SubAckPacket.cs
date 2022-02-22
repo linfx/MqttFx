@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 订阅回执
+    /// 订阅回执(SUBACK – Subscribe acknowledgement)
     /// </summary>
     public class SubAckPacket : PacketWithId
     {

@@ -3,7 +3,7 @@
     /// <summary>
     /// 发布消息
     /// </summary>
-    public sealed class PublishPacket : Packet
+    public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
         /// 重发标志
@@ -41,16 +41,6 @@
         {
             get { return ((PublishVariableHeader)VariableHeader).TopicName; }
             set { ((PublishVariableHeader)VariableHeader).TopicName = value; }
-        }
-
-        /// <summary>
-        /// 报文标识符(Packet Identifier)
-        /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
-        /// </summary>
-        public ushort PacketId
-        {
-            get { return ((PublishVariableHeader)VariableHeader).PacketId; }
-            set { ((PublishVariableHeader)VariableHeader).PacketId = value; }
         }
 
         /// <summary>

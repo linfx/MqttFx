@@ -32,11 +32,24 @@
         {
         }
 
+        /// <summary>
+        /// 报文抽象类(含报文标识符)(MQTT Control Packet)
+        /// </summary>
+        /// <param name="packetType">报文类型</param>
         protected PacketWithId(PacketType packetType, PacketIdVariableHeader variableHeader)
             : base(variableHeader)
         {
             FixedHeader.PacketType = packetType;
-            VariableHeader = variableHeader;
+        }
+
+        /// <summary>
+        /// 报文抽象类(MQTT Control Packet)
+        /// </summary>
+        /// <param name="variableHeader">可变报头(Variable header)</param>
+        /// <param name="payload">有效载荷(Payload)</param>
+        protected PacketWithId(PacketIdVariableHeader variableHeader, Payload payload)
+            : base(variableHeader, payload)
+        {
         }
     }
 }

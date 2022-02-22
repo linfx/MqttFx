@@ -19,18 +19,14 @@
         /// </summary>
         /// <param name="packetType">报文类型</param>
         public PacketWithId(PacketType packetType)
-            : this(packetType, new PacketIdVariableHeader())
-        {
-        }
+            : this(packetType, new PacketIdVariableHeader()) { }
 
         /// <summary>
         /// 报文抽象类(含报文标识符)(MQTT Control Packet)
         /// </summary>
         /// <param name="packetType">报文类型</param>
         public PacketWithId(PacketType packetType, ushort packetId)
-            : this(packetType, new PacketIdVariableHeader(packetId))
-        {
-        }
+            : this(packetType, new PacketIdVariableHeader(packetId)) { }
 
         /// <summary>
         /// 报文抽象类(含报文标识符)(MQTT Control Packet)

@@ -117,7 +117,7 @@ namespace MqttFx.Test
             {
                 PacketId = packetId
             };
-            packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new TopicSubscription(topic, qos)).ToArray());
+            //packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new TopicSubscription(topic, qos)).ToArray());
 
             var recoded = RecodePacket(packet, true, true);
 

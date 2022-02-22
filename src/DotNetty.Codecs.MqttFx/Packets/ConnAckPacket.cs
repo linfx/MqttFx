@@ -9,9 +9,7 @@
         /// 连接报文回执
         /// </summary>
         public ConnAckPacket()
-            : this(new ConnAckVariableHeader()) 
-        {
-        }
+            : this(new ConnAckVariableHeader()) { }
 
         public ConnAckPacket(ConnAckVariableHeader variableHeader)
             : base(variableHeader)

@@ -9,9 +9,7 @@
         /// 连接报文
         /// </summary>
         public ConnectPacket()
-            : this(new ConnectVariableHeader(), new ConnectPayload())
-        {
-        }
+            : this(new ConnectVariableHeader(), new ConnectPayload()) { }
 
         public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPayload payload)
             : base(variableHeader, payload)

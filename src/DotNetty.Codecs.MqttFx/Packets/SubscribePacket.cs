@@ -6,9 +6,7 @@
     public sealed class SubscribePacket : PacketWithId
     {
         public SubscribePacket()
-            : this(new PacketIdVariableHeader(), new SubscribePayload())
-        {
-        }
+            : this(new PacketIdVariableHeader(), new SubscribePayload()) { }
 
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
             : base(variableHeader, payload)

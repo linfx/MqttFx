@@ -6,8 +6,6 @@
     public sealed class PubRecPacket : PacketWithId
     {
         public PubRecPacket(ushort packetId = default)
-            : base(PacketType.PUBREC, packetId)
-        {
-        }
+            : base(PacketType.PUBREC, packetId) { }
     }
 }

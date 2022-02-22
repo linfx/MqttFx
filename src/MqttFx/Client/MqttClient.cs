@@ -104,10 +104,11 @@ namespace MqttFx.Client
         /// <param name="cancellationToken"></param>
         public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
         {
-            var packet = new SubscribePacket();
-            ((PacketIdVariableHeader)packet.VariableHeader).PacketId = _packetIdProvider.NewPacketId();
-
-            packet.Add(topic, qos);
+            var packet = new SubscribePacket
+            {
+                PacketId = _packetIdProvider.NewPacketId()
+            };
+            packet.AddSubscription(topic, qos);
 
             return SendPacketAsync(packet);
         }

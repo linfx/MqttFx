@@ -113,9 +113,11 @@ namespace MqttFx.Test
         //[InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
         public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
-            var packet = new SubscribePacket();
-            ((PacketIdVariableHeader)packet.VariableHeader).PacketId = packetId;
-            packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new SubscribeRequest(topic, qos)).ToArray());
+            var packet = new SubscribePacket
+            {
+                PacketId = packetId
+            };
+            //packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new TopicSubscription(topic, qos)).ToArray());
 
             var recoded = RecodePacket(packet, true, true);
 

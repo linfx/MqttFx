@@ -1,12 +1,12 @@
 ﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 发布消息
+    /// 发布消息(PUBLISH – Publish message)
     /// </summary>
-    public sealed class PublishPacket : Packet
+    public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
-        /// 重发标志
+        /// 重发标志(DUP)
         /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
         /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
         /// </summary>
@@ -17,7 +17,7 @@
         }
 
         /// <summary>
-        /// 服务质量等级
+        /// 服务质量等级(QoS)
         /// </summary>
         public MqttQos Qos
         {
@@ -26,7 +26,7 @@
         }
 
         /// <summary>
-        /// 保留标志
+        /// 保留标志(RETAIN)
         /// </summary>
         public bool Retain
         {
@@ -44,22 +44,10 @@
         }
 
         /// <summary>
-        /// 报文标识符(Packet Identifier)
-        /// 只有当QoS等级是1或2时，报文标识符（Packet Identifier）字段才能出现在PUBLISH报文中。
-        /// </summary>
-        public ushort PacketId
-        {
-            get { return ((PublishVariableHeader)VariableHeader).PacketId; }
-            set { ((PublishVariableHeader)VariableHeader).PacketId = value; }
-        }
-
-        /// <summary>
         /// 发布消息
         /// </summary>
         public PublishPacket()
-            : this(new PublishVariableHeader(), new PublishPayload())
-        {
-        }
+            : this(new PublishVariableHeader(), new PublishPayload()) { }
 
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload)

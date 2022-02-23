@@ -17,75 +17,52 @@ c# mqtt 3.1.1 client
         static async Task Main(string[] args)
         {
             var services = new ServiceCollection();
-            services.AddMqttClient(options =>
+            services.AddMqttFxClient(options =>
             {
-                options.Host = "118.126.96.166";
+                options.Host = "broker.emqx.io";
+                options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
+            var client = container.GetService<IMqttClient>();
 
-            var client = container.GetService<MqttClient>();
-            client.Connected += Client_Connected;
-            client.Disconnected += Client_Disconnected;
-            client.MessageReceived += Client_MessageReceived;
-            if (await client.ConnectAsync() == ConnectReturnCode.ConnectionAccepted)
+
+            client.UseConnectedHandler(async () =>
             {
-                var top = "$SYS/brokers/+/clients/#";
-                Console.WriteLine("Subscribe:" + top);
+                Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var rcs = (await client.SubscribeAsync(top, MqttQos.AtMostOnce)).ReturnCodes;
+                var topic = "testtopic/a";
+                await client.SubscribeAsync(topic);
 
-                foreach (var rc in rcs)
+                Console.WriteLine("### SUBSCRIBED ###");
+            });
+
+            client.UseMessageReceivedHandler(message =>
+            {
+                Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
+                Console.WriteLine($"+ Topic = {message.Topic}");
+                Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(message.Payload)}");
+                Console.WriteLine($"+ QoS = {message.Qos}");
+                Console.WriteLine($"+ Retain = {message.Retain}");
+                Console.WriteLine();
+            });
+
+            var result = await client.ConnectAsync();
+            if (result.Succeeded)
+            {
+                for (int i = 1; i <= 3; i++)
                 {
-                    Console.WriteLine(rc);
+                    await Task.Delay(500);
+                    Console.WriteLine("### Publish Message ###");
+                    var topic = "testtopic/ab";
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
                 }
-
-                for (int i = 1; i < int.MaxValue; i++)
-                {
-                    await client.PublishAsync("/World", Encoding.UTF8.GetBytes($"Hello World!: {i}"), MqttQos.AtLeastOnce);
-                    await Task.Delay(1000);
-                    //Console.ReadKey();
-                }
-            }
-            Console.ReadKey();
-        }
-
-        private static void Client_Connected(object sender, MqttClientConnectedEventArgs e)
-        {
-            Console.WriteLine("Connected Ssuccessful!");
-        }
-
-        private static void Client_Disconnected(object sender, MqttClientDisconnectedEventArgs e)
-        {
-            Console.WriteLine("Disconnected");
-        }
-
-        private static void Client_MessageReceived(object sender, MqttMessageReceivedEventArgs e)
-        {
-            //$SYS/brokers/+/clients/+/connected
-            //$SYS/brokers/+/clients/+/disconnected
-            //$SYS/brokers/+/clients/#
-            var message = e.Message;
-            var payload = Encoding.UTF8.GetString(message.Payload);
-
-            if (new Regex(@"\$SYS/brokers/.+?/connected").Match(message.Topic).Success)
-            {
-                //{ "clientid":"mqtt.fx","username":"mqtt.fx","ipaddress":"127.0.0.1","clean_sess":true,"protocol":4,"connack":0,"ts":1540949660}
-
-                var obj = JObject.Parse(payload);
-                Console.WriteLine($"【Client Connected】 client_id:{obj.Value<string>("clientid")}, ipaddress:{obj.Value<string>("ipaddress")}");
-
-            }
-            else if (new Regex(@"\$SYS/brokers/.+?/disconnected").Match(message.Topic).Success)
-            {
-                //{"clientid":"mqtt.fx","username":"mqtt.fx","reason":"normal","ts":1540949658}
-
-                var obj = JObject.Parse(payload);
-                Console.WriteLine($"【Client Disconnected】 client_id:{obj.Value<string>("clientid")}");
             }
             else
             {
-                Console.WriteLine(payload);
+                Console.WriteLine("Connect Fail!");
             }
+
+            Console.ReadKey();
         }
     }
 

@@ -1,5 +1,4 @@
 ﻿using DotNetty.Buffers;
-using System;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -19,7 +18,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
-            if(Payload != null)
+            if (Payload != null)
                 buffer.WriteBytes(Payload);
         }
 

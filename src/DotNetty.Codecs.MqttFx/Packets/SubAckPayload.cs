@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
@@ -11,11 +12,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 返回代码
         /// </summary>
-        public MqttQos[] ReturnCodes { get; set; }
+        public IList<MqttQos> ReturnCodes { get; set; }
 
         public SubAckPayload() { }
 
-        public SubAckPayload(MqttQos[] returnCodes)
+        public SubAckPayload(IList<MqttQos> returnCodes)
         {
             ReturnCodes = returnCodes;
         }
@@ -30,17 +31,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
-            var returnCodes = new MqttQos[remainingLength];
-            for (int i = 0; i < returnCodes.Length; i++)
+            int len = remainingLength;
+            for (int i = 0; i < len; i++)
             {
                 var returnCode = (MqttQos)buffer.ReadByte(ref remainingLength);
                 if (returnCode > MqttQos.EXACTLY_ONCE && returnCode != MqttQos.FAILURE)
                 {
                     throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
                 }
-                returnCodes[i] = returnCode;
+                ReturnCodes.Add(returnCode);
             }
-            ReturnCodes = returnCodes;
         }
     }
 }

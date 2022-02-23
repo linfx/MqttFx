@@ -18,11 +18,11 @@ namespace MqttFx.Client
     /// </summary>
     public class MqttClient : IMqttClient
     {
-        private readonly ILogger _logger;
-        private IEventLoopGroup _eventLoop;
-        private volatile IChannel _channel;
-        private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
-        private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
+        private readonly ILogger logger;
+        private IEventLoopGroup eventLoop;
+        private volatile IChannel channel;
+        private readonly PacketIdProvider packetIdProvider = new();
+        private readonly PacketDispatcher packetDispatcher = new();
 
         public bool IsConnected { get; private set; }
 
@@ -36,7 +36,7 @@ namespace MqttFx.Client
 
         public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {
-            _logger = logger ?? NullLogger<MqttClient>.Instance;
+            this.logger = logger ?? NullLogger<MqttClient>.Instance;
             Options = options.Value;
         }
 
@@ -46,13 +46,13 @@ namespace MqttFx.Client
         /// <returns></returns>
         public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken)
         {
-            if (_eventLoop == null)
-                _eventLoop = new MultithreadEventLoopGroup();
+            if (eventLoop == null)
+                eventLoop = new MultithreadEventLoopGroup();
 
             var connectFuture = new TaskCompletionSource<MqttConnectResult>();
             var bootstrap = new Bootstrap();
             bootstrap
-                .Group(_eventLoop)
+                .Group(eventLoop)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .RemoteAddress(Options.Host, Options.Port)
@@ -60,18 +60,18 @@ namespace MqttFx.Client
 
             try
             {
-                _channel = await bootstrap.ConnectAsync();
-                if (_channel.Open)
+                channel = await bootstrap.ConnectAsync();
+                if (channel.Open)
                 {
-                    _packetDispatcher.Reset();
-                    _packetIdProvider.Reset();
+                    packetDispatcher.Reset();
+                    packetIdProvider.Reset();
                     IsConnected = true;
                 }
                 return await connectFuture.Task;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
                 throw new MqttException("BrokerUnavailable: " + ex.Message);
             }
         }
@@ -92,7 +92,7 @@ namespace MqttFx.Client
             ((PublishPayload)packet.Payload).Payload = payload;
 
             if (qos > MqttQos.AT_MOST_ONCE)
-                packet.PacketId = _packetIdProvider.NewPacketId();
+                packet.PacketId = packetIdProvider.NewPacketId();
 
             return SendAsync(packet);
         }
@@ -107,7 +107,7 @@ namespace MqttFx.Client
         {
             var packet = new SubscribePacket
             {
-                PacketId = _packetIdProvider.NewPacketId()
+                PacketId = packetIdProvider.NewPacketId()
             };
             packet.AddSubscription(topic, qos);
 
@@ -120,7 +120,7 @@ namespace MqttFx.Client
         /// <param name="topics">主题</param>
         public Task UnsubscribeAsync(params string[] topics)
         {
-            var packet = new UnsubscribePacket(_packetIdProvider.NewPacketId(), topics);
+            var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topics);
 
             return SendAsync(packet);
         }
@@ -131,10 +131,10 @@ namespace MqttFx.Client
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_channel != null)
-                await _channel.CloseAsync();
+            if (channel != null)
+                await channel.CloseAsync();
 
-            await _eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 
         /// <summary>
@@ -144,11 +144,11 @@ namespace MqttFx.Client
         /// <returns></returns>
         private Task SendAsync(Packet packet)
         {
-            if (_channel == null)
+            if (channel == null)
                 return Task.CompletedTask;
 
-            if (_channel.Active)
-                return _channel.WriteAndFlushAsync(packet);
+            if (channel.Active)
+                return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
         }

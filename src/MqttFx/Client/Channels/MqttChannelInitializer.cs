@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MqttFx.Channels
 {
-    internal class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
+    class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
     {
         private readonly IMqttClient client;
         private readonly TaskCompletionSource<MqttConnectResult> connectFuture;

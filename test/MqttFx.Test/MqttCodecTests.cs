@@ -130,11 +130,7 @@ namespace MqttFx.Test
         [InlineData(ushort.MaxValue, new[] { MqttQos.AT_LEAST_ONCE })]
         public void SubAckMessageTest(ushort packetId, MqttQos[] qosValues)
         {
-            var packet = new SubAckPacket
-            {
-                PacketId = packetId,
-                ReturnCodes = qosValues,
-            };
+            var packet = new SubAckPacket(packetId, qosValues);
 
             var recoded = RecodePacket(packet, false, true);
 
@@ -158,7 +154,7 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        //[InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]
+        [InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", new byte[0])]
         [InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
         [InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
         [InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]

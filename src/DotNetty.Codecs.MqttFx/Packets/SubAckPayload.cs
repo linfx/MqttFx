@@ -15,21 +15,25 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
+            foreach (var qos in ReturnCodes)
+            {
+                buffer.WriteByte((byte)qos);
+            }
         }
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
-            //var returnCodes = new MqttQos[FixedHeader.RemaingLength];
-            //for (int i = 0; i < FixedHeader.RemaingLength; i++)
-            //{
-            //    var returnCode = (MqttQos)buffer.ReadByte();
-            //    if (returnCode > MqttQos.ExactlyOnce)
-            //    {
-            //        throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-            //    }
-            //    returnCodes[i] = returnCode;
-            //}
-            //ReturnCodes = returnCodes;
+            var returnCodes = new MqttQos[remainingLength];
+            for (int i = 0; i < remainingLength; i++)
+            {
+                var returnCode = (MqttQos)buffer.ReadByte(ref remainingLength);
+                if (returnCode > MqttQos.EXACTLY_ONCE && returnCode != MqttQos.FAILURE)
+                {
+                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
+                }
+                returnCodes[i] = returnCode;
+            }
+            ReturnCodes = returnCodes;
         }
     }
 }

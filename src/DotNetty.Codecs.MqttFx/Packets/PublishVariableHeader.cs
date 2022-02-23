@@ -20,7 +20,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Encode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
             buffer.WriteString(TopicName);
-            base.Encode(buffer, fixedHeader);
+            if (fixedHeader.GetQos() > MqttQos.AT_MOST_ONCE)
+                base.Encode(buffer, fixedHeader);
         }
 
         /// <summary>
@@ -31,7 +32,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
             TopicName = buffer.ReadString(ref fixedHeader.RemainingLength);
-            base.Decode(buffer, ref fixedHeader);
+            if (fixedHeader.GetQos() > MqttQos.AT_MOST_ONCE)
+            {
+                base.Decode(buffer, ref fixedHeader);
+            }
         }
     }
 }

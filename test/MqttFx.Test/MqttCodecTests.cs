@@ -109,7 +109,7 @@ namespace MqttFx.Test
 
         [Theory]
         [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
-        //[InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
         public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
             var packet = new SubscribePacket
@@ -126,7 +126,7 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        //[InlineData(1, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.FAILURE })]
+        [InlineData(1, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.FAILURE })]
         [InlineData(ushort.MaxValue, new[] { MqttQos.AT_LEAST_ONCE })]
         public void SubAckMessageTest(ushort packetId, MqttQos[] qosValues)
         {

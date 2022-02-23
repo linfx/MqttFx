@@ -24,7 +24,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
             var returnCodes = new MqttQos[remainingLength];
-            for (int i = 0; i < remainingLength; i++)
+            for (int i = 0; i < returnCodes.Length; i++)
             {
                 var returnCode = (MqttQos)buffer.ReadByte(ref remainingLength);
                 if (returnCode > MqttQos.EXACTLY_ONCE && returnCode != MqttQos.FAILURE)

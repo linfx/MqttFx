@@ -26,7 +26,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="fixedHeader"></param>
         public override void Encode(IByteBuffer buffer, FixedHeader fixedHeader)
         {
-            if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
+            if (fixedHeader.GetQos() > MqttQos.AT_MOST_ONCE)
                 buffer.WriteUnsignedShort(PacketId);
         }
 
@@ -37,7 +37,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="fixedHeader"></param>
         public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
-            if (fixedHeader.GetQos() > MqttQos.AT_LEAST_ONCE)
+            if (fixedHeader.GetQos() > MqttQos.AT_MOST_ONCE)
             {
                 PacketId = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
                 if (PacketId == 0)

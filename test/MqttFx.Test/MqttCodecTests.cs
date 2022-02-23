@@ -143,23 +143,19 @@ namespace MqttFx.Test
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
-        //[Theory]
-        //[InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" })]
-        //[InlineData(ushort.MaxValue, new[] { "a" })]
-        //public void TestUnsubscribeMessage(ushort packetId, string[] topicFilters)
-        //{
-        //    var packet = new UnsubscribePacket
-        //    {
-        //        PacketId = packetId,
-        //    };
-        //    packet.AddRange(topicFilters);
+        [Theory]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" })]
+        [InlineData(ushort.MaxValue, new[] { "a" })]
+        public void UnsubscribeMessageTest(ushort packetId, string[] topicFilters)
+        {
+            var packet = new UnsubscribePacket(packetId, topicFilters);
 
-        //    UnsubscribePacket recoded = RecodePacket(packet, true, true);
+            var recoded = RecodePacket(packet, true, true);
 
-        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<UnsubscribePacket>()), Times.Once);
-        //    //Assert.Equal(packet.TopicFilters, recoded.TopicFilters);
-        //    Assert.Equal(packet.PacketId, recoded.PacketId);
-        //}
+            contextMock.Verify(x => x.FireChannelRead(It.IsAny<UnsubscribePacket>()), Times.Once);
+            Assert.Equal(packet.Topics, recoded.Topics);
+            Assert.Equal(packet.PacketId, recoded.PacketId);
+        }
 
         [Theory]
         //[InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]

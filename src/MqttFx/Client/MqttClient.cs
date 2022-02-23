@@ -120,8 +120,7 @@ namespace MqttFx.Client
         /// <param name="topics">主题</param>
         public Task UnsubscribeAsync(params string[] topics)
         {
-            var packet = new UnsubscribePacket();
-            packet.AddRange(topics);
+            var packet = new UnsubscribePacket(_packetIdProvider.NewPacketId(), topics);
 
             return SendPacketAsync(packet);
         }

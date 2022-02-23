@@ -82,16 +82,17 @@ namespace MqttFx.Client
         /// <param name="topic">主题</param>
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
-        /// <param name="retain"></param>
+        /// <param name="retain">保留消息</param>
         public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain, CancellationToken cancellationToken)
         {
             var packet = new PublishPacket(qos, false, retain)
             {
                 TopicName = topic,
-                Payload = payload
             };
-            if (qos > MqttQos.AtMostOnce)
-                packet.PacketIdentifier = _packetIdProvider.NewPacketId();
+            if (qos > MqttQos.AT_MOST_ONCE)
+                packet.PacketId = _packetIdProvider.NewPacketId();
+
+            ((PublishPayload)packet.Payload).Payload = payload;
 
             return SendPacketAsync(packet);
         }
@@ -104,9 +105,11 @@ namespace MqttFx.Client
         /// <param name="cancellationToken"></param>
         public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
         {
-            var packet = new SubscribePacket();
-            packet.VariableHeader.PacketIdentifier = _packetIdProvider.NewPacketId();
-            packet.Add(topic, qos);
+            var packet = new SubscribePacket
+            {
+                PacketId = _packetIdProvider.NewPacketId()
+            };
+            packet.AddSubscription(topic, qos);
 
             return SendPacketAsync(packet);
         }

@@ -11,7 +11,6 @@ namespace EchoClient
     {
         static async Task Main(string[] args)
         {
-            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider());
             var services = new ServiceCollection();
             services.AddMqttFxClient(options =>
             {
@@ -26,7 +25,7 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/abcd";
+                var topic = "testtopic/a";
                 await client.SubscribeAsync(topic);
 
                 Console.WriteLine("### SUBSCRIBED ###");
@@ -45,13 +44,19 @@ namespace EchoClient
             var result = await client.ConnectAsync();
             if (result.Succeeded)
             {
-                for (int i = 1; i <= 1; i++)
+                for (int i = 1; i <= 3; i++)
                 {
                     await Task.Delay(500);
-                    var topic = "testtopic/abcd";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AtMostOnce);
+                    Console.WriteLine("### Publish Message ###");
+                    var topic = "testtopic/ab";
+                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
                 }
             }
+            else
+            {
+                Console.WriteLine("Connect Fail!");
+            }
+
             Console.ReadKey();
         }
     }

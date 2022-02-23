@@ -53,6 +53,35 @@ namespace DotNetty.Codecs.MqttFx
             buffer.WriteBytes(stringBytes);
         }
 
+        public static void WriteLengthBytes(this IByteBuffer buffer, byte[] value)
+        {
+            //var buf = Unpooled.WrappedBuffer(value);
+            //buffer.WriteShort(buf.ReadableBytes);
+            //if(buf.IsReadable())
+            //{
+            //    buffer.WriteBytes(buf);
+            //}
+
+            buffer.WriteShort(value.Length);
+            if(value.Length > 0)
+                buffer.WriteBytes(value);
+        }
+
+        public static byte ReadByte(this IByteBuffer buffer, ref int remainingLength)
+        {
+            DecreaseRemainingLength(ref remainingLength, 1);
+            return buffer.ReadByte();
+        }
+
+        public static byte[] ReadBytes(this IByteBuffer buffer, int length, ref int remainingLength)
+        {
+           if(length == 0)
+                return new byte[0];
+
+            DecreaseRemainingLength(ref remainingLength, 1);
+            return buffer.ReadBytes(length).Array;
+        }
+
         /// <summary>
         /// 读取两字节
         /// </summary>
@@ -64,6 +93,12 @@ namespace DotNetty.Codecs.MqttFx
             high = (byte)stream.ReadByte();
             low = (byte)stream.ReadByte();
             return (short)((high << 8) + low);
+        }
+
+        public static short ReadShort(this IByteBuffer buffer, ref int remainingLength)
+        {
+            DecreaseRemainingLength(ref remainingLength, 2);
+            return buffer.ReadShort();
         }
 
         /// <summary>
@@ -121,13 +156,10 @@ namespace DotNetty.Codecs.MqttFx
             int size = ReadUnsignedShort(buffer, ref remainingLength);
 
             //if (size < minBytes)
-            //{
             //    throw new DecoderException($"String value is shorter than minimum allowed {minBytes}. Advertised length: {size}");
-            //}
+
             //if (size > maxBytes)
-            //{
             //    throw new DecoderException($"String value is longer than maximum allowed {maxBytes}. Advertised length: {size}");
-            //}
 
             if (size == 0)
                 return string.Empty;
@@ -141,6 +173,18 @@ namespace DotNetty.Codecs.MqttFx
         }
 
         /// <summary>
+        /// 读长度字节
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="remainingLength"></param>
+        /// <returns></returns>
+        public static byte[] ReadLengthBytes(this IByteBuffer buffer, ref int remainingLength)
+        {
+            int length = ReadUnsignedShort(buffer, ref remainingLength);
+            return buffer.ReadBytes(length, ref remainingLength);
+        }
+
+        /// <summary>
         /// 布尔转字节
         /// </summary>
         /// <param name="input"></param>
@@ -148,6 +192,27 @@ namespace DotNetty.Codecs.MqttFx
         public static byte ToByte(this bool input)
         {
             return input ? (byte)1 : (byte)0;
+        }
+
+        public static byte[] ReadSliceArray(this IByteBuffer buffer, ref int remainingLength)
+        {
+            IByteBuffer buf;
+            if (remainingLength > 0)
+            {
+                buf = buffer.ReadSlice(remainingLength);
+                buf.Retain();
+                remainingLength = 0;
+            }
+            else
+            {
+                buf = Unpooled.Empty;
+            }
+            return buf.ToByteArray();
+        }
+
+        public static byte[] ToByteArray(this IByteBuffer buffer)
+        {
+            return ((Span<byte>)buffer.Array).Slice(buffer.ArrayOffset, buffer.ReadableBytes).ToArray();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // we don't care about the method being on exception's stack so it's OK to inline

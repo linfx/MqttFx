@@ -47,7 +47,7 @@ namespace MqttFx.Client
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
         /// <returns></returns>
-        Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AtMostOnce, bool retain = false, CancellationToken cancellationToken = default);
+        Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 订阅主题
@@ -56,7 +56,7 @@ namespace MqttFx.Client
         /// <param name="qos">服务质量等级</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AtMostOnce, CancellationToken cancellationToken = default);
+        Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AT_MOST_ONCE, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 取消订阅

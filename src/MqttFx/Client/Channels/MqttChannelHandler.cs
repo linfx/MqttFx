@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace MqttFx.Channels
 {
+    /// <summary>
+    /// 发送和接收数据处理器
+    /// </summary>
     public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
         private readonly IMqttClient client;
@@ -16,29 +19,41 @@ namespace MqttFx.Channels
             this.connectFuture = connectFuture;
         }
 
+        /// <summary>
+        /// 通道激活时触发，当客户端connect成功后，服务端就会接收到这个事件，从而可以把客户端的Channel记录下来
+        /// </summary>
+        /// <param name="context"></param>
         public override void ChannelActive(IChannelHandlerContext context)
         {
             var packet = new ConnectPacket();
-            packet.Payload.ClientId = client.Options.ClientId;
-            packet.VariableHeader.CleanSession = client.Options.CleanSession;
-            packet.VariableHeader.KeepAlive = client.Options.KeepAlive;
+            var variableHeader = (ConnectVariableHeader)packet.VariableHeader;
+            var payload = (ConnectPayload)packet.Payload;
+
+            variableHeader.ConnectFlags.CleanSession = client.Options.CleanSession;
+            variableHeader.KeepAlive = client.Options.KeepAlive;
+            payload.ClientId = client.Options.ClientId;
             if (client.Options.Credentials != null)
             {
-                packet.VariableHeader.UsernameFlag = true;
-                packet.Payload.UserName = client.Options.Credentials.Username;
-                packet.Payload.Password = client.Options.Credentials.Username;
+                variableHeader.ConnectFlags.UsernameFlag = true;
+                payload.UserName = client.Options.Credentials.Username;
+                payload.Password = client.Options.Credentials.Username;
             }
             if (client.Options.WillMessage != null)
             {
-                packet.VariableHeader.WillFlag = true;
-                packet.VariableHeader.WillQos = client.Options.WillMessage.Qos;
-                packet.VariableHeader.WillRetain = client.Options.WillMessage.Retain;
-                packet.Payload.WillTopic = client.Options.WillMessage.Topic;
-                packet.Payload.WillMessage = client.Options.WillMessage.Payload;
+                variableHeader.ConnectFlags.WillFlag = true;
+                variableHeader.ConnectFlags.WillQos = client.Options.WillMessage.Qos;
+                variableHeader.ConnectFlags.WillRetain = client.Options.WillMessage.Retain;
+                payload.WillTopic = client.Options.WillMessage.Topic;
+                payload.WillMessage = client.Options.WillMessage.Payload;
             }
             context.WriteAndFlushAsync(packet);
         }
 
+        /// <summary>
+        /// 当收到对方发来的数据后，就会触发，参数msg就是发来的信息，可以是基础类型，也可以是序列化的复杂对象
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="msg"></param>
         protected override void ChannelRead0(IChannelHandlerContext ctx, Packet msg)
         {
             switch (msg.FixedHeader.PacketType)
@@ -77,7 +92,9 @@ namespace MqttFx.Channels
 
         private void ProcessMessage(IChannel channel, ConnAckPacket message)
         {
-            switch (message.VariableHeader.ConnectReturnCode)
+            var variableHeader = (ConnAckVariableHeader)message.VariableHeader;
+
+            switch (variableHeader.ConnectReturnCode)
             {
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
                     connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
@@ -90,7 +107,7 @@ namespace MqttFx.Channels
                 case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
                 case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
                 case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
-                    connectFuture.TrySetResult(new MqttConnectResult(message.VariableHeader.ConnectReturnCode));
+                    connectFuture.TrySetResult(new MqttConnectResult(variableHeader.ConnectReturnCode));
                     channel.CloseAsync();
                     break;
             }
@@ -100,17 +117,17 @@ namespace MqttFx.Channels
         {
             switch (message.Qos)
             {
-                case MqttQos.AtMostOnce:
+                case MqttQos.AT_MOST_ONCE:
                     InvokeProcessForIncomingPublish(message);
                     break;
 
-                case MqttQos.AtLeastOnce:
+                case MqttQos.AT_LEAST_ONCE:
                     InvokeProcessForIncomingPublish(message);
-                    if (message.PacketIdentifier > 0)
-                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketIdentifier));
+                    if (message.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketId));
                     break;
 
-                case MqttQos.ExactlyOnce:
+                case MqttQos.EXACTLY_ONCE:
                     break;
             }
         }
@@ -121,7 +138,7 @@ namespace MqttFx.Channels
 
         private void ProcessMessage(IChannel channel, PubRecPacket message)
         {
-            var packet = new PubRelPacket(message.VariableHeader.PacketIdentifier);
+            var packet = new PubRelPacket(message.PacketId);
             channel.WriteAndFlushAsync(packet);
         }
 

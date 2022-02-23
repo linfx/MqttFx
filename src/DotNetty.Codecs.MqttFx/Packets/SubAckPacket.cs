@@ -1,35 +1,30 @@
-﻿using DotNetty.Buffers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 订阅回执
+    /// 订阅回执(SUBACK – Subscribe acknowledgement)
     /// </summary>
-    public class SubAckPacket : PacketWithIdentifier
+    public class SubAckPacket : PacketWithId
     {
-        public SubAckPacket()
-            : base(PacketType.SUBACK) { }
-
         /// <summary>
         /// 返回代码
         /// </summary>
-        public IReadOnlyList<MqttQos> ReturnCodes { get; set; }
-
-        public override void Decode(IByteBuffer buffer)
+        public IList<MqttQos> ReturnCodes
         {
-            //base.Decode(buffer);
-            //var returnCodes = new MqttQos[FixedHeader.RemaingLength];
-            //for (int i = 0; i < FixedHeader.RemaingLength; i++)
-            //{
-            //    var returnCode = (MqttQos)buffer.ReadByte();
-            //    if (returnCode > MqttQos.ExactlyOnce)
-            //    {
-            //        throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-            //    }
-            //    returnCodes[i] = returnCode;
-            //}
-            //ReturnCodes = returnCodes;
+            get { return ((SubAckPayload)Payload).ReturnCodes; }
+            set { ((SubAckPayload)Payload).ReturnCodes = value; }
+        }
+
+        public SubAckPacket()
+            : this(new PacketIdVariableHeader(), new SubAckPayload()) { }
+
+        public SubAckPacket(PacketIdVariableHeader variableHeader, SubAckPayload payload)
+            : base(variableHeader, payload)
+        {
+            FixedHeader.PacketType = PacketType.SUBACK;
+            VariableHeader = variableHeader;
+            Payload = payload;
         }
     }
 }

@@ -3,32 +3,27 @@ using System.Collections.Generic;
 
 namespace DotNetty.Codecs.MqttFx.Packets
 {
-    public struct SubscribePayload
+    /// <summary>
+    /// 有效载荷(SUBSCRIBE Packet payload)
+    /// </summary>
+    public class SubscribePayload : Payload
     {
         /// <summary>
         /// 主题列表
         /// </summary>
-        public List<SubscribeRequest> SubscribeTopics;
+        public List<TopicSubscription> TopicSubscriptions { get; set; } = new List<TopicSubscription>();
 
-        public void Encode(IByteBuffer buffer)
+        public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
-            foreach (var item in SubscribeTopics)
+            foreach (var item in TopicSubscriptions)
             {
-                buffer.WriteString(item.Topic);
+                buffer.WriteString(item.TopicName);
                 buffer.WriteByte((byte)item.Qos);
             }
         }
-    }
 
-    public class SubscribeRequest
-    {
-        public SubscribeRequest(string topic, MqttQos qos)
+        public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
-            Topic = topic;
-            Qos = qos;
         }
-
-        public string Topic { get; set; }
-        public MqttQos Qos { get; set; }
     }
 }

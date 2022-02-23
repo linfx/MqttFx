@@ -44,6 +44,7 @@ namespace DotNetty.Codecs.MqttFx
                         Checkpoint();
                         break;
                     case ParseState.Failed:
+                        // read out data until connection is closed
                         input.SkipBytes(input.ReadableBytes);
                         return;
                     default:
@@ -67,7 +68,12 @@ namespace DotNetty.Codecs.MqttFx
             }
 
             FixedHeader fixedHeader = default;
-            fixedHeader.Decode(buffer);
+            if (!fixedHeader.Decode(buffer))
+            {
+                packet = null;
+                return false;
+            }
+
             packet = fixedHeader.PacketType switch
             {
                 PacketType.CONNECT => new ConnectPacket(),

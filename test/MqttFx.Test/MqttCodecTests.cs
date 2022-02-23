@@ -4,6 +4,7 @@ using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using Moq;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace MqttFx.Test
@@ -112,17 +113,19 @@ namespace MqttFx.Test
         [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
         public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
-            var packet = new SubscribePacket
+            var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) =>
             {
-                PacketId = packetId
-            };
-            //packet.AddRange(topicFilters.Zip(requestedQosValues, (topic, qos) => new TopicSubscription(topic, qos)).ToArray());
+                TopicSubscription ts;
+                ts.TopicName = topic;
+                ts.Qos = qos;
+                return ts;
+            }).ToArray());
 
             var recoded = RecodePacket(packet, true, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-            //Assert.Equal(packet.Requests, recoded.Requests, EqualityComparer<SubscribeRequest>.Default);
-            //Assert.Equal(packet.PacketId, recoded.PacketId);
+            Assert.Equal(packet.TopicSubscriptions, recoded.TopicSubscriptions, EqualityComparer<TopicSubscription>.Default);
+            Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
         [Theory]

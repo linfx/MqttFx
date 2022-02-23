@@ -1,4 +1,6 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿using System.Collections.Generic;
+
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 订阅报文(SUBSCRIBE - Subscribe to topics)
@@ -8,12 +10,21 @@
         public SubscribePacket()
             : this(new PacketIdVariableHeader(), new SubscribePayload()) { }
 
+        public SubscribePacket(ushort packetId, params TopicSubscription[] topics)
+            : this(new PacketIdVariableHeader(packetId), new SubscribePayload(topics)) { }
+
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
             : base(variableHeader, payload)
         {
             FixedHeader.PacketType = PacketType.SUBSCRIBE;
             VariableHeader = variableHeader;
             Payload = payload;
+        }
+
+        public IList<TopicSubscription> TopicSubscriptions
+        {
+            get { return ((SubscribePayload)Payload).TopicSubscriptions; }
+            set { ((SubscribePayload)Payload).TopicSubscriptions = value; }
         }
 
         /// <summary>
@@ -26,13 +37,7 @@
             TopicSubscription ts;
             ts.TopicName = topic;
             ts.Qos = qos;
-            ((SubscribePayload)Payload).TopicSubscriptions.Add(ts);
+            TopicSubscriptions.Add(ts);
         }
-
-        /// <summary>
-        /// 订阅主题
-        /// </summary>
-        /// <param name="request"></param>
-        public void AddSubscription(params TopicSubscription[] request) => ((SubscribePayload)Payload).TopicSubscriptions.AddRange(request);
     }
 }

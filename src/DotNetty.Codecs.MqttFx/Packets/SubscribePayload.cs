@@ -11,7 +11,14 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 主题列表
         /// </summary>
-        public List<TopicSubscription> TopicSubscriptions { get; set; } = new List<TopicSubscription>();
+        public IList<TopicSubscription> TopicSubscriptions { get; set; }
+
+        public SubscribePayload() { }
+
+        public SubscribePayload(IList<TopicSubscription> topics)
+        {
+            TopicSubscriptions = topics;
+        }
 
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
@@ -24,6 +31,27 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
+            TopicSubscriptions = new List<TopicSubscription>();
+            while (remainingLength > 0)
+            {
+                string topicFilter = buffer.ReadString(ref remainingLength);
+                MqttCodecUtil.ValidateTopicFilter(topicFilter);
+
+                byte qos = buffer.ReadByte(ref remainingLength);
+                if (qos > (byte)MqttQos.EXACTLY_ONCE)
+                {
+                    throw new DecoderException($"[MQTT-3.8.3-4]. Invalid QoS value: {qos}.");
+                }
+
+                TopicSubscription ts;
+                ts.TopicName = topicFilter;
+                ts.Qos = (MqttQos)qos;
+
+                TopicSubscriptions.Add(ts);
+            }
+
+            if (TopicSubscriptions.Count == 0)
+                throw new DecoderException("[MQTT-3.8.3-3]");
         }
     }
 }

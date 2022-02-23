@@ -4,7 +4,6 @@ using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using Moq;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace MqttFx.Test
@@ -82,7 +81,7 @@ namespace MqttFx.Test
                 Assert.Equal(packet_variableHeader.ConnectFlags.WillQos, recoded_variableHeader.ConnectFlags.WillQos);
                 Assert.Equal(packet_variableHeader.ConnectFlags.WillRetain, recoded_variableHeader.ConnectFlags.WillRetain);
                 Assert.Equal(recoded_payload.WillTopic, recoded_payload.WillTopic);
-                //Assert.True(ByteBufferUtil.Equals(Unpooled.WrappedBuffer(willMessage), recoded.WillMessage));
+                Assert.True(Equals(Unpooled.WrappedBuffer(packet_payload.WillMessage), recoded_payload.WillMessage));
             }
         }
 
@@ -164,9 +163,9 @@ namespace MqttFx.Test
 
         [Theory]
         //[InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", null)]
-        //[InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
+        [InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
         [InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
-        //[InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
+        [InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
             var packet = new PublishPacket(qos, dup, retain)

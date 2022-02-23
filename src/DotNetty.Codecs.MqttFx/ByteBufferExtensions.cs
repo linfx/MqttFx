@@ -194,6 +194,27 @@ namespace DotNetty.Codecs.MqttFx
             return input ? (byte)1 : (byte)0;
         }
 
+        public static byte[] ReadSliceArray(this IByteBuffer buffer, ref int remainingLength)
+        {
+            IByteBuffer buf;
+            if (remainingLength > 0)
+            {
+                buf = buffer.ReadSlice(remainingLength);
+                buf.Retain();
+                remainingLength = 0;
+            }
+            else
+            {
+                buf = Unpooled.Empty;
+            }
+            return buf.ToByteArray();
+        }
+
+        public static byte[] ToByteArray(this IByteBuffer buffer)
+        {
+            return ((Span<byte>)buffer.Array).Slice(buffer.ArrayOffset, buffer.ReadableBytes).ToArray();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // we don't care about the method being on exception's stack so it's OK to inline
         static void DecreaseRemainingLength(ref int remainingLength, int minExpectedLength)
         {

@@ -6,6 +6,38 @@
     public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
+        /// 发布消息
+        /// </summary>
+        public PublishPacket()
+            : this(new PublishVariableHeader(), new PublishPayload()) { }
+
+        public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
+            : base(variableHeader, payload)
+        {
+            FixedHeader.PacketType = PacketType.PUBLISH;
+            VariableHeader = variableHeader;
+            Payload = payload;
+        }
+
+        /// <summary>
+        /// 发布消息
+        /// </summary>
+        /// <param name="qos">服务质量等级</param>
+        /// <param name="dup">重发标志</param>
+        /// <param name="retain">保留标志</param>
+        public PublishPacket(MqttQos qos = MqttQos.AT_MOST_ONCE, bool dup = false, bool retain = false) : this()
+        {
+            // TODO: 不生效
+            //Qos = qos;
+            //Dup = dup;
+            //Retain = retain;
+
+            FixedHeader.Flags |= (byte)qos << 1;
+            FixedHeader.Flags |= dup.ToByte() << 3;
+            FixedHeader.Flags |= retain.ToByte();
+        }
+
+        /// <summary>
         /// 重发标志(DUP)
         /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
         /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
@@ -41,38 +73,6 @@
         {
             get { return ((PublishVariableHeader)VariableHeader).TopicName; }
             set { ((PublishVariableHeader)VariableHeader).TopicName = value; }
-        }
-
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        public PublishPacket()
-            : this(new PublishVariableHeader(), new PublishPayload()) { }
-
-        public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
-            : base(variableHeader, payload)
-        {
-            FixedHeader.PacketType = PacketType.PUBLISH;
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
-
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="dup">重发标志</param>
-        /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos = MqttQos.AT_MOST_ONCE, bool dup = false, bool retain = false) : this()
-        {
-            // TODO: 不生效
-            //Qos = qos;
-            //Dup = dup;
-            //Retain = retain;
-
-            FixedHeader.Flags |= (byte)qos << 1;
-            FixedHeader.Flags |= dup.ToByte() << 3;
-            FixedHeader.Flags |= retain.ToByte();
         }
 
         ///// <summary>

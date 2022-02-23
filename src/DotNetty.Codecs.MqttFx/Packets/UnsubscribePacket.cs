@@ -3,41 +3,28 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 取消订阅
+    /// 取消订阅(UNSUBSCRIBE – Unsubscribe from topics)
     /// </summary>
     public sealed class UnsubscribePacket : PacketWithId
     {
-        private readonly List<string> _topics = new List<string>();
-
         public UnsubscribePacket()
-            : base(PacketType.UNSUBSCRIBE) { }
+            : this(new PacketIdVariableHeader(), new UnsubscribePayload(new List<string>())) { }
 
-        public void AddRange(params string[] topics) => _topics.AddRange(topics);
+        public UnsubscribePacket(ushort packetId, params string[] topics)
+            : this(new PacketIdVariableHeader(packetId), new UnsubscribePayload(topics)) { }
 
-        ///// <summary>
-        ///// 编码
-        ///// </summary>
-        ///// <param name="buffer"></param>
-        //public override void Encode(IByteBuffer buffer)
-        //{
-        //    var buf = Unpooled.Buffer();
-        //    try
-        //    {
-        //        //buf.WriteShort(VariableHeader.PacketId);
+        public UnsubscribePacket(PacketIdVariableHeader variableHeader, UnsubscribePayload payload)
+            : base(variableHeader, payload)
+        {
+            FixedHeader.PacketType = PacketType.UNSUBSCRIBE;
+            VariableHeader = variableHeader;
+            Payload = payload;
+        }
 
-        //        foreach (var item in _topics)
-        //        {
-        //            buf.WriteString(item);
-        //        }
-
-        //        FixedHeader.RemainingLength = buf.ReadableBytes;
-        //        FixedHeader.Encode(buffer);
-        //        buffer.WriteBytes(buf);
-        //    }
-        //    finally
-        //    {
-        //        buf?.Release();
-        //    }
-        //}
+        public IList<string> Topics
+        {
+            get { return ((UnsubscribePayload)Payload).Topics; }
+            set { ((UnsubscribePayload)Payload).Topics = value; }
+        }
     }
 }

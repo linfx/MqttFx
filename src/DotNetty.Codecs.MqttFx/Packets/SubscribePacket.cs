@@ -8,7 +8,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class SubscribePacket : PacketWithId
     {
         public SubscribePacket()
-            : this(new PacketIdVariableHeader(), new SubscribePayload()) { }
+            : this(new PacketIdVariableHeader(), new SubscribePayload(new List<TopicSubscription>())) { }
 
         public SubscribePacket(ushort packetId, params TopicSubscription[] topics)
             : this(new PacketIdVariableHeader(packetId), new SubscribePayload(topics)) { }

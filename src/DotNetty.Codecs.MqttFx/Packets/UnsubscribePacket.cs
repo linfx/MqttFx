@@ -1,4 +1,6 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿using System.Collections.Generic;
+
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 取消订阅(UNSUBSCRIBE – Unsubscribe from topics)
@@ -6,7 +8,7 @@
     public sealed class UnsubscribePacket : PacketWithId
     {
         public UnsubscribePacket()
-            : this(new PacketIdVariableHeader(), new UnsubscribePayload()) { }
+            : this(new PacketIdVariableHeader(), new UnsubscribePayload(new List<string>())) { }
 
         public UnsubscribePacket(ushort packetId, params string[] topics)
             : this(new PacketIdVariableHeader(packetId), new UnsubscribePayload(topics)) { }
@@ -19,7 +21,7 @@
             Payload = payload;
         }
 
-        public string[] Topics
+        public IList<string> Topics
         {
             get { return ((UnsubscribePayload)Payload).Topics; }
             set { ((UnsubscribePayload)Payload).Topics = value; }

@@ -13,11 +13,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// TopicFilters
         /// </summary>
-        public string[] Topics { get; set; }
+        public IList<string> Topics { get; set; }
 
         public UnsubscribePayload() { }
 
-        public UnsubscribePayload(string[] topics)
+        public UnsubscribePayload(IList<string> topics)
         {
             Topics = topics;
         }
@@ -43,7 +43,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             if (unsubscribeTopics.Count == 0)
                 throw new DecoderException("[MQTT-3.10.3-2]");
 
-            Topics = unsubscribeTopics.ToArray();
+            Topics = unsubscribeTopics;
         }
     }
 }

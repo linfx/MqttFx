@@ -12,9 +12,9 @@ namespace MqttFx.Channels
     {
         protected override void ChannelRead0(IChannelHandlerContext ctx, object msg)
         {
-            if (msg is Packet message)
+            if (msg is Packet packet)
             {
-                switch (message.FixedHeader.PacketType)
+                switch (packet.FixedHeader.PacketType)
                 {
                     case PacketType.PINGREQ:
                         HandlePingReq(ctx.Channel);

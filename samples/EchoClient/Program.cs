@@ -18,8 +18,8 @@ namespace EchoClient
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
-            var client = container.GetService<IMqttClient>();
 
+            var client = container.GetService<IMqttClient>();
 
             client.UseConnectedHandler(async () =>
             {

@@ -8,16 +8,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public class ConnAckVariableHeader : VariableHeader
     {
         /*
-         * 连接确认标志 Connect Acknowledge Flags
-         * 第1个字节是 连接确认标志，位7-1是保留位且必须设置为0。 第0 (SP)位 是当前会话（Session Present）标志。
+         * 连接确认标志(Connect Acknowledge Flags)
         */
+
         /// <summary>
         /// 当前会话 Session Present
         /// </summary>
         public bool SessionPresent { get; set; }
 
         /// <summary>
-        /// 连接返回码 Connect Return code
+        /// 连接返回码(Connect Return code)
         /// </summary>
         public ConnectReturnCode ConnectReturnCode { get; set; }
 
@@ -37,9 +37,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="buffer"></param>
         public override void Decode(IByteBuffer buffer, ref int remainingLength)
         {
-            SessionPresent = (buffer.ReadByte() & 0x01) == 0x01;
-            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte();
-            remainingLength -= 2;
+            SessionPresent = (buffer.ReadByte(ref remainingLength) & 0x01) == 0x01;
+            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte(ref remainingLength);
         }
     }
 }

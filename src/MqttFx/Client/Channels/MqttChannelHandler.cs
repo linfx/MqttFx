@@ -53,33 +53,33 @@ namespace MqttFx.Channels
         /// 当收到对方发来的数据后，就会触发，参数msg就是发来的信息，可以是基础类型，也可以是序列化的复杂对象
         /// </summary>
         /// <param name="ctx"></param>
-        /// <param name="msg"></param>
-        protected override void ChannelRead0(IChannelHandlerContext ctx, Packet msg)
+        /// <param name="packet"></param>
+        protected override void ChannelRead0(IChannelHandlerContext ctx, Packet packet)
         {
-            switch (msg.FixedHeader.PacketType)
+            switch (packet.FixedHeader.PacketType)
             {
                 case PacketType.CONNACK:
-                    ProcessMessage(ctx.Channel, (ConnAckPacket)msg);
+                    ProcessMessage(ctx.Channel, (ConnAckPacket)packet);
                     break;
                 case PacketType.PUBLISH:
-                    ProcessMessage(ctx.Channel, (PublishPacket)msg);
+                    ProcessMessage(ctx.Channel, (PublishPacket)packet);
                     break;
                 case PacketType.PUBACK:
-                    ProcessMessage(msg as PubAckPacket);
+                    ProcessMessage(packet as PubAckPacket);
                     break;
                 case PacketType.PUBREC:
-                    ProcessMessage(ctx.Channel, msg as PubRecPacket);
+                    ProcessMessage(ctx.Channel, packet as PubRecPacket);
                     break;
                 case PacketType.PUBREL:
-                    ProcessMessage(ctx.Channel, msg as PubRelPacket);
+                    ProcessMessage(ctx.Channel, packet as PubRelPacket);
                     break;
                 case PacketType.PUBCOMP:
-                    ProcessMessage(msg);
+                    ProcessMessage(packet);
                     break;
                 case PacketType.SUBSCRIBE:
                     break;
                 case PacketType.SUBACK:
-                    ProcessMessage((SubAckPacket)msg);
+                    ProcessMessage((SubAckPacket)packet);
                     break;
                 case PacketType.UNSUBSCRIBE:
                     break;
@@ -90,9 +90,9 @@ namespace MqttFx.Channels
             }
         }
 
-        private void ProcessMessage(IChannel channel, ConnAckPacket message)
+        private void ProcessMessage(IChannel channel, ConnAckPacket packet)
         {
-            var variableHeader = (ConnAckVariableHeader)message.VariableHeader;
+            var variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
 
             switch (variableHeader.ConnectReturnCode)
             {
@@ -113,18 +113,18 @@ namespace MqttFx.Channels
             }
         }
 
-        private void ProcessMessage(IChannel channel, PublishPacket message)
+        private void ProcessMessage(IChannel channel, PublishPacket packet)
         {
-            switch (message.Qos)
+            switch (packet.Qos)
             {
                 case MqttQos.AT_MOST_ONCE:
-                    InvokeProcessForIncomingPublish(message);
+                    InvokeProcessForIncomingPublish(packet);
                     break;
 
                 case MqttQos.AT_LEAST_ONCE:
-                    InvokeProcessForIncomingPublish(message);
-                    if (message.PacketId > 0)
-                        channel.WriteAndFlushAsync(new PubAckPacket(message.PacketId));
+                    InvokeProcessForIncomingPublish(packet);
+                    if (packet.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubAckPacket(packet.PacketId));
                     break;
 
                 case MqttQos.EXACTLY_ONCE:
@@ -136,10 +136,9 @@ namespace MqttFx.Channels
         {
         }
 
-        private void ProcessMessage(IChannel channel, PubRecPacket message)
+        private void ProcessMessage(IChannel channel, PubRecPacket packet)
         {
-            var packet = new PubRelPacket(message.PacketId);
-            channel.WriteAndFlushAsync(packet);
+            channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
         }
 
         private void ProcessMessage(IChannel channel, PubRelPacket message)
@@ -159,12 +158,12 @@ namespace MqttFx.Channels
         {
         }
 
-        private void InvokeProcessForIncomingPublish(PublishPacket message)
+        private void InvokeProcessForIncomingPublish(PublishPacket packet)
         {
             var handler = client.MessageReceivedHandler;
             if(handler != null)
             {
-                handler.OnMesage(message.ToMessage());
+                handler.OnMesage(packet.ToMessage());
             }
         }
     }

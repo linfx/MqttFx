@@ -9,7 +9,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>mqtt</PackageTags>
 		<Copyright>© LinFx. All rights reserved.</Copyright>
-		<Version>0.7.0</Version>
+		<Version>0.7.1</Version>
 		<Description>MQTT codec for DotNetty</Description>
 	</PropertyGroup>
 

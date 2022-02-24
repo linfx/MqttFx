@@ -2,6 +2,7 @@
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
 using System.Threading.Tasks;
+using static DotNetty.Codecs.Mqtt.Packets.ConnectReturnCode;
 
 namespace MqttFx.Channels
 {

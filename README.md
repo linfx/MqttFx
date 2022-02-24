@@ -9,7 +9,7 @@ c# mqtt 3.1.1 client
 `PM> Install-Package MqttFx`
 
 
-## Examples
+## Samples
 ```c#
 
     class Program
@@ -23,8 +23,8 @@ c# mqtt 3.1.1 client
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
-            var client = container.GetService<IMqttClient>();
 
+            var client = container.GetService<IMqttClient>();
 
             client.UseConnectedHandler(async () =>
             {
@@ -68,19 +68,14 @@ c# mqtt 3.1.1 client
 
 ```
 
+## MQTT 规范
 
-## EMQ  百万级分布式开源物联网MQTT消息服务器
-http://www.emqtt.com/
+你可以通过以下链接了解与查阅 MQTT 协议:
 
-***************************
+[MQTT 协议中文版](https://mcxiaoke.gitbooks.io/mqtt-cn/content/)
 
-## 概览
-#### MQTT是一个轻量的发布订阅模式消息传输协议，专门针对低带宽和不稳定网络环境的物联网应用设计
-```
-MQTT 官网:            http://mqtt.org
-MQTT V3.1.1协议规范:  http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html
-MQTT 协议英文版:      http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
-MQTT 协议中文版:      https://mcxiaoke.gitbooks.io/mqtt-cn/content/
-MQTT 协议中文版:      https://legacy.gitbook.com/book/mcxiaoke/mqtt-cn
+[MQTT Version 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html)
 
-```
+[MQTT Version 5.0](https://docs.oasis-open.org/mqtt/mqtt/v5.0/cs02/mqtt-v5.0-cs02.html)
+
+[MQTT SN](https://www.oasis-open.org/committees/download.php/66091/MQTT-SN_spec_v1.2.pdf)

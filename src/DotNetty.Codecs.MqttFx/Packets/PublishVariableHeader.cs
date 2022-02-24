@@ -33,9 +33,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             TopicName = buffer.ReadString(ref fixedHeader.RemainingLength);
             if (fixedHeader.GetQos() > MqttQos.AT_MOST_ONCE)
-            {
                 base.Decode(buffer, ref fixedHeader);
-            }
         }
     }
 }

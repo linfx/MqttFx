@@ -178,7 +178,7 @@ namespace DotNetty.Codecs.MqttFx
         /// <param name="buffer"></param>
         /// <param name="remainingLength"></param>
         /// <returns></returns>
-        public static byte[] ReadLengthBytes(this IByteBuffer buffer, ref int remainingLength)
+        public static byte[] ReadBytesArray(this IByteBuffer buffer, ref int remainingLength)
         {
             int length = ReadUnsignedShort(buffer, ref remainingLength);
             return buffer.ReadBytes(length, ref remainingLength);

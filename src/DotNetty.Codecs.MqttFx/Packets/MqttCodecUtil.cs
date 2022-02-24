@@ -29,4 +29,36 @@
             }
         }
     }
+
+    static class PublishPacketFixedHeaderExtensions
+    {
+        public static bool GetDup(this FixedHeader fixedHeader)
+        {
+            return (fixedHeader.Flags & 0x08) == 0x08;
+        }
+
+        public static MqttQos GetQos(this FixedHeader fixedHeader)
+        {
+            return (MqttQos)((fixedHeader.Flags & 0x06) >> 1);
+        }
+
+        public static bool GetRetain(this FixedHeader fixedHeader)
+        {
+            return (fixedHeader.Flags & 0x01) > 0;
+        }
+
+        public static void SetDup(this FixedHeader fixedHeader, bool dup = false)
+        {
+            fixedHeader.Flags |= dup.ToByte() << 3;
+        }
+        public static void SetQos(this FixedHeader fixedHeader, MqttQos qos)
+        {
+            fixedHeader.Flags |= (byte)qos << 1;
+        }
+
+        public static void SetRetain(this FixedHeader fixedHeader, bool retain = false)
+        {
+            fixedHeader.Flags |= retain.ToByte();
+        }
+    }
 }

@@ -65,16 +65,16 @@ namespace DotNetty.Codecs.MqttFx.Packets
             buffer.WriteShort(KeepAlive);
         }
 
-        public override void Decode(IByteBuffer buffer, ref int remainingLength)
+        public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
             // 协议名 Protocol Name
-            ProtocolName = buffer.ReadString(ref remainingLength);
+            ProtocolName = buffer.ReadString(ref fixedHeader.RemainingLength);
 
             // 协议级别 Protocol Level
-            ProtocolLevel = buffer.ReadByte(ref remainingLength);
+            ProtocolLevel = buffer.ReadByte(ref fixedHeader.RemainingLength);
 
             // 连接标志 Connect Flags
-            int connectFlags = buffer.ReadByte(ref remainingLength);
+            int connectFlags = buffer.ReadByte(ref fixedHeader.RemainingLength);
             ConnectFlags.CleanSession = (connectFlags & 0x02) == 0x02;
             ConnectFlags.WillFlag = (connectFlags & 0x04) == 0x04;
             if (ConnectFlags.WillFlag)
@@ -86,7 +86,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             ConnectFlags.PasswordFlag = (connectFlags & 0x40) == 0x40;
 
             // 保持连接 Keep Alive
-            KeepAlive = (ushort)buffer.ReadShort(ref remainingLength);
+            KeepAlive = (ushort)buffer.ReadShort(ref fixedHeader.RemainingLength);
         }
     }
 }

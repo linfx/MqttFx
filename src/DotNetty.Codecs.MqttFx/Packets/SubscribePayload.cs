@@ -39,14 +39,11 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
                 byte qos = buffer.ReadByte(ref remainingLength);
                 if (qos > (byte)MqttQos.EXACTLY_ONCE)
-                {
                     throw new DecoderException($"[MQTT-3.8.3-4]. Invalid QoS value: {qos}.");
-                }
 
                 TopicSubscription ts;
                 ts.TopicName = topicFilter;
                 ts.Qos = (MqttQos)qos;
-
                 TopicSubscriptions.Add(ts);
             }
 

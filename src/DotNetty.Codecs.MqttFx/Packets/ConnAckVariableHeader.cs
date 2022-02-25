@@ -35,10 +35,10 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// 解码
         /// </summary>
         /// <param name="buffer"></param>
-        public override void Decode(IByteBuffer buffer, ref int remainingLength)
+        public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
-            SessionPresent = (buffer.ReadByte(ref remainingLength) & 0x01) == 0x01;
-            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte(ref remainingLength);
+            SessionPresent = (buffer.ReadByte(ref fixedHeader.RemainingLength) & 0x01) == 0x01;
+            ConnectReturnCode = (ConnectReturnCode)buffer.ReadByte(ref fixedHeader.RemainingLength);
         }
     }
 }

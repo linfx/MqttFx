@@ -42,7 +42,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="variableHeader">可变报头(Variable header)</param>
         protected Packet(VariableHeader variableHeader) :
-            this(variableHeader, null)
+            this(variableHeader, default)
         {
         }
 

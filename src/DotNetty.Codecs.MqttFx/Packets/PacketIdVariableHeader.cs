@@ -12,8 +12,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public ushort PacketId { get; set; }
 
+        /// <summary>
+        /// 可变报头(Variable header)
+        /// </summary>
         public PacketIdVariableHeader() { }
 
+        /// <summary>
+        ///  可变报头(Variable header)
+        /// </summary>
+        /// <param name="packetId">报文标识符(Packet Identifier)</param>
         public PacketIdVariableHeader(ushort packetId)
         {
             PacketId = packetId;
@@ -34,9 +41,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="fixedHeader"></param>
-        public override void Decode(IByteBuffer buffer, ref int remainingLength)
+        public override void Decode(IByteBuffer buffer, ref FixedHeader fixedHeader)
         {
-            PacketId = buffer.ReadUnsignedShort(ref remainingLength);
+            PacketId = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
             if (PacketId == 0)
                 throw new DecoderException("[MQTT-2.3.1-1]");
         }

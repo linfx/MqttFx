@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MqttFx.Channels
 {
+    /// <summary>
+    /// 设置出站解码器和入站编码器
+    /// </summary>
     class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
     {
         private readonly IMqttClient client;

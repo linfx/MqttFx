@@ -2,7 +2,7 @@
 {
     internal class PacketIdProvider
     {
-        private readonly object _syncRoot = new object();
+        private readonly object _syncRoot = new();
         private ushort _value;
 
         public void Reset()

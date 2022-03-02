@@ -2,7 +2,6 @@
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
 using System.Threading.Tasks;
-using static DotNetty.Codecs.Mqtt.Packets.ConnectReturnCode;
 
 namespace MqttFx.Channels
 {
@@ -162,7 +161,7 @@ namespace MqttFx.Channels
         private void InvokeProcessForIncomingPublish(PublishPacket packet)
         {
             var handler = client.MessageReceivedHandler;
-            if(handler != null)
+            if (handler != null)
             {
                 handler.OnMesage(packet.ToMessage());
             }

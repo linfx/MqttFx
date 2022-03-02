@@ -8,7 +8,7 @@ namespace MqttFx.Channels
     /// <summary>
     /// ping 处理器
     /// </summary>
-    internal class MqttPingHandler : SimpleChannelInboundHandler<object>
+    class MqttPingHandler : SimpleChannelInboundHandler<object>
     {
         protected override void ChannelRead0(IChannelHandlerContext ctx, object msg)
         {

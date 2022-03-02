@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MqttFx.Channels
 {
-    internal sealed class ReadListeningHandler : ChannelHandlerAdapter
+    sealed class ReadListeningHandler : ChannelHandlerAdapter
     {
         readonly Queue<object> _receivedQueue = new();
         readonly Queue<TaskCompletionSource<object>> _readPromises = new();

@@ -16,6 +16,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public byte[] Payload { get; set; }
 
+        public PublishPayload() { }
+
+        public PublishPayload(byte[] payload)
+        {
+            Payload = payload;
+        }
+
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
             if (Payload != null)

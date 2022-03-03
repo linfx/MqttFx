@@ -187,6 +187,41 @@ namespace MqttFx.Test
             Assert.Equal(packet_payload.Payload, recoded_payload.Payload);
         }
 
+        //[Theory]
+        //[InlineData(1)]
+        ////[InlineData(127)]
+        ////[InlineData(128)]
+        ////[InlineData(256)]
+        ////[InlineData(257)]
+        ////[InlineData(ushort.MaxValue)]
+        //public void PacketIdOnlyResponseMessagesTest(ushort packetId)
+        //{
+        //    //this.PublishResponseMessageTest<PubAckPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubAckPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubRecPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubRecPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubRelPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubRelPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubCompPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubCompPacket>(packetId, false);
+        //    PublishResponseMessageTest<UnsubAckPacket>(packetId, false);
+        //}
+
+        //void PublishResponseMessageTest<T>(ushort packetId, bool useServer)
+        //    where T : PacketWithId, new()
+        //{
+        //    var packet = new T
+        //    {
+        //        PacketId = packetId
+        //    };
+
+        //    var recoded = RecodePacket(packet, useServer, true);
+
+        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<T>()), Times.Once);
+        //    contextMock.ResetCalls();
+        //    Assert.Equal(packet.PacketId, recoded.PacketId);
+        //}
+
         [Fact]
         public void EmptyPacketMessagesTest()
         {

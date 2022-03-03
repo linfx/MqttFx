@@ -7,8 +7,5 @@
     public class PingRespPacket : Packet
     {
         public static readonly PingRespPacket Instance = new PingRespPacket();
-
-        public PingRespPacket()
-            : base(PacketType.PINGRESP) { }
     }
 }

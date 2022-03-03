@@ -16,7 +16,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
             : base(variableHeader, payload)
         {
-            FixedHeader.PacketType = PacketType.SUBSCRIBE;
             VariableHeader = variableHeader;
             Payload = payload;
         }

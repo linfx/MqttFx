@@ -5,7 +5,5 @@
     /// </summary>
     public sealed class UnsubAckPacket : PacketWithId
     {
-        public UnsubAckPacket()
-            : base(PacketType.UNSUBACK) { }
     }
 }

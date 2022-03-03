@@ -14,7 +14,6 @@
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload)
         {
-            FixedHeader.PacketType = PacketType.PUBLISH;
             VariableHeader = variableHeader;
             Payload = payload;
         }

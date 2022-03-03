@@ -1,7 +1,28 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿using System;
+using System.Collections.Generic;
+
+namespace DotNetty.Codecs.MqttFx.Packets
 {
     public static class MqttCodecUtil
     {
+        public static IDictionary<Type, PacketType> PacketTypes = new Dictionary<Type, PacketType>
+        {
+            { typeof(ConnectPacket), PacketType.CONNECT },
+            { typeof(ConnAckPacket), PacketType.CONNACK },
+            { typeof(PublishPacket), PacketType.PUBLISH },
+            { typeof(PubAckPacket), PacketType.PUBACK },
+            { typeof(PubRecPacket), PacketType.PUBREC },
+            { typeof(PubRelPacket), PacketType.PUBREL },
+            { typeof(PubCompPacket), PacketType.PUBCOMP },
+            { typeof(SubscribePacket), PacketType.SUBSCRIBE },
+            { typeof(SubAckPacket), PacketType.SUBACK },
+            { typeof(UnsubscribePacket), PacketType.UNSUBSCRIBE },
+            { typeof(UnsubAckPacket), PacketType.UNSUBACK },
+            { typeof(PingReqPacket), PacketType.PINGREQ },
+            { typeof(PingRespPacket), PacketType.PINGRESP },
+            { typeof(DisconnectPacket), PacketType.DISCONNECT },
+        };
+
         public static void ValidateTopicFilter(string topicFilter)
         {
             int length = topicFilter.Length;

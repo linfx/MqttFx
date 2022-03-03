@@ -14,7 +14,6 @@
         public ConnAckPacket(ConnAckVariableHeader variableHeader)
             : base(variableHeader)
         {
-            FixedHeader.PacketType = PacketType.CONNACK;
             VariableHeader = variableHeader;
         }
     }

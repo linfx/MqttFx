@@ -16,7 +16,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public SubAckPacket(PacketIdVariableHeader variableHeader, SubAckPayload payload)
             : base(variableHeader, payload)
         {
-            FixedHeader.PacketType = PacketType.SUBACK;
             VariableHeader = variableHeader;
             Payload = payload;
         }

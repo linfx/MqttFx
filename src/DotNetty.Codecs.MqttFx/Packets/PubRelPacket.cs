@@ -6,6 +6,6 @@
     public sealed class PubRelPacket : PacketWithId
     {
         public PubRelPacket(ushort packetId = default)
-            : base(PacketType.PUBREL, packetId) { }
+            : base(packetId) { }
     }
 }

@@ -14,7 +14,6 @@
         public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPayload payload)
             : base(variableHeader, payload)
         {
-            FixedHeader.PacketType = PacketType.CONNECT;
             VariableHeader = variableHeader;
             Payload = payload;
         }

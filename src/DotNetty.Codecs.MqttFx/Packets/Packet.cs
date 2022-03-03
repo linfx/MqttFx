@@ -26,23 +26,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        protected Packet() { }
-
-        /// <summary>
-        /// 报文抽象类(MQTT Control Packet)
-        /// </summary>
-        /// <param name="packetType">报文类型</param>
-        protected Packet(PacketType packetType)
+        protected Packet()
         {
-            FixedHeader.PacketType = packetType;
+            FixedHeader.PacketType = MqttCodecUtil.PacketTypes[GetType()];
         }
 
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
         /// <param name="variableHeader">可变报头(Variable header)</param>
-        protected Packet(VariableHeader variableHeader) :
-            this(variableHeader, default)
+        protected Packet(VariableHeader variableHeader)
+            : this(variableHeader, default)
         {
         }
 
@@ -52,6 +46,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="variableHeader">可变报头(Variable header)</param>
         /// <param name="payload">有效载荷(Payload)</param>
         protected Packet(VariableHeader variableHeader, Payload payload)
+            : this()
         {
             VariableHeader = variableHeader;
             Payload = payload;

@@ -12,10 +12,6 @@
             : this(new ConnectVariableHeader(), new ConnectPayload()) { }
 
         public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPayload payload)
-            : base(variableHeader, payload)
-        {
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
     }
 }

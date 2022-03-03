@@ -12,11 +12,7 @@
             : this(new PublishVariableHeader(), new PublishPayload()) { }
 
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
-            : base(variableHeader, payload)
-        {
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
 
         /// <summary>
         /// 发布消息

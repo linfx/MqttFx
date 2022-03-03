@@ -14,11 +14,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             : this(new PacketIdVariableHeader(packetId), new SubAckPayload(returnCodes)) { }
 
         public SubAckPacket(PacketIdVariableHeader variableHeader, SubAckPayload payload)
-            : base(variableHeader, payload)
-        {
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
 
         /// <summary>
         /// 返回代码

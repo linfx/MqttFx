@@ -12,9 +12,6 @@
             : this(new ConnAckVariableHeader()) { }
 
         public ConnAckPacket(ConnAckVariableHeader variableHeader)
-            : base(variableHeader)
-        {
-            VariableHeader = variableHeader;
-        }
+            : base(variableHeader) { }
     }
 }

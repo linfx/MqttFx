@@ -14,12 +14,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             : this(new PacketIdVariableHeader(packetId), new UnsubscribePayload(topics)) { }
 
         public UnsubscribePacket(PacketIdVariableHeader variableHeader, UnsubscribePayload payload)
-            : base(variableHeader, payload)
-        {
-            FixedHeader.PacketType = PacketType.UNSUBSCRIBE;
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
 
         public IList<string> Topics
         {

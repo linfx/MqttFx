@@ -14,11 +14,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             : this(new PacketIdVariableHeader(packetId), new SubscribePayload(topics)) { }
 
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
-            : base(variableHeader, payload)
-        {
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
 
         public IList<TopicSubscription> TopicSubscriptions
         {

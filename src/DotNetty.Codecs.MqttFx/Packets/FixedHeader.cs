@@ -15,7 +15,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 每个MQTT控制报文类型特定的标志(Flags)
         /// </summary>
-        internal int Flags;
+        public int Flags;
 
         /// <summary>
         /// 剩余长度(Remaining Length)

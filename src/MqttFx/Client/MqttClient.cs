@@ -92,7 +92,7 @@ namespace MqttFx.Client
             {
                 TopicName = topic,
             };
-            ((PublishPayload)packet.Payload).Payload = payload;
+            ((PublishPayload)packet.Payload).Data = payload;
 
             if (qos > MqttQos.AT_MOST_ONCE)
                 packet.PacketId = packetIdProvider.NewPacketId();

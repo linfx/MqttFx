@@ -37,7 +37,7 @@ namespace MqttFx
                 Qos = packet.Qos,
                 Retain = packet.Retain,
                 Topic = packet.TopicName,
-                Payload = ((PublishPayload)packet.Payload).Payload
+                Payload = ((PublishPayload)packet.Payload).Data
             };
         }
     }

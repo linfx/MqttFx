@@ -19,7 +19,7 @@ namespace MqttFx.Client
     /// <summary>
     /// Mqtt客户端
     /// </summary>
-    public class MqttClient : IMqttClient
+    public class MqttClient
     {
         private readonly ILogger logger;
         private IEventLoopGroup eventLoop;
@@ -47,7 +47,7 @@ namespace MqttFx.Client
         /// 连接
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken)
+        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
         {
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
@@ -86,7 +86,7 @@ namespace MqttFx.Client
         /// <param name="payload">有效载荷</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="retain">保留消息</param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain, CancellationToken cancellationToken)
+        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
         {
             var packet = new PublishPacket(qos, false, retain)
             {
@@ -106,7 +106,7 @@ namespace MqttFx.Client
         /// <param name="topic">主题</param>
         /// <param name="qos">服务质量等级</param>
         /// <param name="cancellationToken"></param>
-        public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
+        public Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AT_MOST_ONCE, CancellationToken cancellationToken = default)
         {
             var packet = new SubscribePacket
             {
@@ -158,10 +158,10 @@ namespace MqttFx.Client
 
         class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
         {
-            private readonly IMqttClient client;
+            private readonly MqttClient client;
             private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
 
-            public MqttChannelInitializer(IMqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
+            public MqttChannelInitializer(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
             {
                 this.client = client;
                 this.connectFuture = connectFuture;

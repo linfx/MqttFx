@@ -1,4 +1,5 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using System.Collections.Generic;
@@ -14,7 +15,12 @@ namespace DotNetty.Codecs.MqttFx
 
         protected override void Encode(IChannelHandlerContext context, Packet packet, List<object> output)
         {
-            var buffer = context.Allocator.Buffer();
+            DoEncode(context.Allocator, packet, output);
+        }
+
+        public static void DoEncode(IByteBufferAllocator allocator, Packet packet, List<object> output)
+        {
+            var buffer = allocator.Buffer();
             try
             {
                 packet.Encode(buffer);

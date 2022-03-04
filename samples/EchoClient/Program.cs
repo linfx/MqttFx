@@ -19,7 +19,7 @@ namespace EchoClient
             });
             var container = services.BuildServiceProvider();
 
-            var client = container.GetService<IMqttClient>();
+            var client = container.GetService<MqttClient>();
 
             client.UseConnectedHandler(async () =>
             {

@@ -5,34 +5,34 @@ namespace MqttFx.Client
 {
     public static class MqttClientExtensions
     {
-        public static IMqttClient UseConnectedHandler(this IMqttClient client, Action handler)
+        public static MqttClient UseConnectedHandler(this MqttClient client, Action handler)
         {
             return client.UseConnectedHandler(new MqttClientConnectedHandler(handler));
         }
 
-        public static IMqttClient UseConnectedHandler(this IMqttClient client, IMqttClientConnectedHandler handler)
+        public static MqttClient UseConnectedHandler(this MqttClient client, IMqttClientConnectedHandler handler)
         {
             client.ConnectedHandler = handler;
             return client;
         }
 
-        public static IMqttClient UseDisconnectedHandler(this IMqttClient client, Action handler)
+        public static MqttClient UseDisconnectedHandler(this MqttClient client, Action handler)
         {
             return client.UseDisconnectedHandler(new MqttClientDisconnectedHandler(handler));
         }
 
-        public static IMqttClient UseDisconnectedHandler(this IMqttClient client, IMqttClientDisconnectedHandler handler)
+        public static MqttClient UseDisconnectedHandler(this MqttClient client, IMqttClientDisconnectedHandler handler)
         {
             client.DisconnectedHandler = handler;
             return client;
         }
 
-        public static IMqttClient UseMessageReceivedHandler(this IMqttClient client, Action<Message> handler)
+        public static MqttClient UseMessageReceivedHandler(this MqttClient client, Action<Message> handler)
         {
             return client.UseApplicationMessageReceivedHandler(new MessageReceivedHandler(handler));
         }
 
-        public static IMqttClient UseApplicationMessageReceivedHandler(this IMqttClient client, IMessageReceivedHandler handler)
+        public static MqttClient UseApplicationMessageReceivedHandler(this MqttClient client, IMessageReceivedHandler handler)
         {
             client.MessageReceivedHandler = handler;
             return client;

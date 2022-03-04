@@ -10,10 +10,10 @@ namespace MqttFx.Channels
     /// </summary>
     public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
-        private readonly IMqttClient client;
+        private readonly MqttClient client;
         private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
 
-        public MqttChannelHandler(IMqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
+        public MqttChannelHandler(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
         {
             this.client = client;
             this.connectFuture = connectFuture;

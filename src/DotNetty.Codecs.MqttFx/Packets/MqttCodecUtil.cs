@@ -36,15 +36,13 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 {
                     case '+':
                         if ((i > 0 && topicFilter[i - 1] != '/') || (i < length - 1 && topicFilter[i + 1] != '/'))
-                        {
                             throw new DecoderException($"[MQTT-4.7.1-3]. Invalid topic filter: {topicFilter}");
-                        }
+
                         break;
                     case '#':
                         if (i < length - 1 || (i > 0 && topicFilter[i - 1] != '/'))
-                        {
                             throw new DecoderException($"[MQTT-4.7.1-2]. Invalid topic filter: {topicFilter}");
-                        }
+
                         break;
                 }
             }

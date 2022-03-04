@@ -1,7 +1,9 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Common.Concurrency;
 using DotNetty.Common.Utilities;
 using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Channels;
+using System;
 
 namespace MqttFx.Channels
 {
@@ -10,6 +12,9 @@ namespace MqttFx.Channels
     /// </summary>
     class MqttPingHandler : SimpleChannelInboundHandler<object>
     {
+        //private int keepaliveSeconds;
+        private IScheduledTask pingRespTimeout;
+
         protected override void ChannelRead0(IChannelHandlerContext ctx, object msg)
         {
             if (msg is Packet packet)
@@ -51,6 +56,14 @@ namespace MqttFx.Channels
         private void SendPingReq(IChannel channel)
         {
             channel.WriteAndFlushAsync(PingReqPacket.Instance);
+
+            if (pingRespTimeout != null)
+            {
+                pingRespTimeout = channel.EventLoop.Schedule(() =>
+                {
+                    channel.WriteAndFlushAsync(DisconnectPacket.Instance);
+                }, TimeSpan.FromSeconds(10));
+            }
         }
 
         private void HandlePingReq(IChannel channel)

@@ -21,8 +21,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         public IList<MqttQos> ReturnCodes
         {
-            get { return ((SubAckPayload)Payload).ReturnCodes; }
-            set { ((SubAckPayload)Payload).ReturnCodes = value; }
+            get => ((SubAckPayload)Payload).ReturnCodes; 
+            set => ((SubAckPayload)Payload).ReturnCodes = value;
         }
     }
 }

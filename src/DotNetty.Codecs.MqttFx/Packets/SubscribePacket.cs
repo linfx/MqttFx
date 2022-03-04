@@ -18,8 +18,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
         public IList<TopicSubscription> TopicSubscriptions
         {
-            get { return ((SubscribePayload)Payload).TopicSubscriptions; }
-            set { ((SubscribePayload)Payload).TopicSubscriptions = value; }
+            get => ((SubscribePayload)Payload).TopicSubscriptions;
         }
 
         /// <summary>

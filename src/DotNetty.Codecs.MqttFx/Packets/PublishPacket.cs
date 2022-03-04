@@ -40,8 +40,8 @@
         /// </summary>
         public bool Dup
         {
-            get { return FixedHeader.GetDup(); }
-            private set { FixedHeader.SetDup(value); }
+            get => FixedHeader.GetDup();
+            private set => FixedHeader.SetDup(value);
         }
 
         /// <summary>
@@ -49,8 +49,8 @@
         /// </summary>
         public MqttQos Qos
         {
-            get { return FixedHeader.GetQos(); }
-            private set { FixedHeader.SetQos(value); }
+            get => FixedHeader.GetQos();
+            private set => FixedHeader.SetQos(value);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@
         /// </summary>
         public bool Retain
         {
-            get { return FixedHeader.GetRetain(); }
-            private set { FixedHeader.SetRetain(value); }
+            get => FixedHeader.GetRetain();
+            private set => FixedHeader.SetRetain(value);
         }
 
         /// <summary>
@@ -67,8 +67,8 @@
         /// </summary>
         public string TopicName
         {
-            get { return ((PublishVariableHeader)VariableHeader).TopicName; }
-            set { ((PublishVariableHeader)VariableHeader).TopicName = value; }
+            get => ((PublishVariableHeader)VariableHeader).TopicName;
+            set => ((PublishVariableHeader)VariableHeader).TopicName = value;
         }
     }
 }

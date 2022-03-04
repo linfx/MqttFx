@@ -11,6 +11,11 @@
         public ConnectPacket()
             : this(new ConnectVariableHeader(), new ConnectPayload()) { }
 
+        /// <summary>
+        /// 连接报文
+        /// </summary>
+        /// <param name="variableHeader"></param>
+        /// <param name="payload"></param>
         public ConnectPacket(ConnectVariableHeader variableHeader, ConnectPayload payload)
             : base(variableHeader, payload) { }
     }

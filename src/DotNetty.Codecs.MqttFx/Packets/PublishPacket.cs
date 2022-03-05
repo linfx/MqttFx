@@ -42,7 +42,7 @@
         public bool Dup
         {
             get => FixedHeader.GetDup();
-            private set => FixedHeader.SetDup(value);
+            set => FixedHeader.SetDup(value);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@
         public MqttQos Qos
         {
             get => FixedHeader.GetQos();
-            private set => FixedHeader.SetQos(value);
+            set => FixedHeader.SetQos(value);
         }
 
         /// <summary>
@@ -60,11 +60,11 @@
         public bool Retain
         {
             get => FixedHeader.GetRetain();
-            private set => FixedHeader.SetRetain(value);
+            set => FixedHeader.SetRetain(value);
         }
 
         /// <summary>
-        /// 主题名(UTF-8编码的字符串)(Topic Name)
+        /// 主题名称(UTF-8编码的字符串)(Topic Name)
         /// </summary>
         public string TopicName
         {

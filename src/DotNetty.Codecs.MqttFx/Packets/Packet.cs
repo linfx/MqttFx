@@ -4,7 +4,9 @@ using DotNetty.Common.Utilities;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 报文抽象类(MQTT Control Packet)
+    /// MQTT 控制数据包(MQTT Control Packet)
+    /// 通过网络连接发送的信息包。MQTT 规范定义了 14 种不同类型的控制数据包。
+    /// 
     /// </summary>
     public abstract class Packet
     {

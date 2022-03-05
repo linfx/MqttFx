@@ -1,5 +1,8 @@
-﻿using MqttFx.Client.Handlers;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using MqttFx.Client.Handlers;
 using System;
+using System.Text;
+using System.Threading;
 
 namespace MqttFx.Client
 {
@@ -35,6 +38,25 @@ namespace MqttFx.Client
         public static MqttClient UseApplicationMessageReceivedHandler(this MqttClient client, IMessageReceivedHandler handler)
         {
             client.MessageReceivedHandler = handler;
+            return client;
+        }
+
+        public static MqttClient PublishAsync(this MqttClient client, string topic, string payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        {
+            var payloadBuffer = Encoding.UTF8.GetBytes(payload ?? string.Empty);
+            return PublishAsync(client, topic, payloadBuffer, qos, retain, cancellationToken);
+        }
+
+        public static MqttClient PublishAsync(this MqttClient client, string topic, byte[] payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        {
+            var applicationMessage = new ApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(payload)
+                //.WithRetainFlag(retain)
+                //.WithPayload(qualityOfServiceLevel)
+                .Build();
+
+            client.PublishAsync(applicationMessage, cancellationToken);
             return client;
         }
     }

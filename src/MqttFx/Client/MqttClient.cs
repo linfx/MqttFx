@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using MqttFx.Channels;
+using MqttFx.Formatter;
 using MqttFx.Utils;
 using System;
 using System.Threading;
@@ -18,6 +19,8 @@ namespace MqttFx.Client
 {
     /// <summary>
     /// Mqtt客户端
+    /// 使用 MQTT 的程序或设备。客户端始终建立与服务器的网络连接。
+    /// A program or device that uses MQTT. A Client always establishes the Network Connection to the Server.
     /// </summary>
     public class MqttClient
     {
@@ -79,22 +82,13 @@ namespace MqttFx.Client
             }
         }
 
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="payload">有效载荷</param>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="retain">保留消息</param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        public Task PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellation = default)
         {
-            var packet = new PublishPacket(qos, false, retain)
-            {
-                TopicName = topic,
-            };
-            ((PublishPayload)packet.Payload).Data = payload;
+            cancellation.ThrowIfCancellationRequested();
 
-            if (qos > MqttQos.AT_MOST_ONCE)
+            var packet = PublishPacketFactory.Create(applicationMessage);
+
+            if (packet.Qos > MqttQos.AT_MOST_ONCE)
                 packet.PacketId = packetIdProvider.NewPacketId();
 
             return SendAsync(packet);

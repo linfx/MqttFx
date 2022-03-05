@@ -1,5 +1,5 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MqttFx;
 using MqttFx.Client;
 using System;
 using System.Text;
@@ -48,8 +48,13 @@ namespace EchoClient
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
-                    var topic = "testtopic/ab";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
+
+                    var mesage = new ApplicationMessageBuilder()
+                        .WithTopic("testtopic/ab")
+                        .WithPayload($"HelloWorld: {i}")
+                        .Build();
+
+                    await client.PublishAsync(mesage);
                 }
             }
             else

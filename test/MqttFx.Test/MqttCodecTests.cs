@@ -152,7 +152,7 @@ namespace MqttFx.Test
             var recoded = RecodePacket(packet, true, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<UnsubscribePacket>()), Times.Once);
-            Assert.Equal(packet.Topics, recoded.Topics);
+            Assert.Equal(packet.TopicFilters, recoded.TopicFilters);
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 

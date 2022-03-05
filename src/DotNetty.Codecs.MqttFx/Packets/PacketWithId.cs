@@ -8,7 +8,6 @@
         /// <summary>
         /// 报文抽象类(含报文标识符)(MQTT Control Packet)
         /// </summary>
-        /// <param name="packetType">报文类型</param>
         public PacketWithId()
             : this(new PacketIdVariableHeader()) { }
 
@@ -37,8 +36,8 @@
         /// </summary>
         public ushort PacketId
         {
-            get { return ((PacketIdVariableHeader)VariableHeader).PacketId; }
-            set { ((PacketIdVariableHeader)VariableHeader).PacketId = value; }
+            get => ((PacketIdVariableHeader)VariableHeader).PacketId;
+            set => ((PacketIdVariableHeader)VariableHeader).PacketId = value;
         }
     }
 }

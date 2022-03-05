@@ -45,7 +45,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             PacketId = buffer.ReadUnsignedShort(ref fixedHeader.RemainingLength);
             if (PacketId == 0)
-                throw new DecoderException("[MQTT-2.3.1-1]");
+                throw new DecoderException("SUBSCRIBE, UNSUBSCRIBE, and PUBLISH (in cases where QoS > 0) Control Packets MUST contain a non-zero 16-bit Packet Identifier. [MQTT-2.3.1-1]");
         }
     }
 }

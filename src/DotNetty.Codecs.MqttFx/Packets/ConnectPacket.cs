@@ -6,13 +6,13 @@
     public sealed class ConnectPacket : Packet
     {
         /// <summary>
-        /// 连接报文
+        /// 连接报文(CONNECT)
         /// </summary>
         public ConnectPacket()
             : this(new ConnectVariableHeader(), new ConnectPayload()) { }
 
         /// <summary>
-        /// 连接报文
+        /// 连接报文(CONNECT)
         /// </summary>
         /// <param name="variableHeader"></param>
         /// <param name="payload"></param>

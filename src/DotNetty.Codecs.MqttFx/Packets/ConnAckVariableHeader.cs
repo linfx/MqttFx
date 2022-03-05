@@ -3,12 +3,14 @@
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 可变报头(Variable header)
+    /// 可变报头(CONNACK Packet variable header)
     /// </summary>
     public class ConnAckVariableHeader : VariableHeader
     {
         /*
-         * 连接确认标志(Connect Acknowledge Flags)
+         * 连接确认标志(3.2.2.1 Connect Acknowledge Flags)
+         * Byte 1 is the "Connect Acknowledge Flags". Bits 7-1 are reserved and MUST be set to 0. 
+         * Bit 0 (SP1) is the Session Present Flag.
         */
 
         /// <summary>

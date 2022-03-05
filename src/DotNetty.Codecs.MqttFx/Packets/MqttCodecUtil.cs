@@ -27,7 +27,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             int length = topicFilter.Length;
             if (length == 0)
-                throw new DecoderException("[MQTT-4.7.3-1]");
+                throw new DecoderException("All Topic Names and Topic Filters MUST be at least one character long. [MQTT-4.7.3-1]");
 
             for (int i = 0; i < length; i++)
             {

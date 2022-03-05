@@ -120,9 +120,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             while ((digit & 0x80) != 0 && read < 4);
 
             if (read == 4 && (digit & 0x80) != 0)
-            {
                 throw new DecoderException("Remaining length exceeds 4 bytes in length");
-            }
 
             int completeMessageSize = result + 1 + read;
             //if (completeMessageSize > this.maxMessageSize)

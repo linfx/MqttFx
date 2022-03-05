@@ -36,9 +36,8 @@ namespace DotNetty.Codecs.MqttFx.Packets
             {
                 var returnCode = (MqttQos)buffer.ReadByte(ref remainingLength);
                 if (returnCode > MqttQos.EXACTLY_ONCE && returnCode != MqttQos.FAILURE)
-                {
-                    throw new DecoderException($"[MQTT-3.9.3-2]. Invalid return code: {returnCode}");
-                }
+                    throw new DecoderException($"SUBACK return codes other than 0x00, 0x01, 0x02 and 0x80 are reserved and MUST NOT be used. [MQTT-3.9.3-2](Invalid return code: {returnCode}).");
+
                 ReturnCodes.Add(returnCode);
             }
         }

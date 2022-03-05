@@ -41,7 +41,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             }
 
             if (unsubscribeTopics.Count == 0)
-                throw new DecoderException("[MQTT-3.10.3-2]");
+                throw new DecoderException("The Payload of an UNSUBSCRIBE packet MUST contain at least one Topic Filter. An UNSUBSCRIBE packet with no payload is a protocol violation. [MQTT-3.10.3-2]");
 
             Topics = unsubscribeTopics;
         }

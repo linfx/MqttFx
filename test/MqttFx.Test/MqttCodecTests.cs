@@ -115,16 +115,16 @@ namespace MqttFx.Test
         {
             var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) =>
             {
-                TopicSubscription ts;
-                ts.TopicName = topic;
-                ts.Qos = qos;
+                SubscriptionRequest ts;
+                ts.TopicFilter = topic;
+                ts.RequestedQos = qos;
                 return ts;
             }).ToArray());
 
             var recoded = RecodePacket(packet, true, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-            Assert.Equal(packet.TopicSubscriptions, recoded.TopicSubscriptions, EqualityComparer<TopicSubscription>.Default);
+            Assert.Equal(packet.SubscriptionRequests, recoded.SubscriptionRequests, EqualityComparer<SubscriptionRequest>.Default);
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 

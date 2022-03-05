@@ -31,7 +31,7 @@ namespace MqttFx
         /// <summary>
         /// 遗嘱主题
         /// </summary>
-        public Message WillMessage { get; set; }
+        public ApplicationMessage WillMessage { get; set; }
 
         /// <summary>
         /// 响应超时

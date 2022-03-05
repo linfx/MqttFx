@@ -2,27 +2,27 @@
 
 namespace MqttFx
 {
-    public sealed class MessageBuilder
+    public sealed class ApplicationMessageBuilder
     {
         string _topic;
         byte[] _payload;
 
-        public Message Build()
+        public ApplicationMessage Build()
         {
-            var msg = new Message
+            var msg = new ApplicationMessage
             {
                 Topic = _topic,
                 Payload = _payload,
             };
             return msg;
         }
-        public MessageBuilder WithPayload(byte[] payload)
+        public ApplicationMessageBuilder WithPayload(byte[] payload)
         {
             _payload = payload;
             return this;
         }
 
-        public MessageBuilder WithPayload(string payload)
+        public ApplicationMessageBuilder WithPayload(string payload)
         {
             if (payload == null)
             {
@@ -34,7 +34,7 @@ namespace MqttFx
             return this;
         }
 
-        public MessageBuilder WithTopic(string topic)
+        public ApplicationMessageBuilder WithTopic(string topic)
         {
             _topic = topic;
             return this;

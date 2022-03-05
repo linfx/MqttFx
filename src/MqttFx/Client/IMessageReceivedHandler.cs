@@ -2,6 +2,6 @@
 {
     public interface IMessageReceivedHandler
     {
-        void OnMesage(Message message);
+        void OnMesage(ApplicationMessage message);
     }
 }

@@ -5,7 +5,7 @@ namespace MqttFx
     /// <summary>
     /// 消息
     /// </summary>
-    public class Message
+    public class ApplicationMessage
     {
         /// <summary>
         /// 主题
@@ -30,9 +30,9 @@ namespace MqttFx
 
     public static class MessageExtensions
     {
-        public static Message ToMessage(this PublishPacket packet)
+        public static ApplicationMessage ToMessage(this PublishPacket packet)
         {
-            return new Message
+            return new ApplicationMessage
             {
                 Qos = packet.Qos,
                 Retain = packet.Retain,

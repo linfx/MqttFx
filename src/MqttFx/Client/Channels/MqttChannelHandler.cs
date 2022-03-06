@@ -56,41 +56,37 @@ namespace MqttFx.Channels
         /// <param name="packet"></param>
         protected override void ChannelRead0(IChannelHandlerContext ctx, Packet packet)
         {
-            switch (packet.FixedHeader.PacketType)
+            switch (packet)
             {
-                case PacketType.CONNACK:
-                    ProcessMessage(ctx.Channel, (ConnAckPacket)packet);
+                case PublishPacket publishPacket:
+                    ProcessMessage(ctx.Channel, publishPacket);
                     break;
-                case PacketType.PUBLISH:
-                    ProcessMessage(ctx.Channel, (PublishPacket)packet);
+                case PubRecPacket pubRecPacket:
+                    ProcessMessage(ctx.Channel, pubRecPacket);
                     break;
-                case PacketType.PUBACK:
-                    ProcessMessage(packet as PubAckPacket);
+                case PubRelPacket pubRelPacket:
+                    ProcessMessage(ctx.Channel, pubRelPacket);
                     break;
-                case PacketType.PUBREC:
-                    ProcessMessage(ctx.Channel, packet as PubRecPacket);
+                case PubAckPacket pubAckPacket:
+                    ProcessMessage(ctx.Channel, pubAckPacket);
                     break;
-                case PacketType.PUBREL:
-                    ProcessMessage(ctx.Channel, packet as PubRelPacket);
+                case SubAckPacket subAckPacket:
+                    ProcessMessage(ctx.Channel, subAckPacket);
                     break;
-                case PacketType.PUBCOMP:
-                    ProcessMessage(packet);
+                case UnsubAckPacket unsubAckPacket:
+                    ProcessMessage(ctx.Channel, unsubAckPacket);
                     break;
-                case PacketType.SUBSCRIBE:
+                case ConnAckPacket connAckPacket:
+                    ProcessMessage(ctx.Channel, connAckPacket);
                     break;
-                case PacketType.SUBACK:
-                    ProcessMessage((SubAckPacket)packet);
+                case DisconnectPacket:
                     break;
-                case PacketType.UNSUBSCRIBE:
-                    break;
-                case PacketType.UNSUBACK:
-                    break;
-                case PacketType.DISCONNECT:
+                default:
                     break;
             }
         }
 
-        private void ProcessMessage(IChannel channel, ConnAckPacket packet)
+        void ProcessMessage(IChannel channel, ConnAckPacket packet)
         {
             var variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
 
@@ -113,7 +109,7 @@ namespace MqttFx.Channels
             }
         }
 
-        private void ProcessMessage(IChannel channel, PublishPacket packet)
+        void ProcessMessage(IChannel channel, PublishPacket packet)
         {
             switch (packet.Qos)
             {
@@ -132,39 +128,35 @@ namespace MqttFx.Channels
             }
         }
 
-        private void ProcessMessage(PubAckPacket message)
-        {
-        }
-
-        private void ProcessMessage(IChannel channel, PubRecPacket packet)
-        {
-            channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
-        }
-
-        private void ProcessMessage(IChannel channel, PubRelPacket message)
-        {
-        }
-
-        private void ProcessMessage(SubAckPacket message)
-        {
-        }
-
-        private void ProcessMessage(UnsubAckPacket message)
-        {
-        }
-
-
-        private void ProcessMessage(Packet message)
-        {
-        }
-
-        private void InvokeProcessForIncomingPublish(PublishPacket packet)
+        void InvokeProcessForIncomingPublish(PublishPacket packet)
         {
             var handler = client.MessageReceivedHandler;
             if (handler != null)
             {
                 handler.OnMesage(packet.ToMessage());
             }
+        }
+
+        void ProcessMessage(IChannel channel, PubRecPacket packet)
+        {
+            channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
+        }
+
+        void ProcessMessage(IChannel channel, PubRelPacket packet)
+        {
+            channel.WriteAndFlushAsync(new PubCompPacket(packet.PacketId));
+        }
+
+        void ProcessMessage(IChannel channel, PubAckPacket message)
+        {
+        }
+
+        void ProcessMessage(IChannel channel, SubAckPacket message)
+        {
+        }
+
+        void ProcessMessage(IChannel channel, UnsubAckPacket message)
+        {
         }
     }
 }

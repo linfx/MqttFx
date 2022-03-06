@@ -52,6 +52,8 @@ namespace MqttFx.Client
         /// <returns></returns>
         public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
 
@@ -82,15 +84,23 @@ namespace MqttFx.Client
             }
         }
 
-        public Task PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellation = default)
+        public Task PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellationToken = default)
         {
-            cancellation.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
             var packet = PublishPacketFactory.Create(applicationMessage);
 
             if (packet.Qos > MqttQos.AT_MOST_ONCE)
                 packet.PacketId = packetIdProvider.NewPacketId();
 
+            return SendAsync(packet, cancellationToken);
+        }
+
+        public Task SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
             return SendAsync(packet);
         }
 
@@ -114,10 +124,10 @@ namespace MqttFx.Client
         /// <summary>
         /// 取消订阅
         /// </summary>
-        /// <param name="topics">主题</param>
-        public Task UnsubscribeAsync(params string[] topics)
+        /// <param name="topicFilters">主题</param>
+        public Task UnsubscribeAsync(CancellationToken cancellationToken = default, params string[] topicFilters)
         {
-            var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topics);
+            var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topicFilters);
 
             return SendAsync(packet);
         }
@@ -139,8 +149,10 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        private Task SendAsync(Packet packet)
+        private Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (channel == null)
                 return Task.CompletedTask;
 

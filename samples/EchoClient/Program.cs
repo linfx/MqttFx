@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using Microsoft.Extensions.DependencyInjection;
 using MqttFx;
 using MqttFx.Client;
 using System;
@@ -25,8 +26,11 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/a";
-                await client.SubscribeAsync(topic);
+                var subscriptionRequests = new SubscriptionRequestsBuilder()
+                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
+                    .Build();
+
+                await client.SubscribeAsync(subscriptionRequests);
 
                 Console.WriteLine("### SUBSCRIBED ###");
             });
@@ -52,6 +56,7 @@ namespace EchoClient
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
+                        .WithQos(MqttQos.AT_LEAST_ONCE)
                         .Build();
 
                     await client.PublishAsync(mesage);

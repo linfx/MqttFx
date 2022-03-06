@@ -3,11 +3,46 @@ using MqttFx.Client.Handlers;
 using System;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MqttFx.Client
 {
     public static class MqttClientExtensions
     {
+        public static Task PublishAsync(this MqttClient client, string topic, string payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        {
+            var payloadBuffer = Encoding.UTF8.GetBytes(payload ?? string.Empty);
+            return PublishAsync(client, topic, payloadBuffer, qos, retain, cancellationToken);
+        }
+
+        public static Task PublishAsync(this MqttClient client, string topic, byte[] payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        {
+            var applicationMessage = new ApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(payload)
+                .WithQos(qos)
+                .WithRetainFlag(retain)
+                .Build();
+
+            return client.PublishAsync(applicationMessage, cancellationToken);
+        }
+
+        public static Task SubscribeAsync(this MqttClient mqttClient, TopicFilter topicFilter, CancellationToken cancellationToken = default)
+        {
+            if (mqttClient == null)
+                throw new ArgumentNullException(nameof(mqttClient));
+
+            if (topicFilter == null)
+                throw new ArgumentNullException(nameof(topicFilter));
+
+            var subscribeOptions = new SubscriptionRequestsBuilder()
+                .WithTopicFilter(topicFilter)
+                .Build();
+
+            return mqttClient.SubscribeAsync(subscribeOptions, cancellationToken);
+        }
+
+
         public static MqttClient UseConnectedHandler(this MqttClient client, Action handler)
         {
             return client.UseConnectedHandler(new MqttClientConnectedHandler(handler));
@@ -38,25 +73,6 @@ namespace MqttFx.Client
         public static MqttClient UseApplicationMessageReceivedHandler(this MqttClient client, IMessageReceivedHandler handler)
         {
             client.MessageReceivedHandler = handler;
-            return client;
-        }
-
-        public static MqttClient PublishAsync(this MqttClient client, string topic, string payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
-        {
-            var payloadBuffer = Encoding.UTF8.GetBytes(payload ?? string.Empty);
-            return PublishAsync(client, topic, payloadBuffer, qos, retain, cancellationToken);
-        }
-
-        public static MqttClient PublishAsync(this MqttClient client, string topic, byte[] payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
-        {
-            var applicationMessage = new ApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(payload)
-                //.WithRetainFlag(retain)
-                //.WithPayload(qualityOfServiceLevel)
-                .Build();
-
-            client.PublishAsync(applicationMessage, cancellationToken);
             return client;
         }
     }

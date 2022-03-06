@@ -27,7 +27,6 @@ namespace MqttFx
             return this;
         }
 
-
         public TopicFilterBuilder WithQos(MqttQos qos)
         {
             _qos = qos;
@@ -52,10 +51,15 @@ namespace MqttFx
             return this;
         }
 
-        public TopicFilterBuilder Build()
+        public TopicFilter Build()
         {
-            return new TopicFilterBuilder
+            if (string.IsNullOrEmpty(_topic))
+                throw new MqttException("Topic is not set.");
+
+            return new TopicFilter
             {
+                Topic = _topic,
+                Qos = _qos,
             };
         }
     }

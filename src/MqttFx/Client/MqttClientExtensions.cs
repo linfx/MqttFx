@@ -85,7 +85,7 @@ namespace MqttFx.Client
             return client;
         }
 
-        public static MqttClient UseMessageReceivedHandler(this MqttClient client, Action<ApplicationMessage> handler)
+        public static MqttClient UseApplicationMessageReceivedHandler(this MqttClient client, Action<ApplicationMessage> handler)
         {
             return client.UseApplicationMessageReceivedHandler(new MessageReceivedHandler(handler));
         }

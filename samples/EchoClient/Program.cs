@@ -35,7 +35,7 @@ namespace EchoClient
                 Console.WriteLine("### SUBSCRIBED ###");
             });
 
-            client.UseMessageReceivedHandler(message =>
+            client.UseApplicationMessageReceivedHandler(message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
                 Console.WriteLine($"+ Topic = {message.Topic}");

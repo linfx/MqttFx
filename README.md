@@ -24,14 +24,17 @@ c# mqtt 3.1.1 client
             });
             var container = services.BuildServiceProvider();
 
-            var client = container.GetService<IMqttClient>();
+            var client = container.GetService<MqttClient>();
 
             client.UseConnectedHandler(async () =>
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/a";
-                await client.SubscribeAsync(topic);
+                var subscriptionRequests = new SubscriptionRequestsBuilder()
+                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
+                    .Build();
+
+                await client.SubscribeAsync(subscriptionRequests);
 
                 Console.WriteLine("### SUBSCRIBED ###");
             });
@@ -53,8 +56,14 @@ c# mqtt 3.1.1 client
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
-                    var topic = "testtopic/ab";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
+
+                    var mesage = new ApplicationMessageBuilder()
+                        .WithTopic("testtopic/ab")
+                        .WithPayload($"HelloWorld: {i}")
+                        .WithQos(MqttQos.AT_LEAST_ONCE)
+                        .Build();
+
+                    await client.PublishAsync(mesage);
                 }
             }
             else

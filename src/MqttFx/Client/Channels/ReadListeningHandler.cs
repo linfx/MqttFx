@@ -5,19 +5,17 @@ using System.Threading.Tasks;
 
 namespace MqttFx.Channels
 {
-    internal sealed class ReadListeningHandler : ChannelHandlerAdapter
+    sealed class ReadListeningHandler : ChannelHandlerAdapter
     {
-        readonly Queue<object> _receivedQueue = new Queue<object>();
-        readonly Queue<TaskCompletionSource<object>> _readPromises = new Queue<TaskCompletionSource<object>>();
+        readonly Queue<object> _receivedQueue = new();
+        readonly Queue<TaskCompletionSource<object>> _readPromises = new();
         readonly TimeSpan _defaultReadTimeout;
-        readonly object _gate = new object();
+        readonly object _gate = new();
 
         volatile Exception registeredException;
 
         public ReadListeningHandler()
-            : this(TimeSpan.Zero)
-        {
-        }
+            : this(TimeSpan.Zero) { }
 
         public ReadListeningHandler(TimeSpan defaultReadTimeout)
         {

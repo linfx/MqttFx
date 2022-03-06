@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{6437
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6FF4C7B2-AC10-40F8-9337-827636A50892}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BB60B21-F408-431A-B28A-CF40BDCD5827}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4BB60B21-F408-431A-B28A-CF40BDCD5827}"
 	ProjectSection(SolutionItems) = preProject
 		PROTOCOL.md = PROTOCOL.md
 		README.md = README.md

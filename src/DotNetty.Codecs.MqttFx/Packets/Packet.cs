@@ -4,7 +4,9 @@ using DotNetty.Common.Utilities;
 namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
-    /// 报文抽象类(MQTT Control Packet)
+    /// MQTT 控制数据包(MQTT Control Packet)
+    /// 通过网络连接发送的信息包。MQTT 规范定义了 14 种不同类型的控制数据包。
+    /// 
     /// </summary>
     public abstract class Packet
     {
@@ -26,25 +28,17 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
-        protected Packet() { }
-
-        /// <summary>
-        /// 报文抽象类(MQTT Control Packet)
-        /// </summary>
-        /// <param name="packetType">报文类型</param>
-        protected Packet(PacketType packetType)
+        protected Packet()
         {
-            FixedHeader.PacketType = packetType;
+            FixedHeader.PacketType = MqttCodecUtil.PacketTypes[GetType()];
         }
 
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
         /// </summary>
         /// <param name="variableHeader">可变报头(Variable header)</param>
-        protected Packet(VariableHeader variableHeader) :
-            this(variableHeader, null)
-        {
-        }
+        protected Packet(VariableHeader variableHeader)
+            : this(variableHeader, default) { }
 
         /// <summary>
         /// 报文抽象类(MQTT Control Packet)
@@ -52,6 +46,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <param name="variableHeader">可变报头(Variable header)</param>
         /// <param name="payload">有效载荷(Payload)</param>
         protected Packet(VariableHeader variableHeader, Payload payload)
+            : this()
         {
             VariableHeader = variableHeader;
             Payload = payload;

@@ -1,4 +1,7 @@
-﻿using DotNetty.Codecs.MqttFx.Packets;
+﻿using DotNetty.Codecs.MqttFx;
+using DotNetty.Codecs.MqttFx.Packets;
+using DotNetty.Handlers.Logging;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -6,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using MqttFx.Channels;
+using MqttFx.Formatter;
 using MqttFx.Utils;
 using System;
 using System.Threading;
@@ -15,14 +19,16 @@ namespace MqttFx.Client
 {
     /// <summary>
     /// Mqtt客户端
+    /// 使用 MQTT 的程序或设备。客户端始终建立与服务器的网络连接。
+    /// A program or device that uses MQTT. A Client always establishes the Network Connection to the Server.
     /// </summary>
-    public class MqttClient : IMqttClient
+    public class MqttClient
     {
-        private readonly ILogger _logger;
-        private IEventLoopGroup _eventLoop;
-        private volatile IChannel _channel;
-        private readonly PacketIdProvider _packetIdProvider = new PacketIdProvider();
-        private readonly PacketDispatcher _packetDispatcher = new PacketDispatcher();
+        private readonly ILogger logger;
+        private IEventLoopGroup eventLoop;
+        private volatile IChannel channel;
+        private readonly PacketIdProvider packetIdProvider = new();
+        private readonly PacketDispatcher packetDispatcher = new();
 
         public bool IsConnected { get; private set; }
 
@@ -36,7 +42,7 @@ namespace MqttFx.Client
 
         public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {
-            _logger = logger ?? NullLogger<MqttClient>.Instance;
+            this.logger = logger ?? NullLogger<MqttClient>.Instance;
             Options = options.Value;
         }
 
@@ -44,15 +50,17 @@ namespace MqttFx.Client
         /// 连接
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken)
+        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_eventLoop == null)
-                _eventLoop = new MultithreadEventLoopGroup();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (eventLoop == null)
+                eventLoop = new MultithreadEventLoopGroup();
 
             var connectFuture = new TaskCompletionSource<MqttConnectResult>();
             var bootstrap = new Bootstrap();
             bootstrap
-                .Group(_eventLoop)
+                .Group(eventLoop)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .RemoteAddress(Options.Host, Options.Port)
@@ -60,67 +68,51 @@ namespace MqttFx.Client
 
             try
             {
-                _channel = await bootstrap.ConnectAsync();
-                if (_channel.Open)
+                channel = await bootstrap.ConnectAsync();
+                if (channel.Open)
                 {
-                    _packetDispatcher.Reset();
-                    _packetIdProvider.Reset();
+                    packetDispatcher.Reset();
+                    packetIdProvider.Reset();
                     IsConnected = true;
                 }
                 return await connectFuture.Task;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
                 throw new MqttException("BrokerUnavailable: " + ex.Message);
             }
         }
 
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="payload">有效载荷</param>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="retain">保留消息</param>
-        public Task PublishAsync(string topic, byte[] payload, MqttQos qos, bool retain, CancellationToken cancellationToken)
+        public Task PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellationToken = default)
         {
-            var packet = new PublishPacket(qos, false, retain)
-            {
-                TopicName = topic,
-            };
-            ((PublishPayload)packet.Payload).Payload = payload;
+            cancellationToken.ThrowIfCancellationRequested();
 
-            if (qos > MqttQos.AT_MOST_ONCE)
-                packet.PacketId = _packetIdProvider.NewPacketId();
+            var packet = PublishPacketFactory.Create(applicationMessage);
 
+            if (packet.Qos > MqttQos.AtMostOnce)
+                packet.PacketId = packetIdProvider.NewPacketId();
+
+            return SendAsync(packet, cancellationToken);
+        }
+
+        public Task SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
             return SendAsync(packet);
         }
 
-        /// <summary>
-        /// 订阅主题
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="cancellationToken"></param>
-        public Task SubscribeAsync(string topic, MqttQos qos, CancellationToken cancellationToken)
-        {
-            var packet = new SubscribePacket
-            {
-                PacketId = _packetIdProvider.NewPacketId()
-            };
-            packet.AddSubscription(topic, qos);
 
-            return SendAsync(packet);
-        }
 
         /// <summary>
         /// 取消订阅
         /// </summary>
-        /// <param name="topics">主题</param>
-        public Task UnsubscribeAsync(params string[] topics)
+        /// <param name="topicFilters">主题</param>
+        public Task UnsubscribeAsync(params string[] topicFilters)
         {
-            var packet = new UnsubscribePacket(_packetIdProvider.NewPacketId(), topics);
+            var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topicFilters);
 
             return SendAsync(packet);
         }
@@ -131,10 +123,10 @@ namespace MqttFx.Client
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_channel != null)
-                await _channel.CloseAsync();
+            if (channel != null)
+                await channel.CloseAsync();
 
-            await _eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 
         /// <summary>
@@ -142,15 +134,37 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        private Task SendAsync(Packet packet)
+        private Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
         {
-            if (_channel == null)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (channel == null)
                 return Task.CompletedTask;
 
-            if (_channel.Active)
-                return _channel.WriteAndFlushAsync(packet);
+            if (channel.Active)
+                return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
+        }
+
+        class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
+        {
+            private readonly MqttClient client;
+            private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
+
+            public MqttChannelInitializer(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
+            {
+                this.client = client;
+                this.connectFuture = connectFuture;
+            }
+
+            protected override void InitChannel(ISocketChannel ch)
+            {
+                ch.Pipeline.AddLast(new LoggingHandler());
+                ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
+                ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
+                ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));
+            }
         }
     }
 }

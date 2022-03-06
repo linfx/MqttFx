@@ -4,40 +4,51 @@ namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 订阅报文(SUBSCRIBE - Subscribe to topics)
+    /// The SUBSCRIBE Packet is sent from the Client to the Server to create one or more Subscriptions.
+    /// Each Subscription registers a Client’s interest in one or more Topics. 
+    /// The Server sends PUBLISH Packets to the Client in order to forward Application Messages that were published to Topics that match these Subscriptions. 
+    /// The SUBSCRIBE Packet also specifies (for each Subscription) the maximum QoS with which the Server can send Application Messages to the Client.
     /// </summary>
     public sealed class SubscribePacket : PacketWithId
     {
+        /// <summary>
+        /// SUBSCRIBE - Subscribe to topics
+        /// </summary>
         public SubscribePacket()
-            : this(new PacketIdVariableHeader(), new SubscribePayload(new List<TopicSubscription>())) { }
+            : this(new PacketIdVariableHeader(), new SubscribePayload(new List<SubscriptionRequest>())) { }
 
-        public SubscribePacket(ushort packetId, params TopicSubscription[] topics)
-            : this(new PacketIdVariableHeader(packetId), new SubscribePayload(topics)) { }
+        /// <summary>
+        /// SUBSCRIBE - Subscribe to topics
+        /// </summary>
+        /// <param name="packetId">Packet Identifier</param>
+        /// <param name="requests">Subscription request</param>
+        public SubscribePacket(ushort packetId, params SubscriptionRequest[] requests)
+            : this(new PacketIdVariableHeader(packetId), new SubscribePayload(requests)) { }
 
+        /// <summary>
+        /// SUBSCRIBE - Subscribe to topics
+        /// </summary>
+        /// <param name="variableHeader"></param>
+        /// <param name="payload"></param>
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
-            : base(variableHeader, payload)
-        {
-            FixedHeader.PacketType = PacketType.SUBSCRIBE;
-            VariableHeader = variableHeader;
-            Payload = payload;
-        }
+            : base(variableHeader, payload) { }
 
-        public IList<TopicSubscription> TopicSubscriptions
+        public IList<SubscriptionRequest> SubscriptionRequests
         {
-            get { return ((SubscribePayload)Payload).TopicSubscriptions; }
-            set { ((SubscribePayload)Payload).TopicSubscriptions = value; }
+            get => ((SubscribePayload)Payload).SubscriptionRequests;
         }
 
         /// <summary>
         /// 订阅主题
         /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="qos">服务质量等级</param>
-        public void AddSubscription(string topic, MqttQos qos)
+        /// <param name="topicFilter">Topic Name</param>
+        /// <param name="requestedQos">Requested QoS</param>
+        public void AddSubscription(string topicFilter, MqttQos requestedQos)
         {
-            TopicSubscription ts;
-            ts.TopicName = topic;
-            ts.Qos = qos;
-            TopicSubscriptions.Add(ts);
+            SubscriptionRequest request;
+            request.TopicFilter = topicFilter;
+            request.RequestedQos = requestedQos;
+            SubscriptionRequests.Add(request);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 每个MQTT控制报文类型特定的标志(Flags)
         /// </summary>
-        internal int Flags;
+        public int Flags;
 
         /// <summary>
         /// 剩余长度(Remaining Length)
@@ -120,9 +120,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
             while ((digit & 0x80) != 0 && read < 4);
 
             if (read == 4 && (digit & 0x80) != 0)
-            {
                 throw new DecoderException("Remaining length exceeds 4 bytes in length");
-            }
 
             int completeMessageSize = result + 1 + read;
             //if (completeMessageSize > this.maxMessageSize)
@@ -132,38 +130,6 @@ namespace DotNetty.Codecs.MqttFx.Packets
 
             value = result;
             return true;
-        }
-    }
-
-    static class PublishPacketFixedHeaderExtensions
-    {
-        public static bool GetDup(this FixedHeader fixedHeader)
-        {
-            return (fixedHeader.Flags & 0x08) == 0x08;
-        }
-
-        public static MqttQos GetQos(this FixedHeader fixedHeader)
-        {
-            return (MqttQos)((fixedHeader.Flags & 0x06) >> 1);
-        }
-
-        public static bool GetRetain(this FixedHeader fixedHeader)
-        {
-            return (fixedHeader.Flags & 0x01) > 0;
-        }
-
-        public static void SetDup(this FixedHeader fixedHeader, bool dup = false)
-        {
-            fixedHeader.Flags |= dup.ToByte() << 3;
-        }
-        public static void SetQos(this FixedHeader fixedHeader, MqttQos qos)
-        {
-            fixedHeader.Flags |= (byte)qos << 1;
-        }
-
-        public static void SetRetain(this FixedHeader fixedHeader, bool retain = false)
-        {
-            fixedHeader.Flags |= retain.ToByte();
         }
     }
 }

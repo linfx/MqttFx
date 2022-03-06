@@ -27,8 +27,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.EXACTLY_ONCE, true)]
-        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AT_LEAST_ONCE, false)]
+        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.ExactlyOnce, true)]
+        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AtLeastOnce, false)]
         [InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
         [InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
         public void ConnectMessageTest(string clientId, bool cleanSession, ushort keepAlive, string userName, string password, string willTopicName, byte[] willMessage, MqttQos? willQos, bool willRetain)
@@ -53,7 +53,7 @@ namespace MqttFx.Test
             if (willTopicName != null)
             {
                 packet_variableHeader.ConnectFlags.WillFlag = true;
-                packet_variableHeader.ConnectFlags.WillQos = willQos ?? MqttQos.AT_MOST_ONCE;
+                packet_variableHeader.ConnectFlags.WillQos = willQos ?? MqttQos.AtMostOnce;
                 packet_variableHeader.ConnectFlags.WillRetain = willRetain;
                 packet_payload.WillTopic = willTopicName;
                 packet_payload.WillMessage = willMessage;
@@ -109,28 +109,28 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
-        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
         public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
             var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) =>
             {
-                TopicSubscription ts;
-                ts.TopicName = topic;
-                ts.Qos = qos;
+                SubscriptionRequest ts;
+                ts.TopicFilter = topic;
+                ts.RequestedQos = qos;
                 return ts;
             }).ToArray());
 
             var recoded = RecodePacket(packet, true, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<SubscribePacket>()), Times.Once);
-            Assert.Equal(packet.TopicSubscriptions, recoded.TopicSubscriptions, EqualityComparer<TopicSubscription>.Default);
+            Assert.Equal(packet.SubscriptionRequests, recoded.SubscriptionRequests, EqualityComparer<SubscriptionRequest>.Default);
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
         [Theory]
-        [InlineData(1, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.FAILURE })]
-        [InlineData(ushort.MaxValue, new[] { MqttQos.AT_LEAST_ONCE })]
+        [InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]
+        [InlineData(ushort.MaxValue, new[] { MqttQos.AtLeastOnce })]
         public void SubAckMessageTest(ushort packetId, MqttQos[] qosValues)
         {
             var packet = new SubAckPacket(packetId, qosValues);
@@ -152,15 +152,15 @@ namespace MqttFx.Test
             var recoded = RecodePacket(packet, true, true);
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<UnsubscribePacket>()), Times.Once);
-            Assert.Equal(packet.Topics, recoded.Topics);
+            Assert.Equal(packet.TopicFilters, recoded.TopicFilters);
             Assert.Equal(packet.PacketId, recoded.PacketId);
         }
 
         [Theory]
-        [InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", new byte[0])]
-        [InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
-        [InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
-        [InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
+        [InlineData(MqttQos.AtMostOnce, false, false, 1, "a", new byte[0])]
+        [InlineData(MqttQos.ExactlyOnce, true, false, ushort.MaxValue, "/", new byte[0])]
+        [InlineData(MqttQos.AtLeastOnce, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
+        [InlineData(MqttQos.ExactlyOnce, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
             var packet = new PublishPacket(qos, dup, retain)
@@ -169,23 +169,58 @@ namespace MqttFx.Test
             };
             var packet_payload = (PublishPayload)packet.Payload;
 
-            if (qos > MqttQos.AT_MOST_ONCE)
+            if (qos > MqttQos.AtMostOnce)
             {
                 packet.PacketId = packetId;
             }
-            packet_payload.Payload = payload;
+            packet_payload.Data = payload;
 
             var recoded = RecodePacket(packet, false, true);
             var recoded_payload = (PublishPayload)recoded.Payload;
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
             Assert.Equal(packet.TopicName, recoded.TopicName);
-            if (packet.Qos > MqttQos.AT_MOST_ONCE)
+            if (packet.Qos > MqttQos.AtMostOnce)
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            Assert.Equal(packet_payload.Payload, recoded_payload.Payload);
+            Assert.Equal(packet_payload.Data, recoded_payload.Data);
         }
+
+        //[Theory]
+        //[InlineData(1)]
+        ////[InlineData(127)]
+        ////[InlineData(128)]
+        ////[InlineData(256)]
+        ////[InlineData(257)]
+        ////[InlineData(ushort.MaxValue)]
+        //public void PacketIdOnlyResponseMessagesTest(ushort packetId)
+        //{
+        //    //this.PublishResponseMessageTest<PubAckPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubAckPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubRecPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubRecPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubRelPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubRelPacket>(packetId, false);
+        //    //this.PublishResponseMessageTest<PubCompPacket>(packetId, true);
+        //    //this.PublishResponseMessageTest<PubCompPacket>(packetId, false);
+        //    PublishResponseMessageTest<UnsubAckPacket>(packetId, false);
+        //}
+
+        //void PublishResponseMessageTest<T>(ushort packetId, bool useServer)
+        //    where T : PacketWithId, new()
+        //{
+        //    var packet = new T
+        //    {
+        //        PacketId = packetId
+        //    };
+
+        //    var recoded = RecodePacket(packet, useServer, true);
+
+        //    contextMock.Verify(x => x.FireChannelRead(It.IsAny<T>()), Times.Once);
+        //    contextMock.ResetCalls();
+        //    Assert.Equal(packet.PacketId, recoded.PacketId);
+        //}
 
         [Fact]
         public void EmptyPacketMessagesTest()

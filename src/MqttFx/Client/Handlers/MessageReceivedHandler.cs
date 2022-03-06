@@ -4,14 +4,14 @@ namespace MqttFx.Client.Handlers
 {
     public class MessageReceivedHandler : IMessageReceivedHandler
     {
-        private readonly Action<Message> _handler;
+        private readonly Action<ApplicationMessage> _handler;
 
-        public MessageReceivedHandler(Action<Message> handler)
+        public MessageReceivedHandler(Action<ApplicationMessage> handler)
         {
             _handler = handler;
         }
 
-        public void OnMesage(Message message)
+        public void OnMesage(ApplicationMessage message)
         {
             _handler(message);
         }

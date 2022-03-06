@@ -7,6 +7,6 @@
     public sealed class PubCompPacket : PacketWithId
     {
         public PubCompPacket(ushort packetId = default)
-            : base(PacketType.PUBCOMP, packetId) { }
+            : base(packetId) { }
     }
 }

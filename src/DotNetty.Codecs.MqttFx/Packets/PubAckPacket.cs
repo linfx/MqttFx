@@ -7,6 +7,6 @@
     public sealed class PubAckPacket : PacketWithId
     {
         public PubAckPacket(ushort packetId = default)
-            : base(PacketType.PUBACK, packetId) { }
+            : base(packetId) { }
     }
 }

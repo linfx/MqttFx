@@ -9,9 +9,9 @@ namespace SimpleClient
     public class Services : IHostedService
     {
         private readonly ILogger<Services> _logger;
-        private readonly IMqttClient _client;
+        private readonly MqttClient _client;
 
-        public Services(ILogger<Services> logger, IMqttClient client)
+        public Services(ILogger<Services> logger, MqttClient client)
         {
             _logger = logger;
             _client = client;

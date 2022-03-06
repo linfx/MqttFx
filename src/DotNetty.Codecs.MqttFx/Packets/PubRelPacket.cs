@@ -6,9 +6,6 @@
     public sealed class PubRelPacket : PacketWithId
     {
         public PubRelPacket(ushort packetId = default)
-            : base(PacketType.PUBREL, packetId)
-        {
-            //FixedHeader.Flags = 0x02;
-        }
+            : base(packetId) { }
     }
 }

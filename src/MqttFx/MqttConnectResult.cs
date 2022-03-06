@@ -14,13 +14,7 @@ namespace MqttFx
 
         public bool Succeeded
         {
-            get
-            {
-                if (ConnectReturn == ConnectReturnCode.CONNECTION_ACCEPTED)
-                    return true;
-
-                return false;
-            }
+            get { return ConnectReturn == ConnectReturnCode.CONNECTION_ACCEPTED; }
         }
 
         public ConnectReturnCode ConnectReturn { get; set; } = ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE;

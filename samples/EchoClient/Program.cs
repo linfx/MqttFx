@@ -1,5 +1,6 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using Microsoft.Extensions.DependencyInjection;
+using MqttFx;
 using MqttFx.Client;
 using System;
 using System.Text;
@@ -18,20 +19,23 @@ namespace EchoClient
                 options.Port = 1883;
             });
             var container = services.BuildServiceProvider();
-            var client = container.GetService<IMqttClient>();
 
+            var client = container.GetService<MqttClient>();
 
             client.UseConnectedHandler(async () =>
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var topic = "testtopic/a";
-                await client.SubscribeAsync(topic);
+                var subscriptionRequests = new SubscriptionRequestsBuilder()
+                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
+                    .Build();
+
+                await client.SubscribeAsync(subscriptionRequests);
 
                 Console.WriteLine("### SUBSCRIBED ###");
             });
 
-            client.UseMessageReceivedHandler(message =>
+            client.UseApplicationMessageReceivedHandler(message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
                 Console.WriteLine($"+ Topic = {message.Topic}");
@@ -48,8 +52,14 @@ namespace EchoClient
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
-                    var topic = "testtopic/ab";
-                    await client.PublishAsync(topic, Encoding.UTF8.GetBytes($"HelloWorld: {i}"), MqttQos.AT_MOST_ONCE);
+
+                    var mesage = new ApplicationMessageBuilder()
+                        .WithTopic("testtopic/ab")
+                        .WithPayload($"HelloWorld: {i}")
+                        .WithQos(MqttQos.AtLeastOnce)
+                        .Build();
+
+                    await client.PublishAsync(mesage);
                 }
             }
             else

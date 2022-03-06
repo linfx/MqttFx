@@ -15,25 +15,20 @@ namespace MqttFx.Channels
         //private int keepaliveSeconds;
         private IScheduledTask pingRespTimeout;
 
-        protected override void ChannelRead0(IChannelHandlerContext ctx, object msg)
+        protected override void ChannelRead0(IChannelHandlerContext ctx, object packet)
         {
-            if (msg is Packet packet)
+            switch (packet)
             {
-                switch (packet.FixedHeader.PacketType)
-                {
-                    case PacketType.PINGREQ:
-                        HandlePingReq(ctx.Channel);
-                        break;
-                    case PacketType.PINGRESP:
-                        HandlePingResp();
-                        break;
-                    default:
-                        ctx.FireChannelRead(ReferenceCountUtil.Retain(msg));
-                        break;
-                }
+                case PingReqPacket:
+                    HandlePingReq(ctx.Channel);
+                    break;
+                case PingRespPacket:
+                    HandlePingResp();
+                    break;
+                default:
+                    ctx.FireChannelRead(ReferenceCountUtil.Retain(packet));
+                    break;
             }
-            else
-                ctx.FireChannelRead(msg);
         }
 
         public override void UserEventTriggered(IChannelHandlerContext ctx, object evt)

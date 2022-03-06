@@ -5,9 +5,9 @@ namespace MqttFx
 {
     public class SubscriptionRequestsBuilder
     {
-        SubscriptionRequests _requests = new();
+        readonly SubscriptionRequests _requests = new();
 
-        public SubscriptionRequestsBuilder WithTopicFilter(string topic,  MqttQos qos = MqttQos.AT_MOST_ONCE)
+        public SubscriptionRequestsBuilder WithTopicFilter(string topic,  MqttQos qos = MqttQos.AtMostOnce)
         {
             return WithTopicFilter(new TopicFilter
             {

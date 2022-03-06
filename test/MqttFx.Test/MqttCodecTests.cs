@@ -27,8 +27,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.EXACTLY_ONCE, true)]
-        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AT_LEAST_ONCE, false)]
+        [InlineData("a", true, 0, null, null, "will/topic/name", new byte[] { 5, 3, 255, 6, 5 }, MqttQos.ExactlyOnce, true)]
+        [InlineData("11a_2", false, 1, "user1", null, "will", new byte[0], MqttQos.AtLeastOnce, false)]
         [InlineData("abc/ж", false, 10, "", "pwd", null, null, null, false)]
         [InlineData("", true, 1000, "имя", "密碼", null, null, null, false)]
         public void ConnectMessageTest(string clientId, bool cleanSession, ushort keepAlive, string userName, string password, string willTopicName, byte[] willMessage, MqttQos? willQos, bool willRetain)
@@ -53,7 +53,7 @@ namespace MqttFx.Test
             if (willTopicName != null)
             {
                 packet_variableHeader.ConnectFlags.WillFlag = true;
-                packet_variableHeader.ConnectFlags.WillQos = willQos ?? MqttQos.AT_MOST_ONCE;
+                packet_variableHeader.ConnectFlags.WillQos = willQos ?? MqttQos.AtMostOnce;
                 packet_variableHeader.ConnectFlags.WillRetain = willRetain;
                 packet_payload.WillTopic = willTopicName;
                 packet_payload.WillMessage = willMessage;
@@ -109,8 +109,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.EXACTLY_ONCE, MqttQos.AT_MOST_ONCE })]
-        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AT_LEAST_ONCE })]
+        [InlineData(1, new[] { "+", "+/+", "//", "/#", "+//+" }, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.ExactlyOnce, MqttQos.AtMostOnce })]
+        [InlineData(ushort.MaxValue, new[] { "a" }, new[] { MqttQos.AtLeastOnce })]
         public void SubscribeMessageTest(ushort packetId, string[] topicFilters, MqttQos[] requestedQosValues)
         {
             var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) =>
@@ -129,8 +129,8 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(1, new[] { MqttQos.EXACTLY_ONCE, MqttQos.AT_LEAST_ONCE, MqttQos.AT_MOST_ONCE, MqttQos.FAILURE })]
-        [InlineData(ushort.MaxValue, new[] { MqttQos.AT_LEAST_ONCE })]
+        [InlineData(1, new[] { MqttQos.ExactlyOnce, MqttQos.AtLeastOnce, MqttQos.AtMostOnce, MqttQos.Failure })]
+        [InlineData(ushort.MaxValue, new[] { MqttQos.AtLeastOnce })]
         public void SubAckMessageTest(ushort packetId, MqttQos[] qosValues)
         {
             var packet = new SubAckPacket(packetId, qosValues);
@@ -157,10 +157,10 @@ namespace MqttFx.Test
         }
 
         [Theory]
-        [InlineData(MqttQos.AT_MOST_ONCE, false, false, 1, "a", new byte[0])]
-        [InlineData(MqttQos.EXACTLY_ONCE, true, false, ushort.MaxValue, "/", new byte[0])]
-        [InlineData(MqttQos.AT_LEAST_ONCE, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
-        [InlineData(MqttQos.EXACTLY_ONCE, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
+        [InlineData(MqttQos.AtMostOnce, false, false, 1, "a", new byte[0])]
+        [InlineData(MqttQos.ExactlyOnce, true, false, ushort.MaxValue, "/", new byte[0])]
+        [InlineData(MqttQos.AtLeastOnce, false, true, 129, "a/b", new byte[] { 1, 2, 3 })]
+        [InlineData(MqttQos.ExactlyOnce, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
             var packet = new PublishPacket(qos, dup, retain)
@@ -169,7 +169,7 @@ namespace MqttFx.Test
             };
             var packet_payload = (PublishPayload)packet.Payload;
 
-            if (qos > MqttQos.AT_MOST_ONCE)
+            if (qos > MqttQos.AtMostOnce)
             {
                 packet.PacketId = packetId;
             }
@@ -180,7 +180,7 @@ namespace MqttFx.Test
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
             Assert.Equal(packet.TopicName, recoded.TopicName);
-            if (packet.Qos > MqttQos.AT_MOST_ONCE)
+            if (packet.Qos > MqttQos.AtMostOnce)
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }

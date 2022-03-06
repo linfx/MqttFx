@@ -7,7 +7,7 @@ namespace MqttFx
     {
         string _topic;
         byte[] _payload;
-        MqttQos _qos = MqttQos.AT_MOST_ONCE;
+        MqttQos _qos = MqttQos.AtMostOnce;
         bool _retain;
 
         public ApplicationMessage Build()

@@ -19,7 +19,7 @@ namespace MqttFx
         /// - At least once (1): Message gets delivered at least once (one time or more often).
         /// - Exactly once  (2): Message gets delivered exactly once (It's ensured that the message only comes once).
         /// </summary>
-        MqttQos _qos = MqttQos.AT_MOST_ONCE;
+        MqttQos _qos = MqttQos.AtMostOnce;
 
         public TopicFilterBuilder WithTopic(string topic)
         {
@@ -35,19 +35,19 @@ namespace MqttFx
 
         public TopicFilterBuilder WithAtLeastOnceQoS()
         {
-            _qos = MqttQos.AT_LEAST_ONCE;
+            _qos = MqttQos.AtLeastOnce;
             return this;
         }
 
         public TopicFilterBuilder WithAtMostOnceQoS()
         {
-            _qos = MqttQos.AT_MOST_ONCE;
+            _qos = MqttQos.AtMostOnce;
             return this;
         }
 
         public TopicFilterBuilder WithExactlyOnceQoS()
         {
-            _qos = MqttQos.EXACTLY_ONCE;
+            _qos = MqttQos.ExactlyOnce;
             return this;
         }
 

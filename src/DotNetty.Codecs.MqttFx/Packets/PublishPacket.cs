@@ -21,7 +21,7 @@
         /// <param name="qos">服务质量等级</param>
         /// <param name="dup">重发标志</param>
         /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos = MqttQos.AT_MOST_ONCE, bool dup = false, bool retain = false) 
+        public PublishPacket(MqttQos qos = MqttQos.AtMostOnce, bool dup = false, bool retain = false) 
             : this()
         {
             // TODO: 不生效

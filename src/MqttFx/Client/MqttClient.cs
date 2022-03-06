@@ -90,7 +90,7 @@ namespace MqttFx.Client
 
             var packet = PublishPacketFactory.Create(applicationMessage);
 
-            if (packet.Qos > MqttQos.AT_MOST_ONCE)
+            if (packet.Qos > MqttQos.AtMostOnce)
                 packet.PacketId = packetIdProvider.NewPacketId();
 
             return SendAsync(packet, cancellationToken);

@@ -56,7 +56,7 @@ namespace EchoClient
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AT_LEAST_ONCE)
+                        .WithQos(MqttQos.AtLeastOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);

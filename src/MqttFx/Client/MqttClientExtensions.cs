@@ -9,13 +9,13 @@ namespace MqttFx.Client
 {
     public static class MqttClientExtensions
     {
-        public static Task PublishAsync(this MqttClient mqttClient, string topic, string payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        public static Task PublishAsync(this MqttClient mqttClient, string topic, string payload = default, MqttQos qos = MqttQos.AtMostOnce, bool retain = false, CancellationToken cancellationToken = default)
         {
             var payloadBuffer = Encoding.UTF8.GetBytes(payload ?? string.Empty);
             return PublishAsync(mqttClient, topic, payloadBuffer, qos, retain, cancellationToken);
         }
 
-        public static Task PublishAsync(this MqttClient mqttClient, string topic, byte[] payload = default, MqttQos qos = MqttQos.AT_MOST_ONCE, bool retain = false, CancellationToken cancellationToken = default)
+        public static Task PublishAsync(this MqttClient mqttClient, string topic, byte[] payload = default, MqttQos qos = MqttQos.AtMostOnce, bool retain = false, CancellationToken cancellationToken = default)
         {
             if (mqttClient == null)
                 throw new ArgumentNullException(nameof(mqttClient));
@@ -48,7 +48,7 @@ namespace MqttFx.Client
             return mqttClient.SubscribeAsync(subscribeOptions, cancellationToken);
         }
 
-        public static Task SubscribeAsync(this MqttClient mqttClient, string topic, MqttQos qos = MqttQos.AT_MOST_ONCE, CancellationToken cancellationToken = default)
+        public static Task SubscribeAsync(this MqttClient mqttClient, string topic, MqttQos qos = MqttQos.AtMostOnce, CancellationToken cancellationToken = default)
         {
             if (mqttClient == null)
                 throw new ArgumentNullException(nameof(mqttClient));

@@ -47,7 +47,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
                 MqttCodecUtil.ValidateTopicFilter(topicFilter);
 
                 byte qos = buffer.ReadByte(ref remainingLength);
-                if (qos > (byte)MqttQos.EXACTLY_ONCE)
+                if (qos > (byte)MqttQos.ExactlyOnce)
                     throw new DecoderException($"The Server MUST treat a SUBSCRIBE packet as malformed and close the Network Connection if any of Reserved bits in the payload are non-zero, or QoS is not 0,1 or 2. [MQTT-3.8.3-4](Invalid QoS value: {qos}.)");
 
                 SubscriptionRequest ts;

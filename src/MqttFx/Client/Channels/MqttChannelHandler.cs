@@ -117,17 +117,17 @@ namespace MqttFx.Channels
         {
             switch (packet.Qos)
             {
-                case MqttQos.AT_MOST_ONCE:
+                case MqttQos.AtMostOnce:
                     InvokeProcessForIncomingPublish(packet);
                     break;
 
-                case MqttQos.AT_LEAST_ONCE:
+                case MqttQos.AtLeastOnce:
                     InvokeProcessForIncomingPublish(packet);
                     if (packet.PacketId > 0)
                         channel.WriteAndFlushAsync(new PubAckPacket(packet.PacketId));
                     break;
 
-                case MqttQos.EXACTLY_ONCE:
+                case MqttQos.ExactlyOnce:
                     break;
             }
         }

@@ -23,7 +23,7 @@ namespace MqttFx.Channels
                     HandlePingReq(ctx.Channel);
                     break;
                 case PingRespPacket:
-                    HandlePingResp();
+                    HandlePingResp(ctx.Channel);
                     break;
                 default:
                     ctx.FireChannelRead(ReferenceCountUtil.Retain(packet));
@@ -48,7 +48,7 @@ namespace MqttFx.Channels
             }
         }
 
-        private void SendPingReq(IChannel channel)
+        void SendPingReq(IChannel channel)
         {
             channel.WriteAndFlushAsync(PingReqPacket.Instance);
 
@@ -61,12 +61,12 @@ namespace MqttFx.Channels
             }
         }
 
-        private void HandlePingReq(IChannel channel)
+        void HandlePingReq(IChannel channel)
         {
             channel.WriteAndFlushAsync(PingRespPacket.Instance);
         }
 
-        private void HandlePingResp()
+        void HandlePingResp(IChannel channel)
         {
         }
     }

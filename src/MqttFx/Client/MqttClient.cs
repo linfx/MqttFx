@@ -104,28 +104,13 @@ namespace MqttFx.Client
             return SendAsync(packet);
         }
 
-        /// <summary>
-        /// 订阅主题
-        /// </summary>
-        /// <param name="topic">主题</param>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="cancellationToken"></param>
-        public Task SubscribeAsync(string topic, MqttQos qos = MqttQos.AT_MOST_ONCE, CancellationToken cancellationToken = default)
-        {
-            var packet = new SubscribePacket
-            {
-                PacketId = packetIdProvider.NewPacketId()
-            };
-            packet.AddSubscription(topic, qos);
 
-            return SendAsync(packet);
-        }
 
         /// <summary>
         /// 取消订阅
         /// </summary>
         /// <param name="topicFilters">主题</param>
-        public Task UnsubscribeAsync(CancellationToken cancellationToken = default, params string[] topicFilters)
+        public Task UnsubscribeAsync(params string[] topicFilters)
         {
             var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topicFilters);
 

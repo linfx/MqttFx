@@ -7,6 +7,15 @@ namespace MqttFx
     {
         SubscriptionRequests _requests = new();
 
+        public SubscriptionRequestsBuilder WithTopicFilter(string topic,  MqttQos qos = MqttQos.AT_MOST_ONCE)
+        {
+            return WithTopicFilter(new TopicFilter
+            {
+                Topic = topic,
+                Qos = qos,
+            });
+        }
+
         public SubscriptionRequestsBuilder WithTopicFilter(TopicFilter topicFilter)
         {
             if (topicFilter == null)

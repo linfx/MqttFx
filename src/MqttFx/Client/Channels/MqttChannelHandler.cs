@@ -58,6 +58,9 @@ namespace MqttFx.Channels
         {
             switch (packet)
             {
+                case ConnAckPacket connAckPacket:
+                    ProcessMessage(ctx.Channel, connAckPacket);
+                    break;
                 case PublishPacket publishPacket:
                     ProcessMessage(ctx.Channel, publishPacket);
                     break;
@@ -76,9 +79,6 @@ namespace MqttFx.Channels
                 case UnsubAckPacket unsubAckPacket:
                     ProcessMessage(ctx.Channel, unsubAckPacket);
                     break;
-                case ConnAckPacket connAckPacket:
-                    ProcessMessage(ctx.Channel, connAckPacket);
-                    break;
                 case DisconnectPacket:
                     break;
                 default:
@@ -86,7 +86,7 @@ namespace MqttFx.Channels
             }
         }
 
-        void ProcessMessage(IChannel channel, ConnAckPacket packet)
+        async void ProcessMessage(IChannel channel, ConnAckPacket packet)
         {
             var variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
 
@@ -97,6 +97,9 @@ namespace MqttFx.Channels
 
                     if (client.ConnectedHandler != null)
                         client.ConnectedHandler.OnConnected();
+
+                    await client.OnConnected(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
+
                     break;
 
                 case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
@@ -104,7 +107,7 @@ namespace MqttFx.Channels
                 case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
                 case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
                     connectFuture.TrySetResult(new MqttConnectResult(variableHeader.ConnectReturnCode));
-                    channel.CloseAsync();
+                    await channel.CloseAsync();
                     break;
             }
         }

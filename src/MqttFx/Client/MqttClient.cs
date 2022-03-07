@@ -34,11 +34,15 @@ namespace MqttFx.Client
 
         public MqttClientOptions Options { get; }
 
-        public IMqttClientConnectedHandler ConnectedHandler { get; set; }
+        internal IMqttClientConnectedHandler ConnectedHandler { get; set; }
 
-        public IMessageReceivedHandler MessageReceivedHandler { get; set; }
+        internal IMessageReceivedHandler MessageReceivedHandler { get; set; }
 
-        public IMqttClientDisconnectedHandler DisconnectedHandler { get; set; }
+        internal IMqttClientDisconnectedHandler DisconnectedHandler { get; set; }
+
+        public event Func<MqttConnectResult, Task> ConnectedAsync;
+
+        internal Task OnConnected(MqttConnectResult result) => ConnectedAsync(result);
 
         public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {

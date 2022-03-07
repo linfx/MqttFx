@@ -35,6 +35,15 @@ namespace EchoClient
                 Console.WriteLine("### SUBSCRIBED ###");
             });
 
+            client.ConnectedAsync += async e =>
+            {
+                Console.WriteLine("### CONNECTED WITH SERVER ###");
+
+                await client.SubscribeAsync("#");
+
+                Console.WriteLine("### SUBSCRIBED ###");
+            };
+
             client.UseApplicationMessageReceivedHandler(message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");

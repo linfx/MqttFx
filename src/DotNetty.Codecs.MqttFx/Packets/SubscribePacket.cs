@@ -15,7 +15,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// SUBSCRIBE - Subscribe to topics
         /// </summary>
         public SubscribePacket()
-            : this(new PacketIdVariableHeader(), new SubscribePayload(new List<SubscriptionRequest>())) { }
+            : this(new PacketIdVariableHeader(), new SubscribePayload()) { }
 
         /// <summary>
         /// SUBSCRIBE - Subscribe to topics
@@ -43,7 +43,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// </summary>
         /// <param name="topicFilter">Topic Name</param>
         /// <param name="requestedQos">Requested QoS</param>
-        public void AddSubscription(string topicFilter, MqttQos requestedQos)
+        public void AddSubscriptionRequest(string topicFilter, MqttQos requestedQos)
         {
             SubscriptionRequest request;
             request.TopicFilter = topicFilter;

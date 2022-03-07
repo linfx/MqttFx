@@ -13,7 +13,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 订阅请求(Subscription request)
         /// </summary>
-        public IList<SubscriptionRequest> SubscriptionRequests { get; set; }
+        public IList<SubscriptionRequest> SubscriptionRequests { get; private set; }
 
         /// <summary>
         /// SUBSCRIBE Packet payload
@@ -24,7 +24,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// SUBSCRIBE Packet payload
         /// </summary>
         /// <param name="requests">Subscription request</param>
-        public SubscribePayload(IList<SubscriptionRequest> requests)
+        public SubscribePayload(params SubscriptionRequest[] requests)
         {
             SubscriptionRequests = requests;
         }

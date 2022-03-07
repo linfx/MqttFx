@@ -9,7 +9,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public sealed class UnsubscribePacket : PacketWithId
     {
         public UnsubscribePacket()
-            : this(new PacketIdVariableHeader(), new UnsubscribePayload(new List<string>())) { }
+            : this(new PacketIdVariableHeader(), new UnsubscribePayload()) { }
 
         public UnsubscribePacket(ushort packetId, params string[] topicFilters)
             : this(new PacketIdVariableHeader(packetId), new UnsubscribePayload(topicFilters)) { }

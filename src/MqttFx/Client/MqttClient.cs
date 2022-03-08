@@ -33,8 +33,8 @@ namespace MqttFx.Client
         private IEventLoopGroup eventLoop;
         private volatile IChannel channel;
         private readonly PacketIdProvider packetIdProvider = new();
-        private readonly PacketDispatcher packetDispatcher = new();
 
+        internal ConcurrentDictionary<int, PendingPublish> PendingPublishs = new();
         internal ConcurrentDictionary<int, PendingSubscription> PendingSubscriptions = new();
 
         public bool IsConnected { get; private set; }
@@ -84,8 +84,8 @@ namespace MqttFx.Client
                 channel = await bootstrap.ConnectAsync();
                 if (channel.Open)
                 {
-                    packetDispatcher.Reset();
                     packetIdProvider.Reset();
+                    PendingSubscriptions.Clear();
                     IsConnected = true;
                 }
                 return await connectFuture.Task;
@@ -97,16 +97,37 @@ namespace MqttFx.Client
             }
         }
 
-        public Task PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellationToken = default)
+        public Task<PublishResult> PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var packet = PublishPacketFactory.Create(applicationMessage);
-
             if (packet.Qos > MqttQos.AtMostOnce)
                 packet.PacketId = packetIdProvider.NewPacketId();
 
-            return SendAsync(packet, cancellationToken);
+            SendAsync(packet, cancellationToken);
+
+            return packet.Qos switch
+            {
+                MqttQos.AtMostOnce => Task.FromResult(new PublishResult()),
+                MqttQos.AtLeastOnce => publishAtLeastOnceAsync(),
+                //MqttQos.ExactlyOnce => publishExactlyOnceAsync(),
+                _ => throw new NotSupportedException(),
+            };
+
+            Task<PublishResult> publishAtLeastOnceAsync()
+            {
+                PendingPublish pendingPublish = new();
+                PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
+                return pendingPublish.Future.Task;
+            }
+
+            //Task<PublishResult> publishExactlyOnceAsync()
+            //{
+            //    PendingPublish pendingPublish = new();
+            //    PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
+            //    return pendingPublish.Future.Task;
+            //}
         }
 
         public Task<SubscribeResult> SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
@@ -116,7 +137,7 @@ namespace MqttFx.Client
             var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
             SendAsync(packet);
 
-            var pendingSubscription = new PendingSubscription(packet);
+            PendingSubscription pendingSubscription = new(packet);
             PendingSubscriptions.TryAdd(packet.PacketId, pendingSubscription);
             return pendingSubscription.Future.Task;
         }

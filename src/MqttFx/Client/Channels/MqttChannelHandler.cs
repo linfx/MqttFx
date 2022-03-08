@@ -12,9 +12,9 @@ namespace MqttFx.Channels
     class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
         private readonly MqttClient client;
-        private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
+        private readonly TaskCompletionSource<ConnectResult> connectFuture;
 
-        public MqttChannelHandler(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
+        public MqttChannelHandler(MqttClient client, TaskCompletionSource<ConnectResult> connectFuture)
         {
             this.client = client;
             this.connectFuture = connectFuture;
@@ -91,15 +91,15 @@ namespace MqttFx.Channels
             switch (variableHeader.ConnectReturnCode)
             {
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
-                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
-                    await client.OnConnected(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
+                    connectFuture.TrySetResult(new ConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
+                    await client.OnConnected(new ConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
                     break;
 
                 case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
                 case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
                 case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
                 case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
-                    connectFuture.TrySetResult(new MqttConnectResult(variableHeader.ConnectReturnCode));
+                    connectFuture.TrySetResult(new ConnectResult(variableHeader.ConnectReturnCode));
                     await channel.CloseAsync();
                     break;
             }

@@ -3,11 +3,11 @@ using DotNetty.Transport.Channels;
 
 namespace MqttFx
 {
-    public class MqttConnectResult
+    public class ConnectResult
     {
-        public MqttConnectResult() { }
+        public ConnectResult() { }
 
-        public MqttConnectResult(ConnectReturnCode connectReturn)
+        public ConnectResult(ConnectReturnCode connectReturn)
         {
             ConnectReturn = connectReturn;
         }

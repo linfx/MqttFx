@@ -41,7 +41,7 @@ namespace MqttFx.Client
 
         public MqttClientOptions Options { get; }
 
-        public event Func<MqttConnectResult, Task> ConnectedAsync;
+        public event Func<ConnectResult, Task> ConnectedAsync;
 
         public event Func<Task> DisconnectedAsync;
 
@@ -57,14 +57,14 @@ namespace MqttFx.Client
         /// 连接
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<MqttConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<ConnectResult> ConnectAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (eventLoop == null)
                 eventLoop = new MultithreadEventLoopGroup();
 
-            var connectFuture = new TaskCompletionSource<MqttConnectResult>();
+            var connectFuture = new TaskCompletionSource<ConnectResult>();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(eventLoop)
@@ -162,7 +162,7 @@ namespace MqttFx.Client
             return Task.CompletedTask;
         }
 
-        internal Task OnConnected(MqttConnectResult result)
+        internal Task OnConnected(ConnectResult result)
         {
             if (ConnectedAsync == null)
                 return Task.CompletedTask;

@@ -72,6 +72,9 @@ namespace MqttFx.Channels
                 case PubRelPacket pubRelPacket:
                     ProcessMessage(ctx.Channel, pubRelPacket);
                     break;
+                case PubCompPacket pubCompPacket:
+                    ProcessMessage(ctx.Channel, pubCompPacket);
+                    break;
                 case PubAckPacket pubAckPacket:
                     ProcessMessage(ctx.Channel, pubAckPacket);
                     break;
@@ -138,6 +141,10 @@ namespace MqttFx.Channels
         void ProcessMessage(IChannel channel, PubRelPacket packet)
         {
             channel.WriteAndFlushAsync(new PubCompPacket(packet.PacketId));
+        }
+
+        void ProcessMessage(IChannel channel, PubCompPacket packet)
+        {
         }
 
         void ProcessMessage(IChannel channel, PubAckPacket packet)

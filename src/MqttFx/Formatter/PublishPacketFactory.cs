@@ -28,7 +28,7 @@ namespace MqttFx.Formatter
                 //SubscriptionIdentifiers = applicationMessage.SubscriptionIdentifiers,
                 //UserProperties = applicationMessage.UserProperties
             };
-            ((PublishPayload)packet.Payload).Data = applicationMessage.Payload;
+            ((PublishPayload)packet.Payload).Body = applicationMessage.Payload;
 
             return packet;
         }

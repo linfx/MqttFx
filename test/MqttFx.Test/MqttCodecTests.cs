@@ -173,7 +173,7 @@ namespace MqttFx.Test
             {
                 packet.PacketId = packetId;
             }
-            packet_payload.Data = payload;
+            packet_payload.Body = payload;
 
             var recoded = RecodePacket(packet, false, true);
             var recoded_payload = (PublishPayload)recoded.Payload;
@@ -184,7 +184,7 @@ namespace MqttFx.Test
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            Assert.Equal(packet_payload.Data, recoded_payload.Data);
+            Assert.Equal(packet_payload.Body, recoded_payload.Body);
         }
 
         //[Theory]

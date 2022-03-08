@@ -94,12 +94,7 @@ namespace MqttFx.Channels
             {
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
                     connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
-
-                    if (client.ConnectedHandler != null)
-                        client.ConnectedHandler.OnConnected();
-
                     await client.OnConnected(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
-
                     break;
 
                 case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
@@ -133,11 +128,7 @@ namespace MqttFx.Channels
 
         void InvokeProcessForIncomingPublish(PublishPacket packet)
         {
-            var handler = client.MessageReceivedHandler;
-            if (handler != null)
-            {
-                handler.OnMesage(packet.ToMessage());
-            }
+            client.OnApplicationMessageReceived(packet.ToApplicationMessage());
         }
 
         void ProcessMessage(IChannel channel, PubRecPacket packet)

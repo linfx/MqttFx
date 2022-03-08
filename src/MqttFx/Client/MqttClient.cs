@@ -21,6 +21,10 @@ namespace MqttFx.Client
     /// Mqtt客户端
     /// 使用 MQTT 的程序或设备。客户端始终建立与服务器的网络连接。
     /// A program or device that uses MQTT. A Client always establishes the Network Connection to the Server.
+    /// # 发布其他客户端可能感兴趣的应用程序消息。( Publish Application Messages that other Clients might be interested in.)
+    /// # 发布其他客户端可能感兴趣的应用程序消息。( Subscribe to request Application Messages that it is interested in receiving.)
+    /// # 取消订阅以删除对应用程序消息的请求。(Unsubscribe to remove a request for Application Messages.)
+    /// # 断开与服务器的连接。(Disconnect from the Server.)
     /// </summary>
     public class MqttClient
     {
@@ -34,15 +38,11 @@ namespace MqttFx.Client
 
         public MqttClientOptions Options { get; }
 
-        internal IMqttClientConnectedHandler ConnectedHandler { get; set; }
-
-        internal IMessageReceivedHandler MessageReceivedHandler { get; set; }
-
-        internal IMqttClientDisconnectedHandler DisconnectedHandler { get; set; }
-
         public event Func<MqttConnectResult, Task> ConnectedAsync;
 
-        internal Task OnConnected(MqttConnectResult result) => ConnectedAsync(result);
+        public event Func<Task> DisconnectedAsync;
+
+        public event Func<ApplicationMessage, Task> ApplicationMessageReceivedAsync;
 
         public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {
@@ -142,7 +142,7 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        private Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
+        Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -153,6 +153,30 @@ namespace MqttFx.Client
                 return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
+        }
+
+        internal Task OnConnected(MqttConnectResult result)
+        {
+            if (ConnectedAsync == null)
+                return Task.CompletedTask;
+
+            return ConnectedAsync(result);
+        }
+
+        internal Task OnDisconnected()
+        {
+            if (DisconnectedAsync == null)
+                return Task.CompletedTask;
+
+            return DisconnectedAsync();
+        }
+
+        internal Task OnApplicationMessageReceived(ApplicationMessage message)
+        {
+            if (ApplicationMessageReceivedAsync == null)
+                return Task.CompletedTask;
+
+            return ApplicationMessageReceivedAsync(message);
         }
     }
 }

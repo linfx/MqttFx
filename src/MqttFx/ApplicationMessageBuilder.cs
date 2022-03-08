@@ -80,9 +80,9 @@ namespace MqttFx
         }
     }
 
-    public static class MessageExtensions
+    public static class ApplicationMessageExtensions
     {
-        public static ApplicationMessage ToMessage(this PublishPacket packet)
+        public static ApplicationMessage ToApplicationMessage(this PublishPacket packet)
         {
             return new ApplicationMessage
             {

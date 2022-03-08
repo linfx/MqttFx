@@ -21,6 +21,10 @@ namespace MqttFx.Client
     /// Mqtt客户端
     /// 使用 MQTT 的程序或设备。客户端始终建立与服务器的网络连接。
     /// A program or device that uses MQTT. A Client always establishes the Network Connection to the Server.
+    /// # 发布其他客户端可能感兴趣的应用程序消息。( Publish Application Messages that other Clients might be interested in.)
+    /// # 发布其他客户端可能感兴趣的应用程序消息。( Subscribe to request Application Messages that it is interested in receiving.)
+    /// # 取消订阅以删除对应用程序消息的请求。(Unsubscribe to remove a request for Application Messages.)
+    /// # 断开与服务器的连接。(Disconnect from the Server.)
     /// </summary>
     public class MqttClient
     {
@@ -34,11 +38,11 @@ namespace MqttFx.Client
 
         public MqttClientOptions Options { get; }
 
-        public IMqttClientConnectedHandler ConnectedHandler { get; set; }
+        public event Func<MqttConnectResult, Task> ConnectedAsync;
 
-        public IMessageReceivedHandler MessageReceivedHandler { get; set; }
+        public event Func<Task> DisconnectedAsync;
 
-        public IMqttClientDisconnectedHandler DisconnectedHandler { get; set; }
+        public event Func<ApplicationMessage, Task> ApplicationMessageReceivedAsync;
 
         public MqttClient(ILogger<MqttClient> logger, IOptions<MqttClientOptions> options)
         {
@@ -64,7 +68,13 @@ namespace MqttFx.Client
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .RemoteAddress(Options.Host, Options.Port)
-                .Handler(new MqttChannelInitializer(this, connectFuture));
+                .Handler(new ActionChannelInitializer<ISocketChannel>(ch =>
+                {
+                    ch.Pipeline.AddLast(new LoggingHandler());
+                    ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
+                    ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
+                    ch.Pipeline.AddLast(new MqttChannelHandler(this, connectFuture));
+                }));
 
             try
             {
@@ -104,8 +114,6 @@ namespace MqttFx.Client
             return SendAsync(packet);
         }
 
-
-
         /// <summary>
         /// 取消订阅
         /// </summary>
@@ -134,7 +142,7 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        private Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
+        Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -147,24 +155,28 @@ namespace MqttFx.Client
             return Task.CompletedTask;
         }
 
-        class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
+        internal Task OnConnected(MqttConnectResult result)
         {
-            private readonly MqttClient client;
-            private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
+            if (ConnectedAsync == null)
+                return Task.CompletedTask;
 
-            public MqttChannelInitializer(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
-            {
-                this.client = client;
-                this.connectFuture = connectFuture;
-            }
+            return ConnectedAsync(result);
+        }
 
-            protected override void InitChannel(ISocketChannel ch)
-            {
-                ch.Pipeline.AddLast(new LoggingHandler());
-                ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
-                ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
-                ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));
-            }
+        internal Task OnDisconnected()
+        {
+            if (DisconnectedAsync == null)
+                return Task.CompletedTask;
+
+            return DisconnectedAsync();
+        }
+
+        internal Task OnApplicationMessageReceived(ApplicationMessage message)
+        {
+            if (ApplicationMessageReceivedAsync == null)
+                return Task.CompletedTask;
+
+            return ApplicationMessageReceivedAsync(message);
         }
     }
 }

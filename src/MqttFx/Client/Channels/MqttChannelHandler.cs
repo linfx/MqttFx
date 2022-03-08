@@ -1,7 +1,6 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -124,7 +123,9 @@ namespace MqttFx.Channels
                     break;
 
                 case MqttQos.ExactlyOnce:
-                    throw new NotSupportedException();
+                    if (packet.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubRecPacket(packet.PacketId));
+                    break;
             }
         }
 
@@ -140,6 +141,10 @@ namespace MqttFx.Channels
 
         void ProcessMessage(IChannel channel, PubCompPacket packet)
         {
+            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
+            {
+                pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
+            }
         }
 
         void ProcessMessage(IChannel channel, PubAckPacket packet)

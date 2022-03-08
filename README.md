@@ -26,20 +26,20 @@ c# mqtt 3.1.1 client
 
             var client = container.GetService<MqttClient>();
 
-            client.UseConnectedHandler(async () =>
+            client.ConnectedAsync += async e =>
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
                 var subscriptionRequests = new SubscriptionRequestsBuilder()
-                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
+                    .WithTopicFilter(f => f.WithTopic("testtopic/a"))
                     .Build();
 
                 await client.SubscribeAsync(subscriptionRequests);
 
                 Console.WriteLine("### SUBSCRIBED ###");
-            });
+            };
 
-            client.UseMessageReceivedHandler(message =>
+            client.ApplicationMessageReceivedAsync += async message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
                 Console.WriteLine($"+ Topic = {message.Topic}");
@@ -47,7 +47,9 @@ c# mqtt 3.1.1 client
                 Console.WriteLine($"+ QoS = {message.Qos}");
                 Console.WriteLine($"+ Retain = {message.Retain}");
                 Console.WriteLine();
-            });
+
+                await Task.CompletedTask;
+            };
 
             var result = await client.ConnectAsync();
             if (result.Succeeded)
@@ -60,7 +62,7 @@ c# mqtt 3.1.1 client
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AT_LEAST_ONCE)
+                        .WithQos(MqttQos.AtLeastOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);

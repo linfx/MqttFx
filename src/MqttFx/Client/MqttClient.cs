@@ -12,6 +12,7 @@ using MqttFx.Channels;
 using MqttFx.Formatter;
 using MqttFx.Utils;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,6 +34,8 @@ namespace MqttFx.Client
         private volatile IChannel channel;
         private readonly PacketIdProvider packetIdProvider = new();
         private readonly PacketDispatcher packetDispatcher = new();
+
+        internal ConcurrentDictionary<int, PendingSubscription> PendingSubscriptions = new();
 
         public bool IsConnected { get; private set; }
 
@@ -106,12 +109,16 @@ namespace MqttFx.Client
             return SendAsync(packet, cancellationToken);
         }
 
-        public Task SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
+        public Task<SubscribeResult> SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
-            return SendAsync(packet);
+            SendAsync(packet);
+
+            var pendingSubscription = new PendingSubscription(packet);
+            PendingSubscriptions.TryAdd(packet.PacketId, pendingSubscription);
+            return pendingSubscription.Future.Task;
         }
 
         /// <summary>

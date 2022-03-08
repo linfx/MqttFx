@@ -115,10 +115,10 @@ namespace MqttFx.Test
         {
             var packet = new SubscribePacket(packetId, topicFilters.Zip(requestedQosValues, (topic, qos) =>
             {
-                SubscriptionRequest ts;
-                ts.TopicFilter = topic;
-                ts.RequestedQos = qos;
-                return ts;
+                SubscriptionRequest request;
+                request.TopicFilter = topic;
+                request.RequestedQos = qos;
+                return request;
             }).ToArray());
 
             var recoded = RecodePacket(packet, true, true);

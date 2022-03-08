@@ -28,9 +28,15 @@ namespace EchoClient
 
                 var subscriptionRequests = new SubscriptionRequestsBuilder()
                     .WithTopicFilter(f => f.WithTopic("testtopic/a"))
+                    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
                     .Build();
 
-                await client.SubscribeAsync(subscriptionRequests);
+                var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
+
+                foreach (var item in subscribeResult.Items)
+                {
+                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                }
 
                 Console.WriteLine("### SUBSCRIBED ###");
             };

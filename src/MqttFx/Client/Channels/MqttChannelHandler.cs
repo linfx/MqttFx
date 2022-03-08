@@ -1,6 +1,7 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MqttFx.Channels
@@ -8,7 +9,7 @@ namespace MqttFx.Channels
     /// <summary>
     /// 发送和接收数据处理器
     /// </summary>
-    public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
+    class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
         private readonly MqttClient client;
         private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
@@ -81,15 +82,12 @@ namespace MqttFx.Channels
                     break;
                 case DisconnectPacket:
                     break;
-                default:
-                    break;
             }
         }
 
         async void ProcessMessage(IChannel channel, ConnAckPacket packet)
         {
             var variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
-
             switch (variableHeader.ConnectReturnCode)
             {
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
@@ -141,15 +139,30 @@ namespace MqttFx.Channels
             channel.WriteAndFlushAsync(new PubCompPacket(packet.PacketId));
         }
 
-        void ProcessMessage(IChannel channel, PubAckPacket message)
+        void ProcessMessage(IChannel channel, PubAckPacket packet)
         {
         }
 
-        void ProcessMessage(IChannel channel, SubAckPacket message)
+        void ProcessMessage(IChannel channel, SubAckPacket packet)
         {
+            if (client.PendingSubscriptions.TryRemove(packet.PacketId, out PendingSubscription pendingSubscription))
+            {
+                var items = new List<SubscribeResultItem>();
+
+                for (int i = 0; i < pendingSubscription.SubscribePacket.SubscriptionRequests.Count; i++)
+                {
+                    items.Add(new SubscribeResultItem
+                    {
+                        TopicFilter = pendingSubscription.SubscribePacket.SubscriptionRequests[i].TopicFilter,
+                        ResultCode = packet.ReturnCodes[i]
+                    });
+                }
+
+                pendingSubscription.Future.TrySetResult(new SubscribeResult(items));
+            }
         }
 
-        void ProcessMessage(IChannel channel, UnsubAckPacket message)
+        void ProcessMessage(IChannel channel, UnsubAckPacket packet)
         {
         }
     }

@@ -3,7 +3,7 @@ using System;
 
 namespace MqttFx.Formatter
 {
-    public sealed class PublishPacketFactory
+    class PublishPacketFactory
     {
         public static PublishPacket Create(ApplicationMessage applicationMessage)
         {

@@ -26,7 +26,7 @@ namespace MqttFx.Client
             .WithTopic(topic)
             .WithPayload(payload)
             .WithQos(qos)
-            .WithRetainFlag(retain)
+            .WithRetain(retain)
             .Build();
 
             return mqttClient.PublishAsync(applicationMessage, cancellationToken);

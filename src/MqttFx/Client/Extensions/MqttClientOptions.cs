@@ -1,4 +1,5 @@
-﻿using MqttFx.Client;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using MqttFx.Client;
 using System;
 
 namespace MqttFx
@@ -29,9 +30,24 @@ namespace MqttFx
         public MqttClientCredentials Credentials { get; set; }
 
         /// <summary>
-        /// 遗嘱主题
+        ///     Gets or sets the retain flag of the will message.
         /// </summary>
-        public ApplicationMessage WillMessage { get; set; }
+        public bool WillRetain { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the QoS level of the will message.
+        /// </summary>
+        public MqttQos WillQos { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the topic of the will message.
+        /// </summary>
+        public string WillTopic { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the payload of the will message.
+        /// </summary>
+        public byte[] WillPayload { get; set; }
 
         /// <summary>
         /// 响应超时

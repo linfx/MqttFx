@@ -40,13 +40,13 @@ namespace MqttFx.Channels
                 payload.UserName = client.Options.Credentials.Username;
                 payload.Password = client.Options.Credentials.Username;
             }
-            if (client.Options.WillMessage != null)
+            if (!string.IsNullOrEmpty(client.Options.WillTopic))
             {
                 variableHeader.ConnectFlags.WillFlag = true;
-                variableHeader.ConnectFlags.WillQos = client.Options.WillMessage.Qos;
-                variableHeader.ConnectFlags.WillRetain = client.Options.WillMessage.Retain;
-                payload.WillTopic = client.Options.WillMessage.Topic;
-                payload.WillMessage = client.Options.WillMessage.Payload;
+                variableHeader.ConnectFlags.WillQos = client.Options.WillQos;
+                variableHeader.ConnectFlags.WillRetain = client.Options.WillRetain;
+                payload.WillTopic = client.Options.WillTopic;
+                payload.WillMessage = client.Options.WillPayload;
             }
             context.WriteAndFlushAsync(packet);
         }

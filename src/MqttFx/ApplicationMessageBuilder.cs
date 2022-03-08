@@ -73,7 +73,7 @@ namespace MqttFx
         ///     A retained message is a normal MQTT message with the retained flag set to true.
         ///     The broker stores the last retained message and the corresponding QoS for that topic.
         /// </summary>
-        public ApplicationMessageBuilder WithRetainFlag(bool value = true)
+        public ApplicationMessageBuilder WithRetain(bool value = true)
         {
             _retain = value;
             return this;

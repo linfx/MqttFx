@@ -21,6 +21,9 @@ c# mqtt 3.1.1 client
             {
                 options.Host = "broker.emqx.io";
                 options.Port = 1883;
+                options.WillTopic = "testtopic/c";
+                options.WillPayload = Encoding.UTF8.GetBytes("offline");
+                options.WillRetain = true;
             });
             var container = services.BuildServiceProvider();
 
@@ -43,6 +46,15 @@ c# mqtt 3.1.1 client
                 {
                     Console.WriteLine($"+ ResultCode = {item.ResultCode}");
                 }
+
+                // online
+                var mesage = new ApplicationMessageBuilder()
+                    .WithTopic("testtopic/c")
+                    .WithPayload($"online")
+                    .WithRetain(true)
+                    .Build();
+
+                await client.PublishAsync(mesage);
             };
 
             client.ApplicationMessageReceivedAsync += async message =>

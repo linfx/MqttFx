@@ -10,29 +10,11 @@ namespace MqttFx.Formatter
             if (applicationMessage == null)
                 throw new ArgumentNullException(nameof(applicationMessage));
 
-            // Copy all values to their matching counterparts.
-            // The not supported values in MQTT 3.1.1 are not serialized (excluded) later.
-            var packet = new PublishPacket
+            var packet = new PublishPacket(applicationMessage.Qos, applicationMessage.Dup, applicationMessage.Retain)
             {
                 TopicName = applicationMessage.Topic,
-                //Payload = applicationMessage.Payload,
-                //Qos = applicationMessage.Qos,
-                Retain = applicationMessage.Retain,
-                Dup = applicationMessage.Dup,
-                //ContentType = applicationMessage.ContentType,
-                //CorrelationData = applicationMessage.CorrelationData,
-                //MessageExpiryInterval = applicationMessage.MessageExpiryInterval,
-                //PayloadFormatIndicator = applicationMessage.PayloadFormatIndicator,
-                //ResponseTopic = applicationMessage.ResponseTopic,
-                //TopicAlias = applicationMessage.TopicAlias,
-                //SubscriptionIdentifiers = applicationMessage.SubscriptionIdentifiers,
-                //UserProperties = applicationMessage.UserProperties
             };
-            //packet.FixedHeader.SetQos(applicationMessage.Qos);
-
-            packet.FixedHeader.Flags = (byte)applicationMessage.Qos << 1;
-
-            ((PublishPayload)packet.Payload).Body = applicationMessage.Payload;
+            packet.SetPayload(applicationMessage.Payload);
 
             return packet;
         }

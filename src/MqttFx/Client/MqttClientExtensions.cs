@@ -23,16 +23,16 @@ namespace MqttFx.Client
                 throw new ArgumentNullException(nameof(topic));
 
             var applicationMessage = new ApplicationMessageBuilder()
-            .WithTopic(topic)
-            .WithPayload(payload)
-            .WithQos(qos)
-            .WithRetain(retain)
-            .Build();
+                .WithTopic(topic)
+                .WithPayload(payload)
+                .WithQos(qos)
+                .WithRetain(retain)
+                .Build();
 
             return mqttClient.PublishAsync(applicationMessage, cancellationToken);
         }
 
-        public static Task SubscribeAsync(this MqttClient mqttClient, TopicFilter topicFilter, CancellationToken cancellationToken = default)
+        public static Task<SubscribeResult> SubscribeAsync(this MqttClient mqttClient, TopicFilter topicFilter, CancellationToken cancellationToken = default)
         {
             if (mqttClient == null)
                 throw new ArgumentNullException(nameof(mqttClient));
@@ -47,7 +47,7 @@ namespace MqttFx.Client
             return mqttClient.SubscribeAsync(subscribeOptions, cancellationToken);
         }
 
-        public static Task SubscribeAsync(this MqttClient mqttClient, string topic, MqttQos qos = MqttQos.AtMostOnce, CancellationToken cancellationToken = default)
+        public static Task<SubscribeResult> SubscribeAsync(this MqttClient mqttClient, string topic, MqttQos qos = MqttQos.AtMostOnce, CancellationToken cancellationToken = default)
         {
             if (mqttClient == null)
                 throw new ArgumentNullException(nameof(mqttClient));

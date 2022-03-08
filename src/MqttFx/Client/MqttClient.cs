@@ -111,7 +111,7 @@ namespace MqttFx.Client
             {
                 MqttQos.AtMostOnce => Task.FromResult(new PublishResult()),
                 MqttQos.AtLeastOnce => publishAtLeastOnceAsync(),
-                //MqttQos.ExactlyOnce => publishExactlyOnceAsync(),
+                MqttQos.ExactlyOnce => publishExactlyOnceAsync(),
                 _ => throw new NotSupportedException(),
             };
 
@@ -122,12 +122,12 @@ namespace MqttFx.Client
                 return pendingPublish.Future.Task;
             }
 
-            //Task<PublishResult> publishExactlyOnceAsync()
-            //{
-            //    PendingPublish pendingPublish = new();
-            //    PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
-            //    return pendingPublish.Future.Task;
-            //}
+            Task<PublishResult> publishExactlyOnceAsync()
+            {
+                PendingPublish pendingPublish = new();
+                PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
+                return pendingPublish.Future.Task;
+            }
         }
 
         public Task<SubscribeResult> SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)

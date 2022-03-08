@@ -128,11 +128,6 @@ namespace MqttFx.Channels
             }
         }
 
-        void InvokeProcessForIncomingPublish(PublishPacket packet)
-        {
-            client.OnApplicationMessageReceived(packet.ToApplicationMessage());
-        }
-
         void ProcessMessage(IChannel channel, PubRecPacket packet)
         {
             channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
@@ -176,6 +171,11 @@ namespace MqttFx.Channels
 
         void ProcessMessage(IChannel channel, UnsubAckPacket packet)
         {
+        }
+
+        void InvokeProcessForIncomingPublish(PublishPacket packet)
+        {
+            client.OnApplicationMessageReceived(packet.ToApplicationMessage());
         }
     }
 }

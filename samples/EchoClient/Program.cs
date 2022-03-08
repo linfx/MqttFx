@@ -28,12 +28,13 @@ namespace EchoClient
 
                 Console.WriteLine("### SUBSCRIBED ###");
 
-                var subscriptionRequests = new SubscriptionRequestsBuilder()
-                    .WithTopicFilter(f => f.WithTopic("testtopic/a"))
-                    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
-                    .Build();
+                //var subscriptionRequests = new SubscriptionRequestsBuilder()
+                //    .WithTopicFilter(f => f.WithTopic("testtopic/a"))
+                //    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
+                //    .Build();
 
-                var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
+                //var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
+                var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
 
                 foreach (var item in subscribeResult.Items)
                 {
@@ -56,7 +57,7 @@ namespace EchoClient
             var connectResult = await client.ConnectAsync();
             if (connectResult.Succeeded)
             {
-                for (int i = 1; i <= 3; i++)
+                for (int i = 1; i <= 1; i++)
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
@@ -64,7 +65,7 @@ namespace EchoClient
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AtLeastOnce)
+                        .WithQos(MqttQos.ExactlyOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);

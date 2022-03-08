@@ -25,7 +25,7 @@ namespace SimpleClient
         {
             client.ConnectedAsync += async e =>
             {
-                logger.LogInformation("### CONNECTED WITH SERVER ###");
+                Console.WriteLine("### CONNECTED WITH SERVER ###");
 
                 Console.WriteLine("### SUBSCRIBED ###");
 
@@ -70,7 +70,7 @@ namespace SimpleClient
                 for (int i = 1; i <= 3; i++)
                 {
                     await Task.Delay(500);
-                    Console.WriteLine("### Publish Message ###");
+                    logger.LogInformation("### Publish Message ###");
 
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
@@ -82,7 +82,7 @@ namespace SimpleClient
                 }
             }
             else
-                Console.WriteLine("Connect Fail!");
+                logger.LogError("Connect Fail!");
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

@@ -30,13 +30,19 @@ c# mqtt 3.1.1 client
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
+                Console.WriteLine("### SUBSCRIBED ###");
+
                 var subscriptionRequests = new SubscriptionRequestsBuilder()
                     .WithTopicFilter(f => f.WithTopic("testtopic/a"))
+                    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
                     .Build();
 
-                await client.SubscribeAsync(subscriptionRequests);
+                var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
 
-                Console.WriteLine("### SUBSCRIBED ###");
+                foreach (var item in subscribeResult.Items)
+                {
+                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                }
             };
 
             client.ApplicationMessageReceivedAsync += async message =>
@@ -51,8 +57,8 @@ c# mqtt 3.1.1 client
                 await Task.CompletedTask;
             };
 
-            var result = await client.ConnectAsync();
-            if (result.Succeeded)
+            var connectResult = await client.ConnectAsync();
+            if (connectResult.Succeeded)
             {
                 for (int i = 1; i <= 3; i++)
                 {
@@ -69,9 +75,7 @@ c# mqtt 3.1.1 client
                 }
             }
             else
-            {
                 Console.WriteLine("Connect Fail!");
-            }
 
             Console.ReadKey();
         }

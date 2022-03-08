@@ -26,6 +26,8 @@ namespace EchoClient
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
+                Console.WriteLine("### SUBSCRIBED ###");
+
                 var subscriptionRequests = new SubscriptionRequestsBuilder()
                     .WithTopicFilter(f => f.WithTopic("testtopic/a"))
                     .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
@@ -37,8 +39,6 @@ namespace EchoClient
                 {
                     Console.WriteLine($"+ ResultCode = {item.ResultCode}");
                 }
-
-                Console.WriteLine("### SUBSCRIBED ###");
             };
 
             client.ApplicationMessageReceivedAsync += async message =>
@@ -53,8 +53,8 @@ namespace EchoClient
                 await Task.CompletedTask;
             };
 
-            var result = await client.ConnectAsync();
-            if (result.Succeeded)
+            var connectResult = await client.ConnectAsync();
+            if (connectResult.Succeeded)
             {
                 for (int i = 1; i <= 3; i++)
                 {
@@ -71,9 +71,7 @@ namespace EchoClient
                 }
             }
             else
-            {
                 Console.WriteLine("Connect Fail!");
-            }
 
             Console.ReadKey();
         }

@@ -68,7 +68,13 @@ namespace MqttFx.Client
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .RemoteAddress(Options.Host, Options.Port)
-                .Handler(new MqttChannelInitializer(this, connectFuture));
+                .Handler(new ActionChannelInitializer<ISocketChannel>(ch =>
+                {
+                    ch.Pipeline.AddLast(new LoggingHandler());
+                    ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
+                    ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
+                    ch.Pipeline.AddLast(new MqttChannelHandler(this, connectFuture));
+                }));
 
             try
             {
@@ -107,8 +113,6 @@ namespace MqttFx.Client
             var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
             return SendAsync(packet);
         }
-
-
 
         /// <summary>
         /// 取消订阅
@@ -149,26 +153,6 @@ namespace MqttFx.Client
                 return channel.WriteAndFlushAsync(packet);
 
             return Task.CompletedTask;
-        }
-
-        class MqttChannelInitializer : ChannelInitializer<ISocketChannel>
-        {
-            private readonly MqttClient client;
-            private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
-
-            public MqttChannelInitializer(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
-            {
-                this.client = client;
-                this.connectFuture = connectFuture;
-            }
-
-            protected override void InitChannel(ISocketChannel ch)
-            {
-                ch.Pipeline.AddLast(new LoggingHandler());
-                ch.Pipeline.AddLast(MqttEncoder.Instance, new MqttDecoder(false, 256 * 1024));
-                ch.Pipeline.AddLast(new IdleStateHandler(10, 10, 0), new MqttPingHandler());
-                ch.Pipeline.AddLast(new MqttChannelHandler(client, connectFuture));
-            }
         }
     }
 }

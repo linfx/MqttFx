@@ -16,7 +16,7 @@ namespace MqttFx.Formatter
             {
                 TopicName = applicationMessage.Topic,
                 //Payload = applicationMessage.Payload,
-                Qos = applicationMessage.Qos,
+                //Qos = applicationMessage.Qos,
                 Retain = applicationMessage.Retain,
                 Dup = applicationMessage.Dup,
                 //ContentType = applicationMessage.ContentType,
@@ -28,6 +28,10 @@ namespace MqttFx.Formatter
                 //SubscriptionIdentifiers = applicationMessage.SubscriptionIdentifiers,
                 //UserProperties = applicationMessage.UserProperties
             };
+            //packet.FixedHeader.SetQos(applicationMessage.Qos);
+
+            packet.FixedHeader.Flags = (byte)applicationMessage.Qos << 1;
+
             ((PublishPayload)packet.Payload).Body = applicationMessage.Payload;
 
             return packet;

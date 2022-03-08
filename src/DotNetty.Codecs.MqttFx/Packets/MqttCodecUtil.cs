@@ -49,7 +49,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         }
     }
 
-    static class PublishPacketFixedHeaderExtensions
+    public static class PublishPacketFixedHeaderExtensions
     {
         public static bool GetDup(this FixedHeader fixedHeader)
         {
@@ -70,6 +70,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
         {
             fixedHeader.Flags |= dup.ToByte() << 3;
         }
+
         public static void SetQos(this FixedHeader fixedHeader, MqttQos qos)
         {
             fixedHeader.Flags |= (byte)qos << 1;

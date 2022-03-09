@@ -33,6 +33,15 @@ namespace DotNetty.Codecs.MqttFx.Packets
         public SubscribePacket(PacketIdVariableHeader variableHeader, SubscribePayload payload)
             : base(variableHeader, payload) { }
 
+        /// <summary>
+        /// SUBSCRIBE - Subscribe to topics
+        /// </summary>
+        /// <param name="fixedHeader"></param>
+        /// <param name="variableHeader"></param>
+        /// <param name="payload"></param>
+        public SubscribePacket(FixedHeader fixedHeader, PacketIdVariableHeader variableHeader, SubscribePayload payload)
+            : base(fixedHeader, variableHeader, payload) { }
+
         public IList<SubscriptionRequest> SubscriptionRequests
         {
             get => ((SubscribePayload)Payload).SubscriptionRequests;

@@ -36,6 +36,7 @@ namespace MqttFx.Client
 
         internal ConcurrentDictionary<int, PendingPublish> PendingPublishs = new();
         internal ConcurrentDictionary<int, PendingSubscription> PendingSubscriptions = new();
+        internal ConcurrentDictionary<int, PendingUnSubscription> PendingUnSubscriptions = new();
 
         public bool IsConnected { get; private set; }
 
@@ -105,16 +106,16 @@ namespace MqttFx.Client
             if (packet.Qos > MqttQos.AtMostOnce)
                 packet.PacketId = packetIdProvider.NewPacketId();
 
-            SendAsync(packet, cancellationToken);
+            SendAsync(packet);
 
             if (packet.Qos == MqttQos.AtMostOnce)
                 return Task.FromResult(new PublishResult());
             else
             {
-                PendingPublish pendingPublish = new(packet);
-                PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
-                pendingPublish.StartPublishRetransmissionTimer(EventLoop.GetNext(), p => SendAsync(p));
-                return pendingPublish.Future.Task;
+                PendingPublish pending = new(packet);
+                PendingPublishs.TryAdd(packet.PacketId, pending);
+                pending.StartPublishRetransmissionTimer(EventLoop.GetNext(), SendAsync);
+                return pending.Future.Task;
             }
         }
 
@@ -125,20 +126,25 @@ namespace MqttFx.Client
             var packet = new SubscribePacket(packetIdProvider.NewPacketId(), subscriptionRequests.Requests.ToArray());
             SendAsync(packet);
 
-            PendingSubscription pendingSubscription = new(packet);
-            PendingSubscriptions.TryAdd(packet.PacketId, pendingSubscription);
-            return pendingSubscription.Future.Task;
+            PendingSubscription pending = new(packet);
+            PendingSubscriptions.TryAdd(packet.PacketId, pending);
+            pending.StartRetransmitTimer(EventLoop.GetNext(), SendAsync);
+            return pending.Future.Task;
         }
 
         /// <summary>
         /// 取消订阅
         /// </summary>
         /// <param name="topicFilters">主题</param>
-        public Task UnsubscribeAsync(params string[] topicFilters)
+        public Task<UnSubscribeResult> UnsubscribeAsync(params string[] topicFilters)
         {
             var packet = new UnsubscribePacket(packetIdProvider.NewPacketId(), topicFilters);
+            SendAsync(packet);
 
-            return SendAsync(packet);
+            PendingUnSubscription pending = new(packet);
+            PendingUnSubscriptions.TryAdd(packet.PacketId, pending);
+            pending.StartRetransmitTimer(EventLoop.GetNext(), SendAsync);
+            return pending.Future.Task;
         }
 
         /// <summary>
@@ -162,10 +168,8 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        public Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
+        public Task SendAsync(Packet packet)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             if (channel == null)
                 return Task.CompletedTask;
 

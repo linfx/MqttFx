@@ -34,12 +34,12 @@ namespace EchoClient
                 //    .Build();
 
                 //var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
-                //var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
+                var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
 
-                //foreach (var item in subscribeResult.Items)
-                //{
-                //    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
-                //}
+                foreach (var item in subscribeResult.Items)
+                {
+                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                }
             };
 
             client.ApplicationMessageReceivedAsync += async message =>

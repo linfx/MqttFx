@@ -37,7 +37,7 @@
         /// <param name="fixedHeader">固定报头(Fixed header)</param>
         /// <param name="variableHeader">可变报头(Variable header)</param>
         /// <param name="payload">有效载荷(Payload)</param>
-        public PacketWithId(FixedHeader fixedHeader, PublishVariableHeader variableHeader, PublishPayload payload)
+        public PacketWithId(FixedHeader fixedHeader, PacketIdVariableHeader variableHeader, Payload payload)
             : base(fixedHeader, variableHeader, payload) { }
 
         /// <summary>

@@ -3,7 +3,7 @@ using DotNetty.Common.Concurrency;
 using DotNetty.Transport.Channels;
 using System;
 
-namespace MqttFx.Client.Channels
+namespace MqttFx.Utils
 {
     /// <summary>
     /// 消息重发
@@ -12,7 +12,7 @@ namespace MqttFx.Client.Channels
     class RetransmissionHandler<T> where T : Packet
     {
         private volatile bool stopped;
-        //private final PendingOperation pendingOperation;
+        //private PendingOperation pendingOperation;
         private IScheduledTask timer;
         private int timeout;
         private Action<T> handler;

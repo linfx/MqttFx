@@ -1,6 +1,7 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
+using MqttFx.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -129,15 +130,15 @@ namespace MqttFx.Channels
 
         void ProcessMessage(IChannel channel, PubRecPacket packet)
         {
-            if (client.PendingPublishs.TryGetValue(packet.PacketId, out PendingPublish pendingPublish))
+            if (client.PendingPublishs.TryGetValue(packet.PacketId, out PendingPublish pending))
             {
-                pendingPublish.OnPubAckReceived();
+                pending.OnPubAckReceived();
 
                 PubRelPacket pubRelPacket = new(packet.PacketId);
                 channel.WriteAndFlushAsync(pubRelPacket);
 
-                pendingPublish.SetPubRelMessage(pubRelPacket);
-                pendingPublish.StartPubrelRetransmissionTimer(client.EventLoop.GetNext(), p => client.SendAsync(p));
+                pending.SetPubRelMessage(pubRelPacket);
+                pending.StartPubrelRetransmissionTimer(client.EventLoop.GetNext(), client.SendAsync);
             }
         }
 
@@ -148,43 +149,50 @@ namespace MqttFx.Channels
 
         void ProcessMessage(IChannel channel, PubCompPacket packet)
         {
-            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
+            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pending))
             {
-                pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
-                pendingPublish.OnPubCompReceived();
+                pending.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pending.OnPubCompReceived();
             }
         }
 
         void ProcessMessage(IChannel channel, PubAckPacket packet)
         {
-            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
+            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pending))
             {
-                pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
-                pendingPublish.OnPubAckReceived();
+                pending.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pending.OnPubAckReceived();
             }
         }
 
         void ProcessMessage(IChannel channel, SubAckPacket packet)
         {
-            if (client.PendingSubscriptions.TryRemove(packet.PacketId, out PendingSubscription pendingSubscription))
+            if (client.PendingSubscriptions.TryRemove(packet.PacketId, out PendingSubscription pending))
             {
+                pending.OnSubackReceived();
+
                 var items = new List<SubscribeResultItem>();
 
-                for (int i = 0; i < pendingSubscription.SubscribePacket.SubscriptionRequests.Count; i++)
+                for (int i = 0; i < pending.SubscribePacket.SubscriptionRequests.Count; i++)
                 {
                     items.Add(new SubscribeResultItem
                     {
-                        TopicFilter = pendingSubscription.SubscribePacket.SubscriptionRequests[i].TopicFilter,
+                        TopicFilter = pending.SubscribePacket.SubscriptionRequests[i].TopicFilter,
                         ResultCode = packet.ReturnCodes[i]
                     });
                 }
 
-                pendingSubscription.Future.TrySetResult(new SubscribeResult(items));
+                pending.Future.TrySetResult(new SubscribeResult(items));
             }
         }
 
         void ProcessMessage(IChannel channel, UnsubAckPacket packet)
         {
+            if (client.PendingUnSubscriptions.TryRemove(packet.PacketId, out PendingUnSubscription pending))
+            {
+                pending.Future.TrySetResult(new UnSubscribeResult());
+                pending.OnUnsubackReceived();
+            }
         }
 
         void InvokeProcessForIncomingPublish(PublishPacket packet)

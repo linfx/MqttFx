@@ -1,6 +1,6 @@
 ﻿namespace MqttFx.Utils
 {
-    internal class PacketIdProvider
+    class PacketIdProvider
     {
         private readonly object _syncRoot = new();
         private ushort _value;

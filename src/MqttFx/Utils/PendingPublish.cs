@@ -1,10 +1,9 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
-using MqttFx.Client.Channels;
 using System;
 using System.Threading.Tasks;
 
-namespace MqttFx
+namespace MqttFx.Utils
 {
     class PendingPublish
     {
@@ -13,12 +12,12 @@ namespace MqttFx
 
         public TaskCompletionSource<PublishResult> Future { get; set; } = new();
 
-        public PendingPublish(PublishPacket message)
+        public PendingPublish(PublishPacket packet)
         {
-            publishRetransmissionHandler.OriginalMessage = message;
+            publishRetransmissionHandler.OriginalMessage = packet;
         }
 
-        public void StartPublishRetransmissionTimer(IEventLoop eventLoop, Action<Packet> sendPacket)
+        public void StartPublishRetransmissionTimer(IEventLoop eventLoop, Func<Packet, Task> send)
         {
             publishRetransmissionHandler.SetHandle(originalMessage =>
             {
@@ -26,7 +25,7 @@ namespace MqttFx
                 {
                     Dup = true
                 };
-                sendPacket(packet);
+                send(packet);
             });
             publishRetransmissionHandler.Start(eventLoop);
         }
@@ -38,12 +37,11 @@ namespace MqttFx
 
         public void SetPubRelMessage(PubRelPacket packet) => pubRelRetransmissionHandler.OriginalMessage = packet;
 
-        public void StartPubrelRetransmissionTimer(IEventLoop eventLoop, Action<Packet> sendPacket)
+        public void StartPubrelRetransmissionTimer(IEventLoop eventLoop, Func<Packet, Task> send)
         {
             pubRelRetransmissionHandler.SetHandle(originalMessage =>
             {
-                var packet = new PubRelPacket(originalMessage.PacketId);
-                sendPacket(packet);
+                send(new PubRelPacket(originalMessage.PacketId));
             });
             pubRelRetransmissionHandler.Start(eventLoop);
         }

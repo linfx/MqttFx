@@ -147,10 +147,14 @@ namespace MqttFx.Client
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
+            IsConnected = false;
             if (channel != null)
+            {
+                await SendAsync(new DisconnectPacket());
                 await channel.CloseAsync();
-
+            }
             await EventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await OnDisconnected();
         }
 
         /// <summary>

@@ -83,8 +83,6 @@ namespace MqttFx.Channels
                 case UnsubAckPacket unsubAckPacket:
                     ProcessMessage(ctx.Channel, unsubAckPacket);
                     break;
-                case DisconnectPacket:
-                    break;
             }
         }
 

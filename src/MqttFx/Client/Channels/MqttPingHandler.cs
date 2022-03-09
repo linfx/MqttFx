@@ -64,6 +64,8 @@ namespace MqttFx.Channels
         {
             // 创建心跳超时，断开连接任务
             // 如果客户端在发送 PINGREQ 后的合理时间内未收到 PINGRESP 数据包，则应关闭与服务器的网络连接。
+            // 服务端在1.5个时长内未收到PINGREQ，就断开连接。
+            // 客户端在1个时长内未收到PINGRES，断开连接。
             if (pingRespTimeout == null)
             {
                 pingRespTimeout = channel.EventLoop.Schedule(() =>

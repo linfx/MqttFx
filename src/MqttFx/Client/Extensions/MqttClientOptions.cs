@@ -20,6 +20,7 @@ namespace MqttFx
         public bool CleanSession { get; set; } = true;
 
         /// <summary>
+        /// Keep Alive(秒)
         ///     Gets or sets the keep alive period.
         ///     The connection is normally left open by the client so that is can send and receive data at any time.
         ///     If no data flows over an open connection for a certain time period then the client will generate a PINGREQ and
@@ -55,10 +56,11 @@ namespace MqttFx
         public byte[] WillPayload { get; set; }
 
         /// <summary>
+        /// 连接超时时长(秒)
         ///     Gets or sets the timeout which will be applied at socket level and internal operations.
         ///     The default value is the same as for sockets in .NET in general.
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(100);
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(10);
 
         /// <summary>
         /// HostNameOrAddress

@@ -151,8 +151,10 @@ namespace MqttFx.Client
         /// 断开连接
         /// </summary>
         /// <returns></returns>
-        public async Task DisconnectAsync()
+        public async Task DisconnectAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             IsConnected = false;
             if (channel != null)
             {

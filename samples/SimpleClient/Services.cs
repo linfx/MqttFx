@@ -64,7 +64,7 @@ namespace SimpleClient
                 await Task.CompletedTask;
             };
 
-            var connectResult = await client.ConnectAsync();
+            var connectResult = await client.ConnectAsync(cancellationToken);
             if (connectResult.Succeeded)
             {
                 for (int i = 1; i <= 3; i++)
@@ -85,9 +85,9 @@ namespace SimpleClient
                 logger.LogError("Connect Fail!");
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            await client.DisconnectAsync(cancellationToken);
         }
     }
 }

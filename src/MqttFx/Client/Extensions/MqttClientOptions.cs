@@ -20,9 +20,14 @@ namespace MqttFx
         public bool CleanSession { get; set; } = true;
 
         /// <summary>
-        /// 保持连接 
+        ///     Gets or sets the keep alive period.
+        ///     The connection is normally left open by the client so that is can send and receive data at any time.
+        ///     If no data flows over an open connection for a certain time period then the client will generate a PINGREQ and
+        ///     expect to receive a PINGRESP from the broker.
+        ///     This message exchange confirms that the connection is open and working.
+        ///     This period is known as the keep alive period.
         /// </summary>
-        public ushort KeepAlive { get; set; } = 60;
+        public ushort KeepAlive { get; set; } = 15;
 
         /// <summary>
         /// 凭证
@@ -50,9 +55,10 @@ namespace MqttFx
         public byte[] WillPayload { get; set; }
 
         /// <summary>
-        /// 响应超时
+        ///     Gets or sets the timeout which will be applied at socket level and internal operations.
+        ///     The default value is the same as for sockets in .NET in general.
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(100);
 
         /// <summary>
         /// HostNameOrAddress

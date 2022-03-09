@@ -163,9 +163,11 @@ namespace MqttFx.Test
         [InlineData(MqttQos.ExactlyOnce, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
-            var packet = new PublishPacket(qos, dup, retain)
+            var packet = new PublishPacket
             {
-                TopicName = topicName
+                TopicName = topicName,
+                Dup = dup,
+                Retain = retain,
             };
             var packet_payload = (PublishPayload)packet.Payload;
 

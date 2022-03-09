@@ -30,7 +30,7 @@ namespace MqttFx.Client
     public class MqttClient
     {
         private readonly ILogger logger;
-        private IEventLoopGroup eventLoop;
+        public IEventLoopGroup EventLoop { get; private set; }
         private volatile IChannel channel;
         private readonly PacketIdProvider packetIdProvider = new();
 
@@ -61,13 +61,13 @@ namespace MqttFx.Client
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (eventLoop == null)
-                eventLoop = new MultithreadEventLoopGroup();
+            if (EventLoop == null)
+                EventLoop = new MultithreadEventLoopGroup();
 
             var connectFuture = new TaskCompletionSource<ConnectResult>();
             var bootstrap = new Bootstrap();
             bootstrap
-                .Group(eventLoop)
+                .Group(EventLoop)
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
                 .RemoteAddress(Options.Host, Options.Port)
@@ -113,7 +113,7 @@ namespace MqttFx.Client
             {
                 PendingPublish pendingPublish = new(packet);
                 PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
-                pendingPublish.StartPublishRetransmissionTimer(eventLoop.GetNext(), p => SendAsync(p));
+                pendingPublish.StartPublishRetransmissionTimer(EventLoop.GetNext(), p => SendAsync(p));
                 return pendingPublish.Future.Task;
             }
         }
@@ -150,7 +150,7 @@ namespace MqttFx.Client
             if (channel != null)
                 await channel.CloseAsync();
 
-            await eventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
+            await EventLoop.ShutdownGracefullyAsync(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(1));
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace MqttFx.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <returns></returns>
-        Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
+        public Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

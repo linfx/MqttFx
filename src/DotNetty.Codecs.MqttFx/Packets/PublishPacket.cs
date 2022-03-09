@@ -7,30 +7,22 @@
     public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
-        /// 发布消息
+        /// 发布消息(PUBLISH – Publish message)
         /// </summary>
         public PublishPacket()
             : this(new PublishVariableHeader(), new PublishPayload()) { }
 
+        /// <summary>
+        /// 发布消息(PUBLISH – Publish message)
+        /// </summary>
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload) { }
 
+        /// <summary>
+        /// 发布消息(PUBLISH – Publish message)
+        /// </summary>
         public PublishPacket(FixedHeader fixedHeader, PublishVariableHeader variableHeader, PublishPayload payload)
             : base(fixedHeader, variableHeader, payload) { }
-
-        /// <summary>
-        /// 发布消息
-        /// </summary>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="dup">重发标志</param>
-        /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos = MqttQos.AtMostOnce, bool dup = false, bool retain = false) 
-            : this()
-        {
-            Qos = qos;
-            Dup = dup;
-            Retain = retain;
-        }
 
         /// <summary>
         /// 重发标志(DUP)

@@ -16,12 +16,7 @@ namespace MqttFx.Client.Channels
         private IScheduledTask timer;
         private int timeout;
         private Action<T> handler;
-        private readonly T originalMessage;
-
-        public RetransmissionHandler(T originalMessage)
-        {
-            this.originalMessage = originalMessage;
-        }
+        public T OriginalMessage { get; set; }
 
         public void Start(IEventLoop eventLoop)
         {
@@ -50,7 +45,7 @@ namespace MqttFx.Client.Channels
 
                 timeout += 5;
 
-                handler(originalMessage);
+                handler(OriginalMessage);
                 StartTimer(eventLoop);
             }, TimeSpan.FromSeconds(timeout));
         }

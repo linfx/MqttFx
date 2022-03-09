@@ -8,31 +8,49 @@ namespace MqttFx
 {
     class PendingPublish
     {
-        private RetransmissionHandler<PublishPacket> publishRetransmissionHandler;
-        private RetransmissionHandler<Packet> pubrelRetransmissionHandler;
+        private readonly RetransmissionHandler<PublishPacket> publishRetransmissionHandler = new();
+        private readonly RetransmissionHandler<PubRelPacket> pubRelRetransmissionHandler = new();
 
         public TaskCompletionSource<PublishResult> Future { get; set; } = new();
 
         public PendingPublish(PublishPacket message)
         {
-            publishRetransmissionHandler = new RetransmissionHandler<PublishPacket>(message);
-            pubrelRetransmissionHandler = new RetransmissionHandler<Packet>(message);
+            publishRetransmissionHandler.OriginalMessage = message;
         }
 
         public void StartPublishRetransmissionTimer(IEventLoop eventLoop, Action<Packet> sendPacket)
         {
             publishRetransmissionHandler.SetHandle(originalMessage =>
             {
-                var packet = new PublishPacket(originalMessage.FixedHeader, (PublishVariableHeader)originalMessage.VariableHeader, (PublishPayload)originalMessage.Payload);
-                packet.SetDup(true);
+                var packet = new PublishPacket(originalMessage.FixedHeader, (PublishVariableHeader)originalMessage.VariableHeader, (PublishPayload)originalMessage.Payload)
+                {
+                    Dup = true
+                };
                 sendPacket(packet);
             });
             publishRetransmissionHandler.Start(eventLoop);
         }
 
-        public void OnPubackReceived()
+        public void OnPubAckReceived()
         {
             publishRetransmissionHandler.Stop();
+        }
+
+        public void SetPubRelMessage(PubRelPacket packet) => pubRelRetransmissionHandler.OriginalMessage = packet;
+
+        public void StartPubrelRetransmissionTimer(IEventLoop eventLoop, Action<Packet> sendPacket)
+        {
+            pubRelRetransmissionHandler.SetHandle(originalMessage =>
+            {
+                var packet = new PubRelPacket(originalMessage.PacketId);
+                sendPacket(packet);
+            });
+            pubRelRetransmissionHandler.Start(eventLoop);
+        }
+
+        public void OnPubCompReceived()
+        {
+            pubRelRetransmissionHandler.Stop();
         }
     }
 }

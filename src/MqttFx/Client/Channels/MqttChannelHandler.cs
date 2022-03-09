@@ -131,7 +131,16 @@ namespace MqttFx.Channels
 
         void ProcessMessage(IChannel channel, PubRecPacket packet)
         {
-            channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
+            if (client.PendingPublishs.TryGetValue(packet.PacketId, out PendingPublish pendingPublish))
+            {
+                pendingPublish.OnPubAckReceived();
+
+                PubRelPacket pubRelPacket = new(packet.PacketId);
+                channel.WriteAndFlushAsync(pubRelPacket);
+
+                pendingPublish.SetPubRelMessage(pubRelPacket);
+                pendingPublish.StartPubrelRetransmissionTimer(client.EventLoop.GetNext(), p => client.SendAsync(p));
+            }
         }
 
         void ProcessMessage(IChannel channel, PubRelPacket packet)
@@ -144,6 +153,7 @@ namespace MqttFx.Channels
             if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
             {
                 pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pendingPublish.OnPubCompReceived();
             }
         }
 
@@ -152,7 +162,7 @@ namespace MqttFx.Channels
             if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
             {
                 pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
-                pendingPublish.OnPubackReceived();
+                pendingPublish.OnPubAckReceived();
             }
         }
 

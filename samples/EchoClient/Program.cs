@@ -34,12 +34,12 @@ namespace EchoClient
                 //    .Build();
 
                 //var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
-                var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
+                //var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
 
-                foreach (var item in subscribeResult.Items)
-                {
-                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
-                }
+                //foreach (var item in subscribeResult.Items)
+                //{
+                //    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                //}
             };
 
             client.ApplicationMessageReceivedAsync += async message =>
@@ -57,7 +57,7 @@ namespace EchoClient
             var connectResult = await client.ConnectAsync();
             if (connectResult.Succeeded)
             {
-                for (int i = 1; i <= 1; i++)
+                for (int i = 1; i <= 100; i++)
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
@@ -65,10 +65,12 @@ namespace EchoClient
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AtLeastOnce)
+                        .WithQos(MqttQos.ExactlyOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);
+
+                    Console.ReadKey();
                 }
             }
             else

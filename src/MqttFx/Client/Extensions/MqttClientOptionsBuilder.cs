@@ -2,7 +2,7 @@
 {
     public class MqttClientOptionsBuilder
     {
-        private readonly MqttClientOptions _options = new MqttClientOptions();
+        private readonly MqttClientOptions _options = new();
 
         public MqttClientOptionsBuilder WithCleanSession(bool value = true)
         {

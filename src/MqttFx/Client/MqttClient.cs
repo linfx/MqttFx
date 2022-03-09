@@ -107,25 +107,13 @@ namespace MqttFx.Client
 
             SendAsync(packet, cancellationToken);
 
-            return packet.Qos switch
+            if (packet.Qos == MqttQos.AtMostOnce)
+                return Task.FromResult(new PublishResult());
+            else
             {
-                MqttQos.AtMostOnce => Task.FromResult(new PublishResult()),
-                MqttQos.AtLeastOnce => publishAtLeastOnceAsync(),
-                MqttQos.ExactlyOnce => publishExactlyOnceAsync(),
-                _ => throw new NotSupportedException(),
-            };
-
-            Task<PublishResult> publishAtLeastOnceAsync()
-            {
-                PendingPublish pendingPublish = new();
+                PendingPublish pendingPublish = new(packet);
                 PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
-                return pendingPublish.Future.Task;
-            }
-
-            Task<PublishResult> publishExactlyOnceAsync()
-            {
-                PendingPublish pendingPublish = new();
-                PendingPublishs.TryAdd(packet.PacketId, pendingPublish);
+                pendingPublish.StartPublishRetransmissionTimer(eventLoop.GetNext(), p => SendAsync(p));
                 return pendingPublish.Future.Task;
             }
         }

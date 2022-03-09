@@ -15,6 +15,9 @@
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload) { }
 
+        public PublishPacket(FixedHeader fixedHeader, PublishVariableHeader variableHeader, PublishPayload payload)
+            : base(fixedHeader, variableHeader, payload) { }
+
         /// <summary>
         /// 发布消息
         /// </summary>
@@ -24,9 +27,9 @@
         public PublishPacket(MqttQos qos = MqttQos.AtMostOnce, bool dup = false, bool retain = false) 
             : this()
         {
-            FixedHeader.Flags |= (byte)qos << 1;
-            FixedHeader.Flags |= dup.ToByte() << 3;
-            FixedHeader.Flags |= retain.ToByte();
+            Qos = qos;
+            Dup = dup;
+            Retain = retain;
         }
 
         /// <summary>
@@ -34,17 +37,29 @@
         /// 如果DUP标志被设置为0，表示这是客户端或服务端第一次请求发送这个PUBLISH报文。
         /// 如果DUP标志被设置为1，表示这可能是一个早前报文请求的重发。
         /// </summary>
-        public bool Dup => FixedHeader.GetDup();
+        public bool Dup
+        {
+            get => this.GetDup();
+            set => this.SetDup(value);
+        }
 
         /// <summary>
         /// 服务质量等级(QoS)
         /// </summary>
-        public MqttQos Qos => FixedHeader.GetQos();
+        public MqttQos Qos
+        {
+            get => this.GetQos();
+            set => this.SetQos(value);
+        }
 
         /// <summary>
         /// 保留标志(RETAIN)
         /// </summary>
-        public bool Retain => FixedHeader.GetRetain();
+        public bool Retain
+        {
+            get => this.GetRetain();
+            set => this.SetRetain(value);
+        }
 
         /// <summary>
         /// 主题名称(UTF-8编码的字符串)(Topic Name)

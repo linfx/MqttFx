@@ -152,6 +152,7 @@ namespace MqttFx.Channels
             if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pendingPublish))
             {
                 pendingPublish.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pendingPublish.OnPubackReceived();
             }
         }
 

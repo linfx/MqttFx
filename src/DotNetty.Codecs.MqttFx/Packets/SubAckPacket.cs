@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets
 {
     /// <summary>
     /// 订阅回执(SUBACK – Subscribe acknowledgement)
@@ -8,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     public class SubAckPacket : PacketWithId
     {
         public SubAckPacket()
-            : this(new PacketIdVariableHeader(), new SubAckPayload(new List<MqttQos>())) { }
+            : this(new PacketIdVariableHeader(), new SubAckPayload()) { }
 
         public SubAckPacket(ushort packetId, params MqttQos[] returnCodes)
             : this(new PacketIdVariableHeader(packetId), new SubAckPayload(returnCodes)) { }
@@ -19,10 +17,9 @@ namespace DotNetty.Codecs.MqttFx.Packets
         /// <summary>
         /// 返回代码
         /// </summary>
-        public IList<MqttQos> ReturnCodes
+        public MqttQos[] ReturnCodes
         {
-            get => ((SubAckPayload)Payload).ReturnCodes; 
-            set => ((SubAckPayload)Payload).ReturnCodes = value;
+            get => ((SubAckPayload)Payload).ReturnCodes;
         }
     }
 }

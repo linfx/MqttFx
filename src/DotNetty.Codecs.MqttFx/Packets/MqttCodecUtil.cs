@@ -49,35 +49,41 @@ namespace DotNetty.Codecs.MqttFx.Packets
         }
     }
 
-    static class PublishPacketFixedHeaderExtensions
+    public static class PublishPacketFixedHeaderExtensions
     {
-        public static bool GetDup(this FixedHeader fixedHeader)
-        {
-            return (fixedHeader.Flags & 0x08) == 0x08;
-        }
-
         public static MqttQos GetQos(this FixedHeader fixedHeader)
         {
             return (MqttQos)((fixedHeader.Flags & 0x06) >> 1);
         }
 
-        public static bool GetRetain(this FixedHeader fixedHeader)
+        public static bool GetDup(this PublishPacket packet)
         {
-            return (fixedHeader.Flags & 0x01) > 0;
+            return (packet.FixedHeader.Flags & 0x08) == 0x08;
         }
 
-        public static void SetDup(this FixedHeader fixedHeader, bool dup = false)
+        public static MqttQos GetQos(this PublishPacket packet)
         {
-            fixedHeader.Flags |= dup.ToByte() << 3;
-        }
-        public static void SetQos(this FixedHeader fixedHeader, MqttQos qos)
-        {
-            fixedHeader.Flags |= (byte)qos << 1;
+            return (MqttQos)((packet.FixedHeader.Flags & 0x06) >> 1);
         }
 
-        public static void SetRetain(this FixedHeader fixedHeader, bool retain = false)
+        public static bool GetRetain(this PublishPacket packet)
         {
-            fixedHeader.Flags |= retain.ToByte();
+            return (packet.FixedHeader.Flags & 0x01) > 0;
+        }
+
+        public static void SetQos(this PublishPacket packet, MqttQos qos)
+        {
+            packet.FixedHeader.Flags |= (byte)qos << 1;
+        }
+
+        public static void SetDup(this PublishPacket packet, bool dup = false)
+        {
+            packet.FixedHeader.Flags |= dup.ToByte() << 3;
+        }
+
+        public static void SetRetain(this PublishPacket packet, bool retain = false)
+        {
+            packet.FixedHeader.Flags |= retain.ToByte();
         }
     }
 }

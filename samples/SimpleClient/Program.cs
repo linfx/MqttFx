@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SimpleClient
@@ -20,6 +21,9 @@ namespace SimpleClient
                 {
                     options.Host = "broker.emqx.io";
                     options.Port = 1883;
+                    options.WillTopic = "testtopic/c";
+                    options.WillPayload = Encoding.UTF8.GetBytes("offline");
+                    options.WillRetain = true;
                 });
                 services.AddHostedService<Services>();
             });

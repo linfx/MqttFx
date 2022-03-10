@@ -22,20 +22,27 @@ namespace EchoClient
 
             var client = container.GetService<MqttClient>();
 
-            client.UseConnectedHandler(async () =>
+            client.ConnectedAsync += async e =>
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
-                var subscriptionRequests = new SubscriptionRequestsBuilder()
-                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
-                    .Build();
-
-                await client.SubscribeAsync(subscriptionRequests);
-
                 Console.WriteLine("### SUBSCRIBED ###");
-            });
 
-            client.UseApplicationMessageReceivedHandler(message =>
+                //var subscriptionRequests = new SubscriptionRequestsBuilder()
+                //    .WithTopicFilter(f => f.WithTopic("testtopic/a"))
+                //    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
+                //    .Build();
+
+                //var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
+                var subscribeResult = await client.SubscribeAsync("testopic/bbb", MqttQos.ExactlyOnce);
+
+                foreach (var item in subscribeResult.Items)
+                {
+                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                }
+            };
+
+            client.ApplicationMessageReceivedAsync += async message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
                 Console.WriteLine($"+ Topic = {message.Topic}");
@@ -43,12 +50,14 @@ namespace EchoClient
                 Console.WriteLine($"+ QoS = {message.Qos}");
                 Console.WriteLine($"+ Retain = {message.Retain}");
                 Console.WriteLine();
-            });
 
-            var result = await client.ConnectAsync();
-            if (result.Succeeded)
+                await Task.CompletedTask;
+            };
+
+            var connectResult = await client.ConnectAsync();
+            if (connectResult.Succeeded)
             {
-                for (int i = 1; i <= 3; i++)
+                for (int i = 1; i <= 100; i++)
                 {
                     await Task.Delay(500);
                     Console.WriteLine("### Publish Message ###");
@@ -56,16 +65,16 @@ namespace EchoClient
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AtLeastOnce)
+                        .WithQos(MqttQos.ExactlyOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);
+
+                    Console.ReadKey();
                 }
             }
             else
-            {
                 Console.WriteLine("Connect Fail!");
-            }
 
             Console.ReadKey();
         }

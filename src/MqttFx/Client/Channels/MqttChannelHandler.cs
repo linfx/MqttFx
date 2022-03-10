@@ -1,6 +1,8 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
 using MqttFx.Client;
+using MqttFx.Utils;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MqttFx.Channels
@@ -8,12 +10,12 @@ namespace MqttFx.Channels
     /// <summary>
     /// 发送和接收数据处理器
     /// </summary>
-    public class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
+    class MqttChannelHandler : SimpleChannelInboundHandler<Packet>
     {
         private readonly MqttClient client;
-        private readonly TaskCompletionSource<MqttConnectResult> connectFuture;
+        private readonly TaskCompletionSource<ConnectResult> connectFuture;
 
-        public MqttChannelHandler(MqttClient client, TaskCompletionSource<MqttConnectResult> connectFuture)
+        public MqttChannelHandler(MqttClient client, TaskCompletionSource<ConnectResult> connectFuture)
         {
             this.client = client;
             this.connectFuture = connectFuture;
@@ -38,13 +40,13 @@ namespace MqttFx.Channels
                 payload.UserName = client.Options.Credentials.Username;
                 payload.Password = client.Options.Credentials.Username;
             }
-            if (client.Options.WillMessage != null)
+            if (!string.IsNullOrEmpty(client.Options.WillTopic))
             {
                 variableHeader.ConnectFlags.WillFlag = true;
-                variableHeader.ConnectFlags.WillQos = client.Options.WillMessage.Qos;
-                variableHeader.ConnectFlags.WillRetain = client.Options.WillMessage.Retain;
-                payload.WillTopic = client.Options.WillMessage.Topic;
-                payload.WillMessage = client.Options.WillMessage.Payload;
+                variableHeader.ConnectFlags.WillQos = client.Options.WillQos;
+                variableHeader.ConnectFlags.WillRetain = client.Options.WillRetain;
+                payload.WillTopic = client.Options.WillTopic;
+                payload.WillMessage = client.Options.WillPayload;
             }
             context.WriteAndFlushAsync(packet);
         }
@@ -56,64 +58,56 @@ namespace MqttFx.Channels
         /// <param name="packet"></param>
         protected override void ChannelRead0(IChannelHandlerContext ctx, Packet packet)
         {
-            switch (packet.FixedHeader.PacketType)
+            switch (packet)
             {
-                case PacketType.CONNACK:
-                    ProcessMessage(ctx.Channel, (ConnAckPacket)packet);
+                case ConnAckPacket connAckPacket:
+                    ProcessMessage(ctx.Channel, connAckPacket);
                     break;
-                case PacketType.PUBLISH:
-                    ProcessMessage(ctx.Channel, (PublishPacket)packet);
+                case PublishPacket publishPacket:
+                    ProcessMessage(ctx.Channel, publishPacket);
                     break;
-                case PacketType.PUBACK:
-                    ProcessMessage(packet as PubAckPacket);
+                case PubRecPacket pubRecPacket:
+                    ProcessMessage(ctx.Channel, pubRecPacket);
                     break;
-                case PacketType.PUBREC:
-                    ProcessMessage(ctx.Channel, packet as PubRecPacket);
+                case PubRelPacket pubRelPacket:
+                    ProcessMessage(ctx.Channel, pubRelPacket);
                     break;
-                case PacketType.PUBREL:
-                    ProcessMessage(ctx.Channel, packet as PubRelPacket);
+                case PubCompPacket pubCompPacket:
+                    ProcessMessage(ctx.Channel, pubCompPacket);
                     break;
-                case PacketType.PUBCOMP:
-                    ProcessMessage(packet);
+                case PubAckPacket pubAckPacket:
+                    ProcessMessage(ctx.Channel, pubAckPacket);
                     break;
-                case PacketType.SUBSCRIBE:
+                case SubAckPacket subAckPacket:
+                    ProcessMessage(ctx.Channel, subAckPacket);
                     break;
-                case PacketType.SUBACK:
-                    ProcessMessage((SubAckPacket)packet);
-                    break;
-                case PacketType.UNSUBSCRIBE:
-                    break;
-                case PacketType.UNSUBACK:
-                    break;
-                case PacketType.DISCONNECT:
+                case UnsubAckPacket unsubAckPacket:
+                    ProcessMessage(ctx.Channel, unsubAckPacket);
                     break;
             }
         }
 
-        private void ProcessMessage(IChannel channel, ConnAckPacket packet)
+        async void ProcessMessage(IChannel channel, ConnAckPacket packet)
         {
             var variableHeader = (ConnAckVariableHeader)packet.VariableHeader;
-
             switch (variableHeader.ConnectReturnCode)
             {
                 case ConnectReturnCode.CONNECTION_ACCEPTED:
-                    connectFuture.TrySetResult(new MqttConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
-
-                    if (client.ConnectedHandler != null)
-                        client.ConnectedHandler.OnConnected();
+                    connectFuture.TrySetResult(new ConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
+                    await client.OnConnected(new ConnectResult(ConnectReturnCode.CONNECTION_ACCEPTED));
                     break;
 
                 case ConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
                 case ConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED:
                 case ConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE:
                 case ConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
-                    connectFuture.TrySetResult(new MqttConnectResult(variableHeader.ConnectReturnCode));
-                    channel.CloseAsync();
+                    connectFuture.TrySetResult(new ConnectResult(variableHeader.ConnectReturnCode));
+                    await channel.CloseAsync();
                     break;
             }
         }
 
-        private void ProcessMessage(IChannel channel, PublishPacket packet)
+        void ProcessMessage(IChannel channel, PublishPacket packet)
         {
             switch (packet.Qos)
             {
@@ -128,43 +122,82 @@ namespace MqttFx.Channels
                     break;
 
                 case MqttQos.ExactlyOnce:
+                    if (packet.PacketId > 0)
+                        channel.WriteAndFlushAsync(new PubRecPacket(packet.PacketId));
                     break;
             }
         }
 
-        private void ProcessMessage(PubAckPacket message)
+        void ProcessMessage(IChannel channel, PubRecPacket packet)
         {
-        }
-
-        private void ProcessMessage(IChannel channel, PubRecPacket packet)
-        {
-            channel.WriteAndFlushAsync(new PubRelPacket(packet.PacketId));
-        }
-
-        private void ProcessMessage(IChannel channel, PubRelPacket message)
-        {
-        }
-
-        private void ProcessMessage(SubAckPacket message)
-        {
-        }
-
-        private void ProcessMessage(UnsubAckPacket message)
-        {
-        }
-
-
-        private void ProcessMessage(Packet message)
-        {
-        }
-
-        private void InvokeProcessForIncomingPublish(PublishPacket packet)
-        {
-            var handler = client.MessageReceivedHandler;
-            if (handler != null)
+            if (client.PendingPublishs.TryGetValue(packet.PacketId, out PendingPublish pending))
             {
-                handler.OnMesage(packet.ToMessage());
+                pending.OnPubAckReceived();
+
+                PubRelPacket pubRelPacket = new(packet.PacketId);
+                channel.WriteAndFlushAsync(pubRelPacket);
+
+                pending.SetPubRelMessage(pubRelPacket);
+                pending.StartPubrelRetransmissionTimer(client.EventLoop.GetNext(), client.SendAsync);
             }
+        }
+
+        void ProcessMessage(IChannel channel, PubRelPacket packet)
+        {
+            channel.WriteAndFlushAsync(new PubCompPacket(packet.PacketId));
+        }
+
+        void ProcessMessage(IChannel channel, PubCompPacket packet)
+        {
+            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pending))
+            {
+                pending.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pending.OnPubCompReceived();
+            }
+        }
+
+        void ProcessMessage(IChannel channel, PubAckPacket packet)
+        {
+            if (client.PendingPublishs.TryRemove(packet.PacketId, out PendingPublish pending))
+            {
+                pending.Future.TrySetResult(new PublishResult(packet.PacketId));
+                pending.OnPubAckReceived();
+            }
+        }
+
+        void ProcessMessage(IChannel channel, SubAckPacket packet)
+        {
+            if (client.PendingSubscriptions.TryRemove(packet.PacketId, out PendingSubscription pending))
+            {
+                pending.OnSubackReceived();
+
+                var items = new List<SubscribeResultItem>();
+
+                for (int i = 0; i < pending.SubscribePacket.SubscriptionRequests.Count; i++)
+                {
+                    items.Add(new SubscribeResultItem
+                    {
+                        TopicFilter = pending.SubscribePacket.SubscriptionRequests[i].TopicFilter,
+                        ResultCode = packet.ReturnCodes[i]
+                    });
+                }
+
+                pending.Future.TrySetResult(new SubscribeResult(items));
+            }
+        }
+
+        void ProcessMessage(IChannel channel, UnsubAckPacket packet)
+        {
+            if (client.PendingUnSubscriptions.TryRemove(packet.PacketId, out PendingUnSubscription pending))
+            {
+                pending.Future.TrySetResult(new UnSubscribeResult(packet.PacketId));
+                pending.OnUnsubackReceived();
+            }
+        }
+
+        void InvokeProcessForIncomingPublish(PublishPacket packet)
+        {
+            client.OnApplicationMessageReceived(packet.ToApplicationMessage());
         }
     }
 }

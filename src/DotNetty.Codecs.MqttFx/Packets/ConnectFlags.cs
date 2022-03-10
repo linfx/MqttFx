@@ -36,10 +36,5 @@
         /// 设置为 1，客户端和服务端必须丢弃之前的任何会话并开始一个新的会话。会话仅持续和网络连接同样长的时间。与这个会话关联的状态数据不能被任何之后的会话重用 [MQTT-3.1.2-6]。
         /// </summary>
         public bool CleanSession;
-
-        /// <summary>
-        /// Reserved
-        /// </summary>
-        public bool Reserved;
     }
 }

@@ -1,4 +1,5 @@
-﻿using MqttFx.Client;
+﻿using DotNetty.Codecs.MqttFx.Packets;
+using MqttFx.Client;
 using System;
 
 namespace MqttFx
@@ -19,9 +20,15 @@ namespace MqttFx
         public bool CleanSession { get; set; } = true;
 
         /// <summary>
-        /// 保持连接 
+        /// Keep Alive(秒)
+        ///     Gets or sets the keep alive period.
+        ///     The connection is normally left open by the client so that is can send and receive data at any time.
+        ///     If no data flows over an open connection for a certain time period then the client will generate a PINGREQ and
+        ///     expect to receive a PINGRESP from the broker.
+        ///     This message exchange confirms that the connection is open and working.
+        ///     This period is known as the keep alive period.
         /// </summary>
-        public ushort KeepAlive { get; set; } = 60;
+        public ushort KeepAlive { get; set; } = 15;
 
         /// <summary>
         /// 凭证
@@ -29,14 +36,31 @@ namespace MqttFx
         public MqttClientCredentials Credentials { get; set; }
 
         /// <summary>
-        /// 遗嘱主题
+        ///     Gets or sets the retain flag of the will message.
         /// </summary>
-        public ApplicationMessage WillMessage { get; set; }
+        public bool WillRetain { get; set; }
 
         /// <summary>
-        /// 响应超时
+        ///     Gets or sets the QoS level of the will message.
         /// </summary>
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(300);
+        public MqttQos WillQos { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the topic of the will message.
+        /// </summary>
+        public string WillTopic { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the payload of the will message.
+        /// </summary>
+        public byte[] WillPayload { get; set; }
+
+        /// <summary>
+        /// 连接超时时长(秒)
+        ///     Gets or sets the timeout which will be applied at socket level and internal operations.
+        ///     The default value is the same as for sockets in .NET in general.
+        /// </summary>
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(10);
 
         /// <summary>
         /// HostNameOrAddress

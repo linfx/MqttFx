@@ -7,32 +7,22 @@
     public sealed class PublishPacket : PacketWithId
     {
         /// <summary>
-        /// 发布消息
+        /// 发布消息(PUBLISH – Publish message)
         /// </summary>
         public PublishPacket()
             : this(new PublishVariableHeader(), new PublishPayload()) { }
 
+        /// <summary>
+        /// 发布消息(PUBLISH – Publish message)
+        /// </summary>
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload) { }
 
         /// <summary>
-        /// 发布消息
+        /// 发布消息(PUBLISH – Publish message)
         /// </summary>
-        /// <param name="qos">服务质量等级</param>
-        /// <param name="dup">重发标志</param>
-        /// <param name="retain">保留标志</param>
-        public PublishPacket(MqttQos qos = MqttQos.AtMostOnce, bool dup = false, bool retain = false) 
-            : this()
-        {
-            // TODO: 不生效
-            //Qos = qos;
-            //Dup = dup;
-            //Retain = retain;
-
-            FixedHeader.Flags |= (byte)qos << 1;
-            FixedHeader.Flags |= dup.ToByte() << 3;
-            FixedHeader.Flags |= retain.ToByte();
-        }
+        public PublishPacket(FixedHeader fixedHeader, PublishVariableHeader variableHeader, PublishPayload payload)
+            : base(fixedHeader, variableHeader, payload) { }
 
         /// <summary>
         /// 重发标志(DUP)
@@ -41,8 +31,8 @@
         /// </summary>
         public bool Dup
         {
-            get => FixedHeader.GetDup();
-            set => FixedHeader.SetDup(value);
+            get => this.GetDup();
+            set => this.SetDup(value);
         }
 
         /// <summary>
@@ -50,8 +40,8 @@
         /// </summary>
         public MqttQos Qos
         {
-            get => FixedHeader.GetQos();
-            set => FixedHeader.SetQos(value);
+            get => this.GetQos();
+            set => this.SetQos(value);
         }
 
         /// <summary>
@@ -59,8 +49,8 @@
         /// </summary>
         public bool Retain
         {
-            get => FixedHeader.GetRetain();
-            set => FixedHeader.SetRetain(value);
+            get => this.GetRetain();
+            set => this.SetRetain(value);
         }
 
         /// <summary>
@@ -70,6 +60,11 @@
         {
             get => ((PublishVariableHeader)VariableHeader).TopicName;
             set => ((PublishVariableHeader)VariableHeader).TopicName = value;
+        }
+
+        public void SetPayload(byte[] payload)
+        {
+            ((PublishPayload)Payload).Body = payload;
         }
     }
 }

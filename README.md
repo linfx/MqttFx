@@ -26,20 +26,26 @@ c# mqtt 3.1.1 client
 
             var client = container.GetService<MqttClient>();
 
-            client.UseConnectedHandler(async () =>
+            client.ConnectedAsync += async e =>
             {
                 Console.WriteLine("### CONNECTED WITH SERVER ###");
 
+                Console.WriteLine("### SUBSCRIBED ###");
+
                 var subscriptionRequests = new SubscriptionRequestsBuilder()
-                    .WithTopicFilter( f => f.WithTopic("testtopic/a"))
+                    .WithTopicFilter(f => f.WithTopic("testtopic/a"))
+                    .WithTopicFilter(f => f.WithTopic("testtopic/b").WithAtLeastOnceQoS())
                     .Build();
 
-                await client.SubscribeAsync(subscriptionRequests);
+                var subscribeResult = await client.SubscribeAsync(subscriptionRequests);
 
-                Console.WriteLine("### SUBSCRIBED ###");
-            });
+                foreach (var item in subscribeResult.Items)
+                {
+                    Console.WriteLine($"+ ResultCode = {item.ResultCode}");
+                }
+            };
 
-            client.UseMessageReceivedHandler(message =>
+            client.ApplicationMessageReceivedAsync += async message =>
             {
                 Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
                 Console.WriteLine($"+ Topic = {message.Topic}");
@@ -47,10 +53,12 @@ c# mqtt 3.1.1 client
                 Console.WriteLine($"+ QoS = {message.Qos}");
                 Console.WriteLine($"+ Retain = {message.Retain}");
                 Console.WriteLine();
-            });
 
-            var result = await client.ConnectAsync();
-            if (result.Succeeded)
+                await Task.CompletedTask;
+            };
+
+            var connectResult = await client.ConnectAsync();
+            if (connectResult.Succeeded)
             {
                 for (int i = 1; i <= 3; i++)
                 {
@@ -60,16 +68,14 @@ c# mqtt 3.1.1 client
                     var mesage = new ApplicationMessageBuilder()
                         .WithTopic("testtopic/ab")
                         .WithPayload($"HelloWorld: {i}")
-                        .WithQos(MqttQos.AT_LEAST_ONCE)
+                        .WithQos(MqttQos.AtLeastOnce)
                         .Build();
 
                     await client.PublishAsync(mesage);
                 }
             }
             else
-            {
                 Console.WriteLine("Connect Fail!");
-            }
 
             Console.ReadKey();
         }

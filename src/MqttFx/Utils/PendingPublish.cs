@@ -20,26 +20,19 @@ class PendingPublish
 
     public void StartPublishRetransmissionTimer(IEventLoop eventLoop, Func<Packet, Task> send)
     {
-        publishRetransmissionHandler.SetHandle(originalMessage =>
-        {
-            var packet = originalMessage with { Dup = true };
-            send(packet);
-        });
+        publishRetransmissionHandler.Handler = originalMessage => send(originalMessage with { Dup = true });
         publishRetransmissionHandler.Start(eventLoop);
     }
 
     public void StartPubrelRetransmissionTimer(IEventLoop eventLoop, Func<Packet, Task> send)
     {
-        pubRelRetransmissionHandler.SetHandle(originalMessage =>
-        {
-            send(new PubRelPacket(originalMessage.PacketId));
-        });
+        pubRelRetransmissionHandler.Handler = originalMessage => send(originalMessage with { });
         pubRelRetransmissionHandler.Start(eventLoop);
     }
 
     public void OnPubAckReceived()
     {
-        //publishRetransmissionHandler.Stop();
+        publishRetransmissionHandler.Stop();
     }
 
     public void OnPubCompReceived()

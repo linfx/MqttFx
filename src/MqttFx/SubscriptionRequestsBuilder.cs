@@ -1,56 +1,55 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using System;
 
-namespace MqttFx
+namespace MqttFx;
+
+public class SubscriptionRequestsBuilder
 {
-    public class SubscriptionRequestsBuilder
+    readonly SubscriptionRequests _requests = new();
+
+    public SubscriptionRequestsBuilder WithTopicFilter(string topic, MqttQos qos = MqttQos.AtMostOnce)
     {
-        readonly SubscriptionRequests _requests = new();
-
-        public SubscriptionRequestsBuilder WithTopicFilter(string topic,  MqttQos qos = MqttQos.AtMostOnce)
+        return WithTopicFilter(new TopicFilter
         {
-            return WithTopicFilter(new TopicFilter
-            {
-                Topic = topic,
-                Qos = qos,
-            });
-        }
+            Topic = topic,
+            Qos = qos,
+        });
+    }
 
-        public SubscriptionRequestsBuilder WithTopicFilter(TopicFilter topicFilter)
-        {
-            if (topicFilter == null)
-                throw new ArgumentNullException(nameof(topicFilter));
+    public SubscriptionRequestsBuilder WithTopicFilter(TopicFilter topicFilter)
+    {
+        if (topicFilter == null)
+            throw new ArgumentNullException(nameof(topicFilter));
 
-            SubscriptionRequest request;
-            request.TopicFilter = topicFilter.Topic;
-            request.RequestedQos = topicFilter.Qos;
-            _requests.Requests.Add(request);
+        SubscriptionRequest request;
+        request.TopicFilter = topicFilter.Topic;
+        request.RequestedQos = topicFilter.Qos;
+        _requests.Requests.Add(request);
 
-            return this;
-        }
+        return this;
+    }
 
-        public SubscriptionRequestsBuilder WithTopicFilter(Action<TopicFilterBuilder> topicFilterBuilder)
-        {
-            if (topicFilterBuilder == null) 
-                throw new ArgumentNullException(nameof(topicFilterBuilder));
+    public SubscriptionRequestsBuilder WithTopicFilter(Action<TopicFilterBuilder> topicFilterBuilder)
+    {
+        if (topicFilterBuilder == null)
+            throw new ArgumentNullException(nameof(topicFilterBuilder));
 
-            var internalTopicFilterBuilder = new TopicFilterBuilder();
-            topicFilterBuilder(internalTopicFilterBuilder);
+        var internalTopicFilterBuilder = new TopicFilterBuilder();
+        topicFilterBuilder(internalTopicFilterBuilder);
 
-            return WithTopicFilter(internalTopicFilterBuilder);
-        }
+        return WithTopicFilter(internalTopicFilterBuilder);
+    }
 
-        public SubscriptionRequestsBuilder WithTopicFilter(TopicFilterBuilder topicFilterBuilder)
-        {
-            if (topicFilterBuilder == null)
-                throw new ArgumentNullException(nameof(topicFilterBuilder));
+    public SubscriptionRequestsBuilder WithTopicFilter(TopicFilterBuilder topicFilterBuilder)
+    {
+        if (topicFilterBuilder == null)
+            throw new ArgumentNullException(nameof(topicFilterBuilder));
 
-            return WithTopicFilter(topicFilterBuilder.Build());
-        }
+        return WithTopicFilter(topicFilterBuilder.Build());
+    }
 
-        public SubscriptionRequests Build()
-        {
-            return _requests;
-        }
+    public SubscriptionRequests Build()
+    {
+        return _requests;
     }
 }

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+	<LangVersion>latest</LangVersion>
     <AssemblyName>MqttFx</AssemblyName>
     <RootNamespace>MqttFx</RootNamespace>
     <Version>3.1.3</Version>

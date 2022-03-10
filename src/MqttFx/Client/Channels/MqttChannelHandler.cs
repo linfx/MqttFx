@@ -190,7 +190,7 @@ namespace MqttFx.Channels
         {
             if (client.PendingUnSubscriptions.TryRemove(packet.PacketId, out PendingUnSubscription pending))
             {
-                pending.Future.TrySetResult(new UnSubscribeResult());
+                pending.Future.TrySetResult(new UnSubscribeResult(packet.PacketId));
                 pending.OnUnsubackReceived();
             }
         }

@@ -16,6 +16,7 @@ class PendingPublish
     {
         publishRetransmissionHandler.OriginalMessage = packet;
     }
+
     public void SetPubRelMessage(PubRelPacket packet) => pubRelRetransmissionHandler.OriginalMessage = packet;
 
     public void StartPublishRetransmissionTimer(IEventLoop eventLoop, Func<Packet, Task> send)

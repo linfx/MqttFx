@@ -37,14 +37,13 @@ class RetransmissionHandler<T> where T : Packet
 
         timer = eventLoop.Schedule(() =>
         {
-                //if (stopped || pendingOperation.isCanceled())
-                //    return;
+            //if (stopped || pendingOperation.isCanceled())
+            //    return;
 
-                if (stopped)
+            if (stopped)
                 return;
 
             timeout += 5;
-
             Handler(OriginalMessage);
             StartTimer(eventLoop);
         }, TimeSpan.FromSeconds(timeout));
@@ -55,10 +54,5 @@ class RetransmissionHandler<T> where T : Packet
         stopped = true;
         if (timer != null)
             timer.Cancel();
-    }
-
-    public void SetHandle(Action<T> handler)
-    {
-        this.Handler = handler;
     }
 }

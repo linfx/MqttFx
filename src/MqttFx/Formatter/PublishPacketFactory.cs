@@ -10,15 +10,13 @@ namespace MqttFx.Formatter
             if (applicationMessage == null)
                 throw new ArgumentNullException(nameof(applicationMessage));
 
-            var packet = new PublishPacket
+            var packet = new PublishPacket(applicationMessage.Payload)
             {
                 TopicName = applicationMessage.Topic,
                 Qos = applicationMessage.Qos,
                 Dup = applicationMessage.Dup,
                 Retain = applicationMessage.Retain
             };
-            packet.SetPayload(applicationMessage.Payload);
-
             return packet;
         }
     }

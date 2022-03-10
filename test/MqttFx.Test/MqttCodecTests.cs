@@ -163,7 +163,7 @@ namespace MqttFx.Test
         [InlineData(MqttQos.ExactlyOnce, true, true, ushort.MaxValue - 1, "topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/topic/name/that/is/longer/than/256/characters/", new byte[] { 1 })]
         public void PublishMessageTest(MqttQos qos, bool dup, bool retain, ushort packetId, string topicName, byte[] payload)
         {
-            var packet = new PublishPacket
+            var packet = new PublishPacket(payload)
             {
                 TopicName = topicName,
                 Dup = dup,
@@ -175,7 +175,6 @@ namespace MqttFx.Test
             {
                 packet.PacketId = packetId;
             }
-            packet_payload.Body = payload;
 
             var recoded = RecodePacket(packet, false, true);
             var recoded_payload = (PublishPayload)recoded.Payload;
@@ -186,7 +185,7 @@ namespace MqttFx.Test
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            Assert.Equal(packet_payload.Body, recoded_payload.Body);
+            Assert.Equal(packet_payload, recoded_payload);
         }
 
         //[Theory]

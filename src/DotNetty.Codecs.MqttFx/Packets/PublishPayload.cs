@@ -11,24 +11,31 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// </summary>
     public class PublishPayload : Payload
     {
-        public byte[] Body { get; set; }
+        byte[] _body;
 
         public PublishPayload() { }
 
-        public PublishPayload(byte[] payload)
-        {
-            Body = payload;
-        }
+        public PublishPayload(byte[] payload) => _body = payload;
 
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
-            if (Body != null)
-                buffer.WriteBytes(Body);
+            if (_body != null)
+                buffer.WriteBytes(_body);
         }
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
-            Body = buffer.ReadSliceArray(ref remainingLength);
+            _body = buffer.ReadSliceArray(ref remainingLength);
+        }
+
+        public static implicit operator PublishPayload(byte[] payload)
+        {
+            return new PublishPayload(payload);
+        }
+
+        public static implicit operator byte[](PublishPayload payload)
+        {
+            return payload._body;
         }
     }
 }

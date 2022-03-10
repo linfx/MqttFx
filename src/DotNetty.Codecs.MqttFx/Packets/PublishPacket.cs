@@ -15,6 +15,12 @@
         /// <summary>
         /// 发布消息(PUBLISH – Publish message)
         /// </summary>
+        public PublishPacket(PublishPayload payload)
+            : base(new PublishVariableHeader(), payload) { }
+
+        /// <summary>
+        /// 发布消息(PUBLISH – Publish message)
+        /// </summary>
         public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
             : base(variableHeader, payload) { }
 
@@ -60,11 +66,6 @@
         {
             get => ((PublishVariableHeader)VariableHeader).TopicName;
             set => ((PublishVariableHeader)VariableHeader).TopicName = value;
-        }
-
-        public void SetPayload(byte[] payload)
-        {
-            ((PublishPayload)Payload).Body = payload;
         }
     }
 }

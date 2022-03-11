@@ -1,27 +1,26 @@
-﻿namespace MqttFx.Utils
+﻿namespace MqttFx.Utils;
+
+class PacketIdProvider
 {
-    class PacketIdProvider
+    private readonly object _syncRoot = new();
+    private ushort _value;
+
+    public void Reset()
     {
-        private readonly object _syncRoot = new();
-        private ushort _value;
+        lock (_syncRoot)
+            _value = 0;
+    }
 
-        public void Reset()
+    public ushort NewPacketId()
+    {
+        lock (_syncRoot)
         {
-            lock (_syncRoot)
+            if (_value == ushort.MaxValue)
                 _value = 0;
-        }
 
-        public ushort NewPacketId()
-        {
-            lock (_syncRoot)
-            {
-                if (_value == ushort.MaxValue)
-                    _value = 0;
+            _value++;
 
-                _value++;
-
-                return _value;
-            }
+            return _value;
         }
     }
 }

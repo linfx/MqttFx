@@ -13,7 +13,7 @@ namespace DotNetty.Codecs.MqttFx.Packets
     {
         byte[] _body;
 
-        public PublishPayload() { }
+    public PublishPayload() { }
 
         public PublishPayload(byte[] payload) => _body = payload;
 

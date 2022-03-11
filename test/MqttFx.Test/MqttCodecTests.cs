@@ -169,7 +169,6 @@ namespace MqttFx.Test
                 Dup = dup,
                 Retain = retain,
             };
-            var packet_payload = (PublishPayload)packet.Payload;
 
             if (qos > MqttQos.AtMostOnce)
             {
@@ -177,7 +176,6 @@ namespace MqttFx.Test
             }
 
             var recoded = RecodePacket(packet, false, true);
-            var recoded_payload = (PublishPayload)recoded.Payload;
 
             contextMock.Verify(x => x.FireChannelRead(It.IsAny<PublishPacket>()), Times.Once);
             Assert.Equal(packet.TopicName, recoded.TopicName);
@@ -185,7 +183,7 @@ namespace MqttFx.Test
             {
                 Assert.Equal(packet.PacketId, recoded.PacketId);
             }
-            Assert.Equal(packet_payload, recoded_payload);
+            Assert.Equal((PublishPayload)packet.Payload, (PublishPayload)recoded.Payload);
         }
 
         //[Theory]

@@ -7,7 +7,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// 有效载荷(SUBACK Packet payload)
 /// The payload contains a list of return codes. Each return code corresponds to a Topic Filter in the SUBSCRIBE Packet being acknowledged. The order of return codes in the SUBACK Packet MUST match the order of Topic Filters in the SUBSCRIBE Packet [MQTT-3.9.3-1].
 /// </summary>
-public record SubAckPayload : Payload
+public class SubAckPayload : Payload
 {
     /// <summary>
     /// 返回代码

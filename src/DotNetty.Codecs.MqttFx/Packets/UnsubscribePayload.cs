@@ -8,7 +8,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// The payload for the UNSUBSCRIBE Packet contains the list of Topic Filters that the Client wishes to unsubscribe from. 
 /// The Payload of an UNSUBSCRIBE packet MUST contain at least one Topic Filter. An UNSUBSCRIBE packet with no payload is a protocol violation [MQTT-3.10.3-2]. 
 /// </summary>
-public record UnsubscribePayload : Payload
+public class UnsubscribePayload : Payload
 {
     /// <summary>
     /// Topic Filters

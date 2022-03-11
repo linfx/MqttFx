@@ -8,7 +8,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// If it chooses not to support topic filters that contain wildcard characters it MUST reject any Subscription request whose filter contains them [MQTT-3.8.3-2]. 
 /// The payload of a SUBSCRIBE packet MUST contain at least one Topic Filter / QoS pair. A SUBSCRIBE packet with no payload is a protocol violation [MQTT-3.8.3-3].
 /// </summary>
-public record SubscribePayload : Payload
+public class SubscribePayload : Payload
 {
     /// <summary>
     /// 订阅请求(Subscription request)

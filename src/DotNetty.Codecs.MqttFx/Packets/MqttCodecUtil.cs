@@ -47,10 +47,7 @@ public static class MqttCodecUtil
             }
         }
     }
-}
 
-public static class PublishPacketFixedHeaderExtensions
-{
     public static MqttQos GetQos(this FixedHeader fixedHeader)
     {
         return (MqttQos)((fixedHeader.Flags & 0x06) >> 1);

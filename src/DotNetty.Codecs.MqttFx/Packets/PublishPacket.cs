@@ -12,17 +12,17 @@ public sealed record class PublishPacket : PacketWithId
     public PublishPacket()
         : this(new PublishVariableHeader(), new PublishPayload()) { }
 
-        /// <summary>
-        /// 发布消息(PUBLISH – Publish message)
-        /// </summary>
-        public PublishPacket(PublishPayload payload)
-            : base(new PublishVariableHeader(), payload) { }
+    /// <summary>
+    /// 发布消息(PUBLISH – Publish message)
+    /// </summary>
+    public PublishPacket(PublishPayload payload)
+        : base(new PublishVariableHeader(), payload) { }
 
-        /// <summary>
-        /// 发布消息(PUBLISH – Publish message)
-        /// </summary>
-        public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
-            : base(variableHeader, payload) { }
+    /// <summary>
+    /// 发布消息(PUBLISH – Publish message)
+    /// </summary>
+    public PublishPacket(PublishVariableHeader variableHeader, PublishPayload payload)
+        : base(variableHeader, payload) { }
 
     /// <summary>
     /// 发布消息(PUBLISH – Publish message)
@@ -59,13 +59,12 @@ public sealed record class PublishPacket : PacketWithId
         set => this.SetRetain(value);
     }
 
-        /// <summary>
-        /// 主题名称(UTF-8编码的字符串)(Topic Name)
-        /// </summary>
-        public string TopicName
-        {
-            get => ((PublishVariableHeader)VariableHeader).TopicName;
-            set => ((PublishVariableHeader)VariableHeader).TopicName = value;
-        }
+    /// <summary>
+    /// 主题名称(UTF-8编码的字符串)(Topic Name)
+    /// </summary>
+    public string TopicName
+    {
+        get => ((PublishVariableHeader)VariableHeader).TopicName;
+        set => ((PublishVariableHeader)VariableHeader).TopicName = value;
     }
 }

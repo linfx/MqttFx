@@ -1,5 +1,6 @@
 ﻿using DotNetty.Codecs.MqttFx.Packets;
 using DotNetty.Transport.Channels;
+using MqttFx.Formatter;
 using MqttFx.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;

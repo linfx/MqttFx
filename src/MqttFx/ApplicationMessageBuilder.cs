@@ -79,18 +79,3 @@ public sealed class ApplicationMessageBuilder
         return this;
     }
 }
-
-    public static class ApplicationMessageExtensions
-    {
-        public static ApplicationMessage ToApplicationMessage(this PublishPacket packet)
-        {
-            return new ApplicationMessage
-            {
-                Qos = packet.Qos,
-                Retain = packet.Retain,
-                Topic = packet.TopicName,
-                Payload = (PublishPayload)packet.Payload
-            };
-        }
-    }
-}

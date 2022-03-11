@@ -8,7 +8,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// 通过网络连接发送的信息包。MQTT 规范定义了 14 种不同类型的控制数据包。
 /// 
 /// </summary>
-public abstract record class Packet
+public abstract record Packet
 {
     /// <summary>
     /// 固定报头(Fixed header)

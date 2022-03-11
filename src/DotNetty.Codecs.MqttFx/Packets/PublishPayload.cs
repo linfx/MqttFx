@@ -9,33 +9,27 @@ namespace DotNetty.Codecs.MqttFx.Packets
     /// The length of the payload can be calculated by subtracting the length of the variable header from the Remaining Length field that is in the Fixed Header. 
     /// It is valid for a PUBLISH Packet to contain a zero length payload.
     /// </summary>
-    public class PublishPayload : Payload
+    public record PublishPayload : Payload
     {
-        byte[] _body;
+        byte[] body;
 
-    public PublishPayload() { }
+        public PublishPayload() { }
 
-        public PublishPayload(byte[] payload) => _body = payload;
+        public PublishPayload(byte[] payload) => body = payload;
 
         public override void Encode(IByteBuffer buffer, VariableHeader variableHeader)
         {
-            if (_body != null)
-                buffer.WriteBytes(_body);
+            if (body != null)
+                buffer.WriteBytes(body);
         }
 
         public override void Decode(IByteBuffer buffer, VariableHeader variableHeader, ref int remainingLength)
         {
-            _body = buffer.ReadSliceArray(ref remainingLength);
+            body = buffer.ReadSliceArray(ref remainingLength);
         }
 
-        public static implicit operator PublishPayload(byte[] payload)
-        {
-            return new PublishPayload(payload);
-        }
+        public static implicit operator byte[](PublishPayload payload) => payload.body;
 
-        public static implicit operator byte[](PublishPayload payload)
-        {
-            return payload._body;
-        }
+        public static implicit operator PublishPayload(byte[] payload) => new(payload);
     }
 }

@@ -7,7 +7,7 @@
 /// 2. Request that the Server responds to confirm that it is alive.
 /// 3. Exercise the network to indicate that the Network Connection is active.
 /// </summary>
-public sealed record class PingReqPacket : Packet
+public sealed record PingReqPacket : Packet
 {
     /*
      * PINGREQ 数据包从客户端发送到服务器。它可用于：

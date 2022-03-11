@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// 可变报头(Variable header)
 /// The variable header for the CONNECT Packet consists of four fields in the following order:  Protocol Name, Protocol Level, Connect Flags, and Keep Alive.
 /// </summary>
-public sealed class ConnectVariableHeader : VariableHeader
+public sealed record ConnectVariableHeader : VariableHeader
 {
     /// <summary>
     /// 协议名(UTF-8编码的字符串)(Protocol Name)

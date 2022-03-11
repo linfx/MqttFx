@@ -3,7 +3,7 @@
 /// <summary>
 /// 报文抽象类(含报文标识符)(MQTT Control Packet)
 /// </summary>
-public abstract record class PacketWithId : Packet
+public abstract record PacketWithId : Packet
 {
     /// <summary>
     /// 报文抽象类(含报文标识符)(MQTT Control Packet)

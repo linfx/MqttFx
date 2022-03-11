@@ -3,7 +3,7 @@
 /// <summary>
 /// 订阅回执(SUBACK – Subscribe acknowledgement)
 /// </summary>
-public sealed record class SubAckPacket : PacketWithId
+public sealed record SubAckPacket : PacketWithId
 {
     public SubAckPacket()
         : this(new PacketIdVariableHeader(), new SubAckPayload()) { }
@@ -17,8 +17,5 @@ public sealed record class SubAckPacket : PacketWithId
     /// <summary>
     /// 返回代码
     /// </summary>
-    public MqttQos[] ReturnCodes
-    {
-        get => ((SubAckPayload)Payload).ReturnCodes;
-    }
+    public MqttQos[] ReturnCodes => ((SubAckPayload)Payload).ReturnCodes;
 }

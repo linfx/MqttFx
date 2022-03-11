@@ -6,7 +6,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// 取消订阅(UNSUBSCRIBE – Unsubscribe from topics)
 /// An UNSUBSCRIBE Packet is sent by the Client to the Server, to unsubscribe from topics.
 /// </summary>
-public sealed record class UnsubscribePacket : PacketWithId
+public sealed record UnsubscribePacket : PacketWithId
 {
     /// <summary>
     /// 取消订阅(UNSUBSCRIBE – Unsubscribe from topics)

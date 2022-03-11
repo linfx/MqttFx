@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// <summary>
 /// 可变报头(Variable header)
 /// </summary>
-public abstract class VariableHeader
+public abstract record VariableHeader
 {
     public virtual void Encode(IByteBuffer buffer) { }
 

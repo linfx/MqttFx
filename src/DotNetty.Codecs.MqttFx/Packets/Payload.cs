@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// <summary>
 /// 有效载荷(Payload)
 /// </summary>
-public abstract class Payload
+public abstract record Payload
 {
     /// <summary>
     /// 编码

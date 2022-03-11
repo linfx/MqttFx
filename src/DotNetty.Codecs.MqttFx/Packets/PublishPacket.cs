@@ -4,7 +4,7 @@
 /// 发布消息(PUBLISH – Publish message)
 /// A PUBLISH Control Packet is sent from a Client to a Server or from Server to a Client to transport an Application Message.
 /// </summary>
-public sealed record class PublishPacket : PacketWithId
+public sealed record PublishPacket : PacketWithId
 {
     /// <summary>
     /// 发布消息(PUBLISH – Publish message)

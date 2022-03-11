@@ -5,7 +5,7 @@
 /// The CONNACK Packet is the packet sent by the Server in response to a CONNECT Packet received from a Client. 
 /// The first packet sent from the Server to the Client MUST be a CONNACK Packet [MQTT-3.2.0-1].
 /// </summary>
-public sealed record class ConnAckPacket : Packet
+public sealed record ConnAckPacket : Packet
 {
     /// <summary>
     /// 连接报文回执(CONNACK)

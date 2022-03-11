@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// <summary>
 /// 固定报头(Fixed header)
 /// </summary>
-public struct FixedHeader
+public record struct FixedHeader
 {
     /// <summary>
     /// 报文类型(MQTT Control Packet type)

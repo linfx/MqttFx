@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// <summary>
 /// 可变报头
 /// </summary>
-public class PublishVariableHeader : PacketIdVariableHeader
+public record PublishVariableHeader : PacketIdVariableHeader
 {
     /// <summary>
     /// 主题名称(UTF-8编码的字符串)(Topic Name)

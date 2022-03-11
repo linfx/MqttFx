@@ -9,7 +9,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// The Server sends PUBLISH Packets to the Client in order to forward Application Messages that were published to Topics that match these Subscriptions. 
 /// The SUBSCRIBE Packet also specifies (for each Subscription) the maximum QoS with which the Server can send Application Messages to the Client.
 /// </summary>
-public sealed record class SubscribePacket : PacketWithId
+public sealed record SubscribePacket : PacketWithId
 {
     /// <summary>
     /// SUBSCRIBE - Subscribe to topics

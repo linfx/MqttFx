@@ -5,7 +5,7 @@ namespace DotNetty.Codecs.MqttFx.Packets;
 /// <summary>
 /// 可变报头(CONNACK Packet variable header)
 /// </summary>
-public sealed class ConnAckVariableHeader : VariableHeader
+public sealed record ConnAckVariableHeader : VariableHeader
 {
     /*
      * 连接确认标志(3.2.2.1 Connect Acknowledge Flags)

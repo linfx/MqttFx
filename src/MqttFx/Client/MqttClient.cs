@@ -98,6 +98,12 @@ public class MqttClient
         }
     }
 
+    /// <summary>
+    /// 发布消息
+    /// </summary>
+    /// <param name="applicationMessage"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task<PublishResult> PublishAsync(ApplicationMessage applicationMessage, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -119,6 +125,12 @@ public class MqttClient
         }
     }
 
+    /// <summary>
+    /// 订阅消息
+    /// </summary>
+    /// <param name="subscriptionRequests"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task<SubscribeResult> SubscribeAsync(SubscriptionRequests subscriptionRequests, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

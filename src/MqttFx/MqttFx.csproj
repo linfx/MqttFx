@@ -5,7 +5,7 @@
 	<LangVersion>latest</LangVersion>
     <AssemblyName>MqttFx</AssemblyName>
     <RootNamespace>MqttFx</RootNamespace>
-    <Version>3.1.3</Version>
+    <Version>3.1.4</Version>
     <Authors>linfx</Authors>
     <Description>Mqtt Client,   using Dotnetty</Description>
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>

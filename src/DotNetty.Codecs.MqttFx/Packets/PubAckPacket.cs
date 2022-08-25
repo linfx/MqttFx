@@ -1,12 +1,11 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets;
+
+/// <summary>
+/// 发布回执
+/// QoS level = 1
+/// </summary>
+public sealed record PubAckPacket : PacketWithId
 {
-    /// <summary>
-    /// 发布回执
-    /// QoS level = 1
-    /// </summary>
-    public sealed class PubAckPacket : PacketWithId
-    {
-        public PubAckPacket(ushort packetId = default)
-            : base(packetId) { }
-    }
+    public PubAckPacket(ushort packetId = default)
+        : base(packetId) { }
 }

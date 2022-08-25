@@ -3,34 +3,30 @@ using DotNetty.Transport.Channels;
 using System;
 using System.Threading.Tasks;
 
-namespace MqttFx.Utils
+namespace MqttFx.Utils;
+
+class PendingSubscription
 {
-    class PendingSubscription
+    private readonly RetransmissionHandler<SubscribePacket> retransmissionHandler = new();
+
+    public TaskCompletionSource<SubscribeResult> Future { get; set; } = new();
+
+    public SubscribePacket SubscribePacket { get; set; }
+
+    public PendingSubscription(SubscribePacket packet)
     {
-        private readonly RetransmissionHandler<SubscribePacket> retransmissionHandler = new();
+        SubscribePacket = packet;
+        retransmissionHandler.OriginalMessage = packet;
+    }
 
-        public TaskCompletionSource<SubscribeResult> Future { get; set; } = new();
+    public void StartRetransmitTimer(IEventLoop eventLoop, Func<Packet, Task> send)
+    {
+        retransmissionHandler.Handler = originalMessage => send(originalMessage with { });
+        retransmissionHandler.Start(eventLoop);
+    }
 
-        public SubscribePacket SubscribePacket { get; set; }
-
-        public PendingSubscription(SubscribePacket packet)
-        {
-            SubscribePacket = packet;
-            retransmissionHandler.OriginalMessage = packet;
-        }
-
-        public void StartRetransmitTimer(IEventLoop eventLoop, Func<Packet, Task> send)
-        {
-            retransmissionHandler.SetHandle(originalMessage =>
-            {
-                send(new SubscribePacket(originalMessage.FixedHeader, (PacketIdVariableHeader)originalMessage.VariableHeader, (SubscribePayload)originalMessage.Payload));
-            });
-            retransmissionHandler.Start(eventLoop);
-        }
-
-        public void OnSubackReceived()
-        {
-            retransmissionHandler.Stop();
-        }
+    public void OnSubackReceived()
+    {
+        retransmissionHandler.Stop();
     }
 }

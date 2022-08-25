@@ -6,14 +6,14 @@
     <AssemblyName>MqttFx</AssemblyName>
     <RootNamespace>MqttFx</RootNamespace>
     <Version>3.1.4</Version>
-    <Authors>DTXLink</Authors>
+    <Authors>linfx</Authors>
     <Description>Mqtt Client,   using Dotnetty</Description>
     <PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
     <PackageId>MqttFx</PackageId>
+    <Product>MqttFx</Product>
     <NoWarn>1701;1702;1591;</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

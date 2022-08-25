@@ -2,19 +2,20 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<Authors>LinFx</Authors>
-		<Company>LinFx</Company>
+		<LangVersion>latest</LangVersion>
+		<Authors>DTXLink</Authors>
 		<PackageProjectUrl>https://github.com/linfx/MqttFx</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/linfx/MqttFx</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>mqtt</PackageTags>
 		<Copyright>© LinFx. All rights reserved.</Copyright>
-		<Version>0.7.3</Version>
+		<Version>0.7.4</Version>
 		<Description>MQTT codec for DotNetty</Description>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DotNetty.Codecs" Version="0.7.2" />
+		<PackageReference Include="DotNetty.Codecs" Version="0.7.4" />
 	</ItemGroup>
 
 </Project>

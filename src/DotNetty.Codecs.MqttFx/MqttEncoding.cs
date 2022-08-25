@@ -2,51 +2,50 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DotNetty.Codecs.MqttFx
+namespace DotNetty.Codecs.MqttFx;
+
+/// <summary>
+/// 编码
+/// </summary>
+public class MqttEncoding : ASCIIEncoding
 {
-    /// <summary>
-    /// 编码
-    /// </summary>
-    public class MqttEncoding : ASCIIEncoding
+    public override byte[] GetBytes(string s)
     {
-        public override byte[] GetBytes(string s)
-        {
-            ValidateString(s);
-            var stringBytes = new List<byte>
+        ValidateString(s);
+        var stringBytes = new List<byte>
             {
                 (byte)(s.Length >> 8),
                 (byte)(s.Length & 0xFF)
             };
-            stringBytes.AddRange(ASCII.GetBytes(s));
-            return stringBytes.ToArray();
-        }
+        stringBytes.AddRange(ASCII.GetBytes(s));
+        return stringBytes.ToArray();
+    }
 
-        public override string GetString(byte[] bytes)
+    public override string GetString(byte[] bytes)
+    {
+        return ASCII.GetString(bytes);
+    }
+
+    public override int GetCharCount(byte[] bytes)
+    {
+        if (bytes.Length < 2)
+            throw new ArgumentException("Length byte array must comprise 2 bytes");
+
+        return (ushort)((bytes[0] << 8) + bytes[1]);
+    }
+
+    public override int GetByteCount(string chars)
+    {
+        ValidateString(chars);
+        return ASCII.GetByteCount(chars) + 2;
+    }
+
+    private static void ValidateString(string s)
+    {
+        foreach (var c in s)
         {
-            return ASCII.GetString(bytes);
-        }
-
-        public override int GetCharCount(byte[] bytes)
-        {
-            if (bytes.Length < 2)
-                throw new ArgumentException("Length byte array must comprise 2 bytes");
-
-            return (ushort)((bytes[0] << 8) + bytes[1]);
-        }
-
-        public override int GetByteCount(string chars)
-        {
-            ValidateString(chars);
-            return ASCII.GetByteCount(chars) + 2;
-        }
-
-        private static void ValidateString(string s)
-        {
-            foreach (var c in s)
-            {
-                if (c > 0x7F)
-                    throw new ArgumentException("The input string has extended UTF characters, which are not supported");
-            }
+            if (c > 0x7F)
+                throw new ArgumentException("The input string has extended UTF characters, which are not supported");
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿namespace MqttFx
-{
-    public class UnSubscribeResult
-    {
-        public ushort PacketId { get; set; }
+﻿namespace MqttFx;
 
-        public UnSubscribeResult(ushort packetId)
-        {
-            PacketId = packetId;
-        }
+public class UnSubscribeResult
+{
+    public ushort PacketId { get; set; }
+
+    public UnSubscribeResult(ushort packetId)
+    {
+        PacketId = packetId;
     }
 }

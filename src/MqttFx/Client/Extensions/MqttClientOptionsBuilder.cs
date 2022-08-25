@@ -1,41 +1,40 @@
-﻿namespace MqttFx
+﻿namespace MqttFx;
+
+public class MqttClientOptionsBuilder
 {
-    public class MqttClientOptionsBuilder
+    private readonly MqttClientOptions _options = new();
+
+    public MqttClientOptionsBuilder WithCleanSession(bool value = true)
     {
-        private readonly MqttClientOptions _options = new();
+        _options.CleanSession = value;
+        return this;
+    }
 
-        public MqttClientOptionsBuilder WithCleanSession(bool value = true)
-        {
-            _options.CleanSession = value;
-            return this;
-        }
+    public MqttClientOptionsBuilder WithClientId(string clientId)
+    {
+        _options.ClientId = clientId;
+        return this;
+    }
 
-        public MqttClientOptionsBuilder WithClientId(string clientId)
+    public MqttClientOptionsBuilder WithCredentials(string username, string password = default)
+    {
+        _options.Credentials = new MqttClientCredentials
         {
-            _options.ClientId = clientId;
-            return this;
-        }
+            Username = username,
+            Password = password
+        };
+        return this;
+    }
 
-        public MqttClientOptionsBuilder WithCredentials(string username, string password = default)
-        {
-            _options.Credentials = new MqttClientCredentials
-            {
-                Username = username,
-                Password = password
-            };
-            return this;
-        }
+    public MqttClientOptionsBuilder WithTcpServer(string server, int port = 1883)
+    {
+        _options.Host = server;
+        _options.Port = port;
+        return this;
+    }
 
-        public MqttClientOptionsBuilder WithTcpServer(string server, int port = 1883)
-        {
-            _options.Host = server;
-            _options.Port = port;
-            return this;
-        }
-
-        public MqttClientOptions Build()
-        {
-            return _options;
-        }
+    public MqttClientOptions Build()
+    {
+        return _options;
     }
 }

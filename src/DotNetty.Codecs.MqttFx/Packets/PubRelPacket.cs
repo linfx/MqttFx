@@ -1,11 +1,10 @@
-﻿namespace DotNetty.Codecs.MqttFx.Packets
+﻿namespace DotNetty.Codecs.MqttFx.Packets;
+
+/// <summary>
+/// 发布释放（QoS 2，第二步）
+/// </summary>
+public sealed record PubRelPacket : PacketWithId
 {
-    /// <summary>
-    /// 发布释放（QoS 2，第二步）
-    /// </summary>
-    public sealed class PubRelPacket : PacketWithId
-    {
-        public PubRelPacket(ushort packetId = default)
-            : base(packetId) { }
-    }
+    public PubRelPacket(ushort packetId = default)
+        : base(packetId) { }
 }
